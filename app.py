@@ -1,13 +1,7 @@
 import streamlit as st
 from datetime import datetime
 import random
-
-# クリップボード操作用（環境に pyperclip が無い場合でもアプリが落ちないようにする）
-try:
-    import pyperclip  # クリップボード操作用
-    PYPERCLIP_AVAILABLE = True
-except ImportError:
-    PYPERCLIP_AVAILABLE = False
+import pyperclip  # クリップボード操作用
 
 # ============================================
 # メール生成関数（最初に定義）
@@ -365,19 +359,17 @@ with col2:
             with col_btn1:
                 if st.button("📋 コピー"):
                     full_text = f"件名: {email['subject']}\n\n{email['body']}"
-                    if PYPERCLIP_AVAILABLE:
-                        # pyperclip が使える環境（ローカルなど）の場合は自動コピー
+                    try:
+                        import pyperclip
                         pyperclip.copy(full_text)
                         st.success("✓ クリップボードにコピーしました！")
-                    else:
-                        # pyperclip が使えない環境（Streamlit Cloud 等）は手動コピーにフォールバック
-                        st.info("この環境では自動コピーが使えません。以下のテキストを手動でコピーしてください。")
+                    except:
+                        # pyperclipが使えない場合、テキストエリアで表示
                         st.text_area("以下をコピーしてください:", full_text, height=150)
             
             with col_btn2:
                 if st.button("🔄 再生成"):
                     if len(st.session_state.messages) >= 2:
-                        # 直近のユーザーメッセージ（-2 が user、その次 -1 が assistant）
                         last_user_message = st.session_state.messages[-2]['content']
                         # バリエーションカウントを増やして別の表現を生成
                         st.session_state.variation_count += 1
