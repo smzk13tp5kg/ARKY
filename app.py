@@ -489,6 +489,48 @@ section.main > div {
 }
 
 
+/* =========================================================
+   チャットメッセージを白背景＋黒文字に強制上書き
+   ========================================================= */
+
+/* チャットメッセージ全体（assistant/user 共通） */
+.stChatMessage {
+    background-color: #ffffff !important;  /* 白背景 */
+    color: #111827 !important;             /* 黒に近い濃いグレー */
+    border-radius: 12px;
+    padding: 12px 16px !important;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 10px;
+}
+
+/* 吹き出し内のテキスト */
+.stChatMessage p,
+.stChatMessage span,
+.stChatMessage div {
+    color: #111827 !important;
+}
+
+/* ユーザーとAIの区別を無くしたい場合（白統一） */
+.stChatMessage[data-testid="chatMessageUser"] {
+    background-color: #ffffff !important;
+}
+.stChatMessage[data-testid="chatMessageAssistant"] {
+    background-color: #ffffff !important;
+}
+
+/* チャット内のアイコン（左の丸） */
+.stChatMessage .stChatMessageAvatar {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    border: 1px solid #e5e7eb;
+}
+
+/* チャットメッセージの影（お好みで） */
+.stChatMessage {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -782,6 +824,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
