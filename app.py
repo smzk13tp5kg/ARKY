@@ -606,7 +606,7 @@ with col1:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ============================================
-# 右：プレビューエリア (変更なし)
+# 右：プレビューエリア 修正版
 # ============================================
 with col2:
     if st.session_state.generated_email is None:
@@ -617,29 +617,24 @@ with col2:
     else:
         email = st.session_state.generated_email
 
-        # 件名＋本文カード（全部この中に収める）
-        st.markdown("<div class='preview-main-wrapper'>", unsafe_allow_html=True)
-
-        # 件名
-        st.markdown("<p class='preview-label'>件名</p>", unsafe_allow_html=True)
-        st.markdown(
-            f"<p class='preview-subject'>{html.escape(email['subject'])}</p>",
-            unsafe_allow_html=True,
-        )
-
-        # 本文（text_area をやめて HTML の div にする）
-        st.markdown("<p class='preview-label'>本文</p>", unsafe_allow_html=True)
+        # 本文を HTML 用に整形
         body_html = html.escape(email["body"]).replace("\n", "<br>")
-        st.markdown(
-            f"<div class='preview-body'>{body_html}</div>",
-            unsafe_allow_html=True,
-        )
 
-        st.markdown("</div>", unsafe_allow_html=True)  # /preview-main-wrapper
+        # ★ 件名＋本文を 1 つの div.preview-main-wrapper の中にまとめて出力
+        preview_html = f"""
+        <div class="preview-main-wrapper">
+            <p class='preview-label'>件名</p>
+            <p class='preview-subject'>{html.escape(email['subject'])}</p>
+
+            <p class='preview-label'>本文</p>
+            <div class='preview-body'>{body_html}</div>
+        </div>
+        """
+        st.markdown(preview_html, unsafe_allow_html=True)
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-        # アドバイス
+        # アドバイスボックス（これはカードの外で OK）
         st.markdown(
             f"""
             <div class="advice-box">
@@ -652,7 +647,7 @@ with col2:
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-        # コピー／再生成ボタン（今までと同じ処理）
+        # コピー／再生成ボタン
         st.markdown("<div class='preview-actions'>", unsafe_allow_html=True)
         btn_col1, btn_col2 = st.columns(2)
 
@@ -703,4 +698,3 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)  # /preview-actions
-
