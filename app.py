@@ -1,7 +1,6 @@
 import streamlit as st
 from datetime import datetime
 import random
-import pyperclip  # クリップボード操作用
 
 # ============================================
 # メール生成関数（最初に定義）
@@ -53,7 +52,7 @@ def generate_email(template, tone, recipient, message, variation=0):
     greeting_list = greetings_variations.get(recipient, ['お世話になっております。'])
     greeting = greeting_list[variation % len(greeting_list)]
     
-    # 本文の表現バリエーション
+    # 本文の表現バリエーション（※トーンは今は使わず、共通ロジック）
     body_variations = [
         # バリエーション0: 標準
         f"""{greeting}
@@ -153,28 +152,95 @@ st.set_page_config(
 # ============================================
 st.markdown("""
 <style>
-    .main {
-        background-color: #f5f7fa;
-    }
-    .stButton>button {
-        width: 100%;
-        background-color: #1a73e8;
-        color: white;
-        font-weight: 600;
-        border-radius: 8px;
-        padding: 12px;
-        border: none;
-    }
-    .stButton>button:hover {
-        background-color: #1557b0;
-    }
-    .advice-box {
-        background-color: #e8f5e9;
-        border-left: 3px solid #4caf50;
-        padding: 15px;
-        border-radius: 4px;
-        margin-top: 15px;
-    }
+/* メイン背景 */
+.main {
+    background-color: #f5f7fa;
+}
+
+/* サイドバー全体の背景 */
+[data-testid="stSidebar"] {
+    background-color: #f5f7fa;
+}
+
+/* サイドバー上部タイトル */
+.sidebar-app-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+/* ナビカードの共通スタイル */
+.nav-section {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 10px 10px 12px;
+    margin-bottom: 16px;
+    border: 1px solid #e4e7f2;
+}
+
+/* セクションラベル */
+.nav-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 6px;
+}
+
+/* ラジオグループ全体を縦方向に詰める */
+.nav-section div[role="radiogroup"] {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* ラジオの各行を pill っぽくする */
+.nav-section div[role="radiogroup"] > label {
+    border-radius: 8px;
+    padding: 6px 10px;
+    border: 1px solid #e5e7eb;
+    background-color: #ffffff;
+    cursor: pointer;
+}
+
+/* ホバー時 */
+.nav-section div[role="radiogroup"] > label:hover {
+    background-color: #f3f4ff;
+}
+
+/* テキストを少し小さめに */
+.nav-section div[role="radiogroup"] span {
+    font-size: 13px;
+}
+
+/* 選択中（checked）のスタイル */
+.nav-section div[role="radiogroup"] input:checked + div {
+    background-color: #e8f0ff;
+    border-color: #1a73e8;
+    color: #1a73e8;
+}
+
+/* メインボタン */
+.stButton>button {
+    width: 100%;
+    background-color: #1a73e8;
+    color: white;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 12px;
+    border: none;
+}
+.stButton>button:hover {
+    background-color: #1557b0;
+}
+
+/* アドバイスボックス */
+.advice-box {
+    background-color: #e8f5e9;
+    border-left: 3px solid #4caf50;
+    padding: 15px;
+    border-radius: 4px;
+    margin-top: 15px;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -198,59 +264,121 @@ st.markdown("---")
 # サイドバー（設定）
 # ============================================
 with st.sidebar:
-    st.header("⚙️ メール設定")
-    
-    # 新規作成ボタン
-    if st.button("➕ 新規作成"):
+    # アプリ名＋新規作成ボタン
+    st.markdown('<div class="sidebar-app-title">✉️ メール生成AI</div>', unsafe_allow_html=True)
+    if st.button("+ 新規作成", use_container_width=True):
         st.session_state.messages = []
         st.session_state.generated_email = None
         st.session_state.variation_count = 0
         st.rerun()
-    
-    st.markdown("---")
-    
-    # テンプレート選択
-    st.subheader("📧 テンプレート")
-    template_options = ["依頼", "交渉", "お礼", "謝罪", "挨拶", "その他"]
-    template = st.selectbox(
-        "メールの種類",
-        template_options,
-        label_visibility="collapsed"
-    )
-    
+
+    # --- テンプレート ---
+    with st.container():
+        st.markdown('<div class="nav-section">', unsafe_allow_html=True)
+        st.markdown('<div class="nav-label">テンプレート</div>', unsafe_allow_html=True)
+
+        template_display = st.radio(
+            "テンプレート",
+            [
+                "📩 依頼メール",
+                "🤝 交渉メール",
+                "🙏 お礼メール",
+                "🙇‍♂️ 謝罪メール",
+                "👋 挨拶メール",
+                "✏️ その他"
+            ],
+            index=0,
+            label_visibility="collapsed",
+            key="template_radio"
+        )
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    display_to_template = {
+        "📩 依頼メール": "依頼",
+        "🤝 交渉メール": "交渉",
+        "🙏 お礼メール": "お礼",
+        "🙇‍♂️ 謝罪メール": "謝罪",
+        "👋 挨拶メール": "挨拶",
+        "✏️ その他": "その他",
+    }
+    template = display_to_template[template_display]
+
     custom_template = None
     if template == "その他":
         custom_template = st.text_input("カスタムテンプレート", placeholder="例: 報告")
         template = custom_template if custom_template else "その他"
-    
-    st.markdown("---")
-    
-    # トーン選択
-    st.subheader("🎨 トーン")
-    tone_options = ["下書", "カジュアル", "フォーマル"]
-    tone = st.selectbox(
-        "文体のトーン",
-        tone_options,
-        index=2,
-        label_visibility="collapsed"
-    )
-    
-    st.markdown("---")
-    
-    # 相手選択
-    st.subheader("👤 相手")
-    recipient_options = ["上司", "同僚", "部下", "社外企業社員", "取引先", "その他"]
-    recipient = st.selectbox(
-        "送信先",
-        recipient_options,
-        label_visibility="collapsed"
-    )
-    
+
+    # --- トーン（6種類） ---
+    with st.container():
+        st.markdown('<div class="nav-section">', unsafe_allow_html=True)
+        st.markdown('<div class="nav-label">トーン</div>', unsafe_allow_html=True)
+
+        tone_display = st.radio(
+            "トーン",
+            [
+                "😊 カジュアル／フレンドリー（同僚・社内フラット向け）",
+                "📄 標準ビジネス（最も一般的）",
+                "📘 フォーマル（社外顧客／上位者／依頼交渉）",
+                "🙏 厳粛・儀礼的（謝罪・不祥事・クレーム対応）",
+                "⏱️ 緊急・簡潔（即時対応が必要な通知）",
+                "🌿 柔らかめ（関係維持・お礼・広報向け）"
+            ],
+            index=1,  # デフォルト：標準ビジネス
+            label_visibility="collapsed",
+            key="tone_radio"
+        )
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # 表示 → 内部で使う短いラベル
+    display_to_tone = {
+        "😊 カジュアル／フレンドリー（同僚・社内フラット向け）": "カジュアル／フレンドリー",
+        "📄 標準ビジネス（最も一般的）": "標準ビジネス",
+        "📘 フォーマル（社外顧客／上位者／依頼交渉）": "フォーマル",
+        "🙏 厳粛・儀礼的（謝罪・不祥事・クレーム対応）": "厳粛・儀礼的",
+        "⏱️ 緊急・簡潔（即時対応が必要な通知）": "緊急・簡潔",
+        "🌿 柔らかめ（関係維持・お礼・広報向け）": "柔らかめ",
+    }
+    tone = display_to_tone[tone_display]
+
+    # --- 相手 ---
+    with st.container():
+        st.markdown('<div class="nav-section">', unsafe_allow_html=True)
+        st.markdown('<div class="nav-label">相手</div>', unsafe_allow_html=True)
+
+        recipient_display = st.radio(
+            "相手",
+            [
+                "👔 上司",
+                "👥 同僚",
+                "📋 部下",
+                "🏢 社外企業社員",
+                "🤝 取引先",
+                "✏️ その他"
+            ],
+            index=0,
+            label_visibility="collapsed",
+            key="recipient_radio"
+        )
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    display_to_recipient = {
+        "👔 上司": "上司",
+        "👥 同僚": "同僚",
+        "📋 部下": "部下",
+        "🏢 社外企業社員": "社外企業社員",
+        "🤝 取引先": "取引先",
+        "✏️ その他": "その他",
+    }
+    recipient = display_to_recipient[recipient_display]
+
     custom_recipient = None
     if recipient == "その他":
         custom_recipient = st.text_input("カスタム相手", placeholder="例: 顧客")
         recipient = custom_recipient if custom_recipient else "その他"
-    
+
     st.markdown("---")
     st.caption("© 2024 メール生成AI")
 
@@ -265,12 +393,14 @@ col1, col2 = st.columns([3, 2])
 with col1:
     st.subheader("💬 メッセージ")
     
-    # チャット履歴表示
     chat_container = st.container(height=400)
     
     with chat_container:
         if not st.session_state.messages:
-            st.info("👋 こんにちは！ビジネスメールの作成をお手伝いします。\n\n左側からメールの種類、トーン、相手を選択して、具体的な内容を入力してください。")
+            st.info(
+                "👋 こんにちは！ビジネスメールの作成をお手伝いします。\n\n"
+                "左側からメールの種類、トーン、相手を選択して、具体的な内容を入力してください。"
+            )
         
         for msg in st.session_state.messages:
             if msg['role'] == 'user':
@@ -302,8 +432,8 @@ with col1:
                     'content': user_message
                 })
                 
-                # AI応答を追加
-                response = f"{template}メールを{tone}なトーンで、{recipient}宛に作成しました！右側のプレビューをご覧ください。"
+                # AI応答を追加（トーンは短いラベルで表示）
+                response = f"{template}メールを「{tone}」なトーンで、{recipient}宛に作成しました！右側のプレビューをご覧ください。"
                 st.session_state.messages.append({
                     'role': 'assistant',
                     'content': response
@@ -326,7 +456,6 @@ with col2:
     if st.session_state.generated_email:
         email = st.session_state.generated_email
         
-        # プレビューボックス
         with st.container():
             st.markdown("**件名**")
             st.text(email['subject'])
@@ -356,40 +485,24 @@ with col2:
             # ボタン
             col_btn1, col_btn2 = st.columns(2)
             
+            # コピー（常に手動コピーにする）
             with col_btn1:
                 if st.button("📋 コピー"):
                     full_text = f"件名: {email['subject']}\n\n{email['body']}"
-                    try:
-                        import pyperclip
-                        pyperclip.copy(full_text)
-                        st.success("✓ クリップボードにコピーしました！")
-                    except:
-                        # pyperclipが使えない場合、テキストエリアで表示
-                        st.text_area("以下をコピーしてください:", full_text, height=150)
+                    st.info("以下のテキストをコピーしてご利用ください。")
+                    st.text_area("コピー用テキスト", full_text, height=150)
             
+            # 再生成
             with col_btn2:
                 if st.button("🔄 再生成"):
                     if len(st.session_state.messages) >= 2:
-                        # 「再生成しています...」メッセージを追加
-                        st.session_state.messages.append({
-                            'role': 'assistant',
-                            'content': 'メールを再生成しています...'
-                        })
-                        
-                        last_user_message = st.session_state.messages[-3]['content']  # -3に変更（新しいメッセージを追加したため）
-                        # バリエーションカウントを増やして別の表現を生成
+                        last_user_message = st.session_state.messages[-2]['content']  # -2 = 直近のuser
                         st.session_state.variation_count += 1
                         st.session_state.generated_email = generate_email(
                             template, tone, recipient, last_user_message, 
                             variation=st.session_state.variation_count
                         )
-                        
-                        # 「生成完了」メッセージを追加
-                        st.session_state.messages.append({
-                            'role': 'assistant',
-                            'content': f'新しいバージョン（バリエーション {st.session_state.variation_count + 1}）を生成しました！プレビューをご確認ください。'
-                        })
-                        
+                        st.success(f"✨ バリエーション {st.session_state.variation_count + 1} を生成しました！")
                         st.rerun()
     else:
         st.info("メールを生成すると、ここにプレビューが表示されます。")
