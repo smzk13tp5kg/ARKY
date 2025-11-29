@@ -1,7 +1,13 @@
 import streamlit as st
 from datetime import datetime
 import random
-import pyperclip  # クリップボード操作用
+
+# クリップボード操作（ローカル専用扱い）
+try:
+    import pyperclip
+    PYPERCLIP_AVAILABLE = True
+except ImportError:
+    PYPERCLIP_AVAILABLE = False
 
 # ============================================
 # メール生成関数（最初に定義）
@@ -153,72 +159,30 @@ st.set_page_config(
 # ============================================
 st.markdown("""
 <style>
-/* サイドバー全体の背景 */
-[data-testid="stSidebar"] {
-    background-color: #f5f7fa;
-}
-
-/* サイドバー上部タイトル */
-.sidebar-app-title {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-/* ナビカードの共通スタイル */
-.nav-section {
-    background-color: #ffffff;
-    border-radius: 12px;
-    padding: 10px 10px 12px;
-    margin-bottom: 16px;
-    border: 1px solid #e4e7f2;
-}
-
-/* セクションラベル */
-.nav-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #6b7280;
-    margin-bottom: 6px;
-}
-
-/* ラジオグループ全体を縦方向に詰める */
-.nav-section div[role="radiogroup"] {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-/* ラジオの各行を pill っぽくする */
-.nav-section div[role="radiogroup"] > label {
-    border-radius: 8px;
-    padding: 6px 10px;
-    border: 1px solid #e5e7eb;
-    background-color: #ffffff;
-    cursor: pointer;
-}
-
-/* ホバー時 */
-.nav-section div[role="radiogroup"] > label:hover {
-    background-color: #f3f4ff;
-}
-
-/* テキストを少し小さめに */
-.nav-section div[role="radiogroup"] span {
-    font-size: 13px;
-}
-
-/* 選択中（checked）のスタイル
-   ※Streamlitのマークアップに依存するため、
-     もし効かなければ input と label の構造をブラウザで確認して微調整が必要。 */
-.nav-section div[role="radiogroup"] input:checked + div {
-    background-color: #e8f0ff;
-    border-color: #1a73e8;
-    color: #1a73e8;
-}
+    .main {
+        background-color: #f5f7fa;
+    }
+    .stButton>button {
+        width: 100%;
+        background-color: #1a73e8;
+        color: white;
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 12px;
+        border: none;
+    }
+    .stButton>button:hover {
+        background-color: #1557b0;
+    }
+    .advice-box {
+        background-color: #e8f5e9;
+        border-left: 3px solid #4caf50;
+        padding: 15px;
+        border-radius: 4px;
+        margin-top: 15px;
+    }
 </style>
 """, unsafe_allow_html=True)
-
 
 # ============================================
 # セッション状態の初期化
@@ -240,114 +204,61 @@ st.markdown("---")
 # サイドバー（設定）
 # ============================================
 with st.sidebar:
-    # アプリ名＋新規作成ボタン
-    st.markdown('<div class="sidebar-app-title">✉️ メール生成AI</div>', unsafe_allow_html=True)
-    if st.button("+ 新規作成", use_container_width=True):
+    st.header("⚙️ メール設定")
+    
+    # 新規作成ボタン
+    if st.button("➕ 新規作成"):
         st.session_state.messages = []
         st.session_state.generated_email = None
         st.session_state.variation_count = 0
         st.rerun()
-
-    # --- テンプレート ---
-    with st.container():
-        st.markdown('<div class="nav-section">', unsafe_allow_html=True)
-        st.markdown('<div class="nav-label">テンプレート</div>', unsafe_allow_html=True)
-
-        template_display = st.radio(
-            "テンプレート",
-            [
-                "📩 依頼メール",
-                "🤝 交渉メール",
-                "🙏 お礼メール",
-                "🙇‍♂️ 謝罪メール",
-                "👋 挨拶メール",
-                "✏️ その他"
-            ],
-            index=0,
-            label_visibility="collapsed",
-            key="template_radio"
-        )
-
-        st.markdown('</div>', unsafe_allow_html=True)  # nav-section の閉じタグ
-
-    # 表示名 → 内部値 変換
-    display_to_template = {
-        "📩 依頼メール": "依頼",
-        "🤝 交渉メール": "交渉",
-        "🙏 お礼メール": "お礼",
-        "🙇‍♂️ 謝罪メール": "謝罪",
-        "👋 挨拶メール": "挨拶",
-        "✏️ その他": "その他",
-    }
-    template = display_to_template[template_display]
-
+    
+    st.markdown("---")
+    
+    # テンプレート選択
+    st.subheader("📧 テンプレート")
+    template_options = ["依頼", "交渉", "お礼", "謝罪", "挨拶", "その他"]
+    template = st.selectbox(
+        "メールの種類",
+        template_options,
+        label_visibility="collapsed"
+    )
+    
     custom_template = None
     if template == "その他":
         custom_template = st.text_input("カスタムテンプレート", placeholder="例: 報告")
         template = custom_template if custom_template else "その他"
-
-    # --- トーン ---
-    with st.container():
-        st.markdown('<div class="nav-section">', unsafe_allow_html=True)
-        st.markdown('<div class="nav-label">トーン</div>', unsafe_allow_html=True)
-
-        tone_display = st.radio(
-            "トーン",
-            ["✏️ 下書", "😊 カジュアル", "📘 フォーマル"],
-            index=2,
-            label_visibility="collapsed",
-            key="tone_radio"
-        )
-
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    display_to_tone = {
-        "✏️ 下書": "下書",
-        "😊 カジュアル": "カジュアル",
-        "📘 フォーマル": "フォーマル",
-    }
-    tone = display_to_tone[tone_display]
-
-    # --- 相手 ---
-    with st.container():
-        st.markdown('<div class="nav-section">', unsafe_allow_html=True)
-        st.markdown('<div class="nav-label">相手</div>', unsafe_allow_html=True)
-
-        recipient_display = st.radio(
-            "相手",
-            [
-                "👔 上司",
-                "👥 同僚",
-                "📋 部下",
-                "🏢 社外企業社員",
-                "🤝 取引先",
-                "✏️ その他"
-            ],
-            index=0,
-            label_visibility="collapsed",
-            key="recipient_radio"
-        )
-
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    display_to_recipient = {
-        "👔 上司": "上司",
-        "👥 同僚": "同僚",
-        "📋 部下": "部下",
-        "🏢 社外企業社員": "社外企業社員",
-        "🤝 取引先": "取引先",
-        "✏️ その他": "その他",
-    }
-    recipient = display_to_recipient[recipient_display]
-
+    
+    st.markdown("---")
+    
+    # トーン選択
+    st.subheader("🎨 トーン")
+    tone_options = ["下書", "カジュアル", "フォーマル"]
+    tone = st.selectbox(
+        "文体のトーン",
+        tone_options,
+        index=2,
+        label_visibility="collapsed"
+    )
+    
+    st.markdown("---")
+    
+    # 相手選択
+    st.subheader("👤 相手")
+    recipient_options = ["上司", "同僚", "部下", "社外企業社員", "取引先", "その他"]
+    recipient = st.selectbox(
+        "送信先",
+        recipient_options,
+        label_visibility="collapsed"
+    )
+    
     custom_recipient = None
     if recipient == "その他":
         custom_recipient = st.text_input("カスタム相手", placeholder="例: 顧客")
         recipient = custom_recipient if custom_recipient else "その他"
-
+    
     st.markdown("---")
     st.caption("© 2024 メール生成AI")
-
 
 # ============================================
 # メインエリア（2カラム）
@@ -454,12 +365,13 @@ with col2:
             with col_btn1:
                 if st.button("📋 コピー"):
                     full_text = f"件名: {email['subject']}\n\n{email['body']}"
-                    try:
-                        import pyperclip
+                    if PYPERCLIP_AVAILABLE:
+                        # ローカルなど pyperclip が使える環境向け
                         pyperclip.copy(full_text)
                         st.success("✓ クリップボードにコピーしました！")
-                    except:
-                        # pyperclipが使えない場合、テキストエリアで表示
+                    else:
+                        # Web版など pyperclip が使えない環境向け
+                        st.info("この環境では自動コピーが使えません。以下のテキストを手動でコピーしてください。")
                         st.text_area("以下をコピーしてください:", full_text, height=150)
             
             with col_btn2:
@@ -471,7 +383,9 @@ with col2:
                             'content': 'メールを再生成しています...'
                         })
                         
-                        last_user_message = st.session_state.messages[-3]['content']  # -3に変更（新しいメッセージを追加したため）
+                        # 直近のユーザーメッセージ（簡易版：今の仕様前提で -3 を使用）
+                        last_user_message = st.session_state.messages[-3]['content']
+                        
                         # バリエーションカウントを増やして別の表現を生成
                         st.session_state.variation_count += 1
                         st.session_state.generated_email = generate_email(
