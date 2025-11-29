@@ -412,6 +412,82 @@ section.main > div {
 .nav-label {
     color: #ffd666 !important;
 }
+/* 画面全体の背景をサイドバーと揃える */
+.stApp {
+    background-color: #050b23;
+}
+[data-testid="stAppViewContainer"] {
+    background-color: #050b23;
+}
+[data-testid="stHeader"] {
+    background-color: #050b23;
+}
+
+/* カード類を「白いカード」にする（メッセージ／入力／プレビュー共通） */
+.card,
+.preview-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+    color: #111827;
+}
+
+/* メッセージカード内のテキスト色 */
+.message-card .stChatMessage {
+    color: #111827;
+}
+
+/* 入力カード内のテキストエリア */
+.input-card textarea {
+    background: #f9fafb;
+    border-radius: 12px !important;
+    border-color: #e5e7eb !important;
+    color: #111827 !important;
+}
+
+/* プレビュー内テキストエリア */
+.preview-card textarea {
+    background: #f9fafb;
+    border-radius: 12px !important;
+    border-color: #e5e7eb !important;
+    color: #111827 !important;
+}
+
+/* アドバイスカードは少しだけ色を残す */
+.advice-box {
+    background: #ecfdf5;
+    border-left: 3px solid #16a34a;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #14532d;
+}
+
+/* コピー／再生成ボタンを青系に統一 */
+.preview-actions .stButton>button {
+    background: #2563eb;
+    color: #ffffff;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 6px 16px;
+}
+.preview-actions .stButton>button:hover {
+    background: #1d4ed8;
+}
+
+/* コピー用テキストエリアも白カード風に */
+.copy-area textarea {
+    background: #f9fafb;
+    border-radius: 12px !important;
+    border-color: #e5e7eb !important;
+    color: #111827 !important;
+}
+
 
 </style>
 """,
@@ -706,6 +782,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
