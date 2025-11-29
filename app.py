@@ -1,16 +1,14 @@
 import streamlit as st
 from datetime import datetime
 import random
-import html  # HTMLエスケープ用
-import textwrap  # ← 追加：インデント除去用
+import html
+import textwrap
 
 # ============================================
-# メール生成関数
+# メール生成関数 (変更なし)
 # ============================================
 def generate_email(template, tone, recipient, message, variation=0):
-    """メールを生成する（variation: 0=通常, 1=バリエーション1, 2=バリエーション2）"""
-
-    # 件名生成（バリエーション）
+    # ... (変更なし)
     subject_variations = {
         "依頼": [
             f"【ご依頼】{message[:20]}",
@@ -41,7 +39,6 @@ def generate_email(template, tone, recipient, message, variation=0):
     template_subjects = subject_variations.get(template, [f"{template} - {message[:20]}"])
     subject = template_subjects[variation % len(template_subjects)]
 
-    # 挨拶文（バリエーション）
     greetings_variations = {
         "上司": [
             "お疲れ様です。",
@@ -72,7 +69,6 @@ def generate_email(template, tone, recipient, message, variation=0):
     greeting_list = greetings_variations.get(recipient, ["お世話になっております。"])
     greeting = greeting_list[variation % len(greeting_list)]
 
-    # 本文バリエーション
     body_variations = [
         f"""{greeting}
 
@@ -103,7 +99,6 @@ def generate_email(template, tone, recipient, message, variation=0):
     ]
     body_start = body_variations[variation % len(body_variations)]
 
-    # 結びの言葉（バリエーション）
     closings_variations = {
         "上司": [
             "ご確認のほど、よろしくお願いいたします。",
@@ -136,7 +131,6 @@ def generate_email(template, tone, recipient, message, variation=0):
 
     body = body_start + closing
 
-    # アドバイス
     advices = {
         "依頼": "依頼メールでは、具体的な内容と期限を明記することで、相手が対応しやすくなります。簡潔で丁寧な表現を心掛けましょう。",
         "交渉": "交渉メールでは、双方にメリットがある提案を心掛けましょう。相手の立場を考慮した表現が重要です。",
@@ -153,9 +147,8 @@ def generate_email(template, tone, recipient, message, variation=0):
         "variation": variation,
     }
 
-
 # ============================================
-# ページ設定
+# ページ設定 (変更なし)
 # ============================================
 st.set_page_config(
     page_title="ビジネスメール作成アシスタント",
@@ -164,7 +157,7 @@ st.set_page_config(
 )
 
 # ============================================
-# カスタムCSS
+# カスタムCSS (変更なし - メッセージエリアのCSSは前回修正したものを維持)
 # ============================================
 st.markdown(
     """
@@ -267,90 +260,120 @@ div[data-testid="stHorizontalBlock"] {
     margin: 8px 0;
 }
 
-/* メッセージ表示カード（左ペイン用：必要なら後で調整） */
+/* ★★★ 左：メッセージ表示カード（Flexboxで高さを厳密に制御 - 前回修正を維持） ★★★ */
 .message-wrapper {
     background: #ffffff;
     border-radius: 12px;
     border: 1px solid #ffd666;
     padding: 10px 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    height: 180px;
+    /* 高さを固定し、Flexコンテナとして設定 */
+    height: 180px; /* <--- 親コンテナの高さを固定 */
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
     color: #111827;
+    
+    display: flex;
+    flex-direction: column; 
+    overflow: hidden; /* 親コンテナのスクロールは禁止 */
+}
+
+/* 1. message-wrapper の直後に Streamlit が挿入する div (Flexboxの子として振る舞わせる) */
+/* ここが、st.chat_messageの親ブロックの高さ制御のキモ */
+.message-wrapper + div {
+    height: 100%; 
+    min-height: 0;
+    flex: 1; 
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
 }
 
-/* 入力カード */
-.card {
-    background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
-    padding: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    color: #111827;
-    width: 100%;
-    max-width: 100%;
-    overflow: hidden;
-    box-sizing: border-box;
+/* 2. st.chat_message が配置される Streamlit のメインブロック (スクロールを担当) */
+.message-wrapper + div > div[data-testid="stVerticalBlock"] {
+    flex: 1; /* 残りのスペースを全て埋める */
+    overflow-y: auto; /* ここでスクロールさせる */
+    padding-right: 8px; /* スクロールバーのためのスペースを確保 */
+    min-height: 0; 
 }
 
-/* 入力欄（テキストエリア） */
-.input-card textarea {
-    background: #f3f4f6 !important;
-    border-radius: 8px !important;
-    border: 1px solid #d1d5db !important;
-    color: #111827 !important;
-    font-size: 14px !important;
+/* Streamlitのチャットメッセージの調整 */
+div[data-testid="stChatMessage"] {
     width: 100% !important;
+    max-width: 100% !important;
+    margin: 4px 0 !important;
+    padding: 4px 0 !important;
+    flex-shrink: 0; 
 }
 
-/* プレビューカード（右ペイン） */
+/* チャットのテキスト部分に強制的な折り返しを設定 (念のため) */
+.message-wrapper p,
+.message-wrapper span,
+.message-wrapper div {
+    color: #111827 !important;
+    word-break: break-word !important; 
+    word-wrap: break-word !important; 
+    white-space: pre-wrap !important; 
+    max-width: 100% !important;
+}
+
+/* -------------------------------------------
+   右：プレビューカード（HTML要素を全て内包するためのスタイル）
+------------------------------------------- */
+/* ★★★ プレビューカードのラッパーCSSを修正 ★★★ */
 .preview-main-wrapper {
     background: #ffffff;
     border-radius: 12px;
     border: 1px solid #e5e7eb;
     padding: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    min-height: 350px;
+    min-height: 350px; 
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
     display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    flex-direction: column; 
+    overflow: hidden; /* コンテナ自体はスクロールさせない */
 }
 
-/* プレースホルダ */
-.preview-placeholder {
-    color: #6b7280;
-    font-size: 14px;
-}
-
-/* ラベル、件名、本文など */
-.preview-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 4px;
-}
+/* プレビュー：件名（HTML p要素）*/
 .preview-subject {
-    font-size: 14px;
-    font-weight: 600;
-    color: #111827;
-    margin-bottom: 12px;
-}
-.preview-body {
-    font-size: 14px;
-    color: #111827;
-    white-space: pre-wrap;
-    word-break: break-word;
+    color: #111827; 
+    font-size: 14px; 
+    margin-bottom: 16px;
+    font-weight: bold;
 }
 
-/* コピー用テキストエリア */
+/* プレビュー：本文（HTML div要素） - スクロールを担当させる */
+.preview-body {
+    background: #f3f4f6;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    color: #111827;
+    font-size: 14px;
+    padding: 12px;
+    
+    flex-grow: 1; /* 残りの高さを全て使う */
+    min-height: 200px; /* 最小高さを保証 */
+    overflow-y: auto; /* ここでスクロールさせる */
+    
+    /* 適切に改行と表示を行うための設定 */
+    word-break: break-word; 
+    white-space: pre-wrap; /* \nの代わりに<br>を使うためpre-wrapは不要かもしれないが念のため */
+}
+
+/* アドバイスボックス */
+.advice-box {
+    background: #fffbe6;
+    border: 1px solid #ffd666;
+    border-radius: 8px;
+    padding: 10px;
+    color: #4b5563;
+    font-size: 13px;
+    margin-top: 12px;
+}
+
+/* コピー用テキストエリア (変更なし) */
 .copy-area textarea {
     background: #f3f4f6 !important;
     border-radius: 8px !important;
@@ -359,23 +382,13 @@ div[data-testid="stHorizontalBlock"] {
     font-size: 12px !important;
     width: 100% !important;
 }
-
-/* アドバイスボックス */
-.advice-box {
-    background: #1f2937;
-    border-radius: 8px;
-    padding: 10px 12px;
-    color: #e5e7eb;
-    font-size: 13px;
-    border: 1px solid #4b5563;
-}
 </style>
 """,
     unsafe_allow_html=True,
 )
 
 # ============================================
-# セッション状態初期化
+# セッション状態初期化 (変更なし)
 # ============================================
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -385,7 +398,7 @@ if "variation_count" not in st.session_state:
     st.session_state.variation_count = 0
 
 # ============================================
-# トップバー
+# トップバー (変更なし)
 # ============================================
 st.markdown(
     "<div class='top-bar'><h1 class='app-title'>✉️ ビジネスメール作成アシスタント</h1></div>",
@@ -393,7 +406,7 @@ st.markdown(
 )
 
 # ============================================
-# サイドバー
+# サイドバー (変更なし)
 # ============================================
 with st.sidebar:
     st.markdown(
@@ -513,7 +526,7 @@ with st.sidebar:
     st.caption("© 2024 メール生成AI")
 
 # ============================================
-# メイン 2 カラム
+# メイン 2 カラム (変更なし)
 # ============================================
 col1, col2 = st.columns([3, 2], gap="medium")
 
@@ -526,15 +539,22 @@ with col2:
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
 # ============================================
-# 左：メッセージエリア
+# 左：メッセージエリア (前回修正版の構造を維持)
 # ============================================
 with col1:
+    # ★ message-wrapper は高さ固定の親コンテナとして機能
+    st.markdown("<div class='message-wrapper'>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True) # 閉じタグを挿入
+
+    # ★ st.chat_message は st.markdown の直後に配置
     if not st.session_state.messages:
+        # st.chat_messageの初期メッセージ
         st.chat_message("assistant").write(
             "こんにちは！ビジネスメールの作成をお手伝いします。\n\n"
             "左側からメールの種類、トーン、相手を選択して、具体的な内容を入力してください。"
         )
     else:
+        # 過去のチャット履歴の表示
         for msg in st.session_state.messages:
             if msg["role"] == "user":
                 st.chat_message("user").write(msg["content"])
@@ -543,7 +563,7 @@ with col1:
 
     st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-    # 入力カード
+    # 入力カード (変更なし)
     st.markdown("<div class='card input-card'>", unsafe_allow_html=True)
     with st.form("message_form", clear_on_submit=True):
         user_message = st.text_area(
@@ -576,11 +596,11 @@ with col1:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ============================================
-# 右：プレビューエリア
+# 右：プレビューエリア (HTML一括レンダリングに修正)
 # ============================================
 with col2:
     if st.session_state.generated_email is None:
-        # まだメールが生成されていない場合：プレースホルダだけカード内に表示
+        # まだメールが生成されていない場合
         placeholder_html = textwrap.dedent(
             """
             <div class="preview-main-wrapper">
@@ -593,10 +613,18 @@ with col2:
         st.markdown(placeholder_html, unsafe_allow_html=True)
     else:
         email = st.session_state.generated_email
-        # 本文を HTML 用に整形
-        body_html = html.escape(email["body"]).replace("\n", "<br>")
+        
+        # 1. 本文を HTML 用に整形: 改行を <br> に置き換え
+        # この時、本文を textwrap.dedent の内側で定義する際にインデントが入るのを防ぐため、
+        # generate_email内の body_variations の文字列定義に注意し、
+        # ここでは純粋に改行コード \n を <br> に変換する
+        
+        # まずHTMLエスケープ (タグの誤認識を防ぐ)
+        escaped_body = html.escape(email["body"])
+        # 改行コードを <br> に置き換え
+        body_html_formatted = escaped_body.replace("\n", "<br>")
 
-        # preview-main-wrapper を 1 回の markdown で出力（dedent で先頭スペース除去）
+        # 2. 件名と本文の全てを、一つの大きなHTML文字列として構築
         preview_html = textwrap.dedent(
             f"""
             <div class="preview-main-wrapper">
@@ -604,15 +632,16 @@ with col2:
                 <p class="preview-subject">{html.escape(email['subject'])}</p>
 
                 <p class="preview-label">本文</p>
-                <div class="preview-body">{body_html}</div>
+                <div class="preview-body">{body_html_formatted}</div>
             </div>
             """
         )
+        # 3. 一度の st.markdown で出力
         st.markdown(preview_html, unsafe_allow_html=True)
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-        # アドバイス（こちらも dedent）
+        # アドバイス
         advice_html = textwrap.dedent(
             f"""
             <div class="advice-box">
@@ -625,7 +654,7 @@ with col2:
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-        # コピー／再生成ボタン
+        # コピー／再生成ボタン（Streamlitコンポーネントのため、HTML divの外に配置）
         st.markdown("<div class='preview-actions'>", unsafe_allow_html=True)
         btn_col1, btn_col2 = st.columns(2)
 
