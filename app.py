@@ -530,6 +530,65 @@ section.main > div {
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
+/* =========================================================
+   メッセージカード／プレビューカードを白いカードにする
+   ========================================================= */
+
+/* メッセージ全体のカード（左） */
+.message-wrapper {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #f5b742;   /* メッセージ側は金色枠に寄せる */
+    padding: 12px 16px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+}
+
+/* プレビュー側カード（右） */
+.preview-main-wrapper {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    padding: 12px 16px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+}
+
+/* チャットメッセージを「カードの上に乗るテキスト」にする */
+.message-wrapper .stChatMessage {
+    background-color: transparent !important;  /* 紺色の吹き出しを消す */
+    border: none !important;
+    box-shadow: none !important;
+    padding: 4px 0 !important;
+}
+
+/* チャット内のテキストを黒っぽく */
+.message-wrapper .stChatMessage p,
+.message-wrapper .stChatMessage span,
+.message-wrapper .stChatMessage div {
+    color: #111827 !important;
+}
+
+/* 入力カードは薄グレーのボックスに */
+.input-card textarea {
+    background: #f9fafb;
+    border-radius: 12px !important;
+    border-color: #e5e7eb !important;
+    color: #111827 !important;
+}
+
+/* セクション見出しの下に細い金ラインを引く */
+.section-header {
+    position: relative;
+}
+.section-header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -6px;
+    height: 1px;
+    background: #ffd666;
+}
+
 
 </style>
 """,
@@ -824,6 +883,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
