@@ -1,10 +1,10 @@
 import streamlit as st
 from datetime import datetime
 import random
-import html # ← HTMLエスケープのために必要
+import html  # HTMLエスケープ用
 
 # ============================================
-# メール生成関数 (変更なし)
+# メール生成関数
 # ============================================
 def generate_email(template, tone, recipient, message, variation=0):
     """メールを生成する（variation: 0=通常, 1=バリエーション1, 2=バリエーション2）"""
@@ -154,7 +154,7 @@ def generate_email(template, tone, recipient, message, variation=0):
 
 
 # ============================================
-# ページ設定 (変更なし)
+# ページ設定
 # ============================================
 st.set_page_config(
     page_title="ビジネスメール作成アシスタント",
@@ -163,7 +163,7 @@ st.set_page_config(
 )
 
 # ============================================
-# カスタムCSS (左側メッセージエリアのCSSを再強化)
+# カスタムCSS
 # ============================================
 st.markdown(
     """
@@ -266,66 +266,23 @@ div[data-testid="stHorizontalBlock"] {
     margin: 8px 0;
 }
 
-/* ★★★ 左：メッセージ表示カード（Flexboxで高さを厳密に制御） ★★★ */
+/* メッセージ表示カード（左ペイン用：必要なら後で調整） */
 .message-wrapper {
     background: #ffffff;
     border-radius: 12px;
     border: 1px solid #ffd666;
     padding: 10px 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    /* 高さを固定し、Flexコンテナとして設定 */
-    height: 180px; /* <--- 親コンテナの高さを固定 */
+    height: 180px;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
     color: #111827;
-    
-    display: flex;
-    flex-direction: column; 
-    overflow: hidden; /* 親コンテナのスクロールは禁止 */
-}
-
-/* 1. message-wrapper の直後に Streamlit が挿入する div (Flexboxの子として振る舞わせる) */
-.message-wrapper + div {
-    /* この div が .message-wrapper の高さを埋めるよう強制 */
-    height: 100%; 
-    min-height: 0;
-    flex: 1; /* 高さを継承させるためのFlexプロパティ */
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
 }
 
-/* 2. st.chat_message が配置される Streamlit のメインブロック (スクロールを担当) */
-.message-wrapper + div > div[data-testid="stVerticalBlock"] {
-    flex: 1; /* 残りのスペースを全て埋める */
-    overflow-y: auto; /* ここでスクロールさせる */
-    padding-right: 8px; /* スクロールバーのためのスペースを確保 */
-    min-height: 0; /* Flexアイテムの最小高さを0にする */
-}
-
-/* Streamlitのチャットメッセージの調整 */
-div[data-testid="stChatMessage"] {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 4px 0 !important;
-    padding: 4px 0 !important;
-    flex-shrink: 0; /* 高さが固定の親内で縮まないように */
-}
-
-/* チャットのテキスト部分に強制的な折り返しを設定 (念のため) */
-.message-wrapper p,
-.message-wrapper span,
-.message-wrapper div {
-    color: #111827 !important;
-    word-break: break-word !important; 
-    word-wrap: break-word !important; 
-    white-space: pre-wrap !important; 
-    max-width: 100% !important;
-}
-
-/* -------------------------------------------
-   右：プレビューカード（前回の修正でHTMLレンダリング済み）
-------------------------------------------- */
 /* 入力カード */
 .card {
     background: #ffffff;
@@ -350,61 +307,49 @@ div[data-testid="stChatMessage"] {
     width: 100% !important;
 }
 
-/* プレビューカード（HTML要素を全て内包するためのスタイル） */
+/* プレビューカード（右ペイン） */
 .preview-main-wrapper {
     background: #ffffff;
     border-radius: 12px;
     border: 1px solid #e5e7eb;
     padding: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    /* st.text_area を使わないため、高さを固定して要素を収める */
-    min-height: 350px; 
+    min-height: 350px;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
     display: flex;
-    flex-direction: column; 
-    overflow: hidden; /* コンテナ自体はスクロールさせない */
+    flex-direction: column;
+    overflow: hidden;
 }
 
-/* プレビュー：件名（HTML p要素）*/
-.preview-subject {
-    color: #111827; 
-    font-size: 14px; 
-    margin-bottom: 16px;
-    font-weight: bold;
-}
-
-/* プレビュー：本文（HTML div要素） - スクロールを担当させる */
-.preview-body {
-    background: #f3f4f6;
-    border-radius: 8px;
-    border: 1px solid #d1d5db;
-    color: #111827;
+/* プレースホルダ */
+.preview-placeholder {
+    color: #6b7280;
     font-size: 14px;
-    padding: 12px;
-    
-    /* 高さを確保し、スクロール可能にする */
-    flex-grow: 1; /* 残りの高さを全て使う */
-    min-height: 200px; /* 最小高さを保証 */
-    overflow-y: auto; /* ここでスクロールさせる */
-    
-    word-break: break-word; 
-    white-space: pre-wrap; /* <br>がなくても改行を保持する */
 }
 
-/* アドバイスボックス */
-.advice-box {
-    background: #fffbe6;
-    border: 1px solid #ffd666;
-    border-radius: 8px;
-    padding: 10px;
-    color: #4b5563;
+/* ラベル、件名、本文など */
+.preview-label {
     font-size: 13px;
-    margin-top: 12px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 4px;
+}
+.preview-subject {
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 12px;
+}
+.preview-body {
+    font-size: 14px;
+    color: #111827;
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
-/* コピー用テキストエリア (変更なし) */
+/* コピー用テキストエリア */
 .copy-area textarea {
     background: #f3f4f6 !important;
     border-radius: 8px !important;
@@ -413,13 +358,23 @@ div[data-testid="stChatMessage"] {
     font-size: 12px !important;
     width: 100% !important;
 }
+
+/* アドバイスボックス */
+.advice-box {
+    background: #1f2937;
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: #e5e7eb;
+    font-size: 13px;
+    border: 1px solid #4b5563;
+}
 </style>
 """,
     unsafe_allow_html=True,
 )
 
 # ============================================
-# セッション状態初期化 (変更なし)
+# セッション状態初期化
 # ============================================
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -429,7 +384,7 @@ if "variation_count" not in st.session_state:
     st.session_state.variation_count = 0
 
 # ============================================
-# トップバー (変更なし)
+# トップバー
 # ============================================
 st.markdown(
     "<div class='top-bar'><h1 class='app-title'>✉️ ビジネスメール作成アシスタント</h1></div>",
@@ -437,7 +392,7 @@ st.markdown(
 )
 
 # ============================================
-# サイドバー (変更なし)
+# サイドバー
 # ============================================
 with st.sidebar:
     st.markdown(
@@ -557,7 +512,7 @@ with st.sidebar:
     st.caption("© 2024 メール生成AI")
 
 # ============================================
-# メイン 2 カラム (変更なし)
+# メイン 2 カラム
 # ============================================
 col1, col2 = st.columns([3, 2], gap="medium")
 
@@ -570,14 +525,9 @@ with col2:
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
 # ============================================
-# 左：メッセージエリア
+# 左：メッセージエリア（今回はそのまま chat_message を使用）
 # ============================================
 with col1:
-    # ★ message-wrapper は高さ固定の親コンテナとして機能
-    st.markdown("<div class='message-wrapper'>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True) # 閉じタグを挿入
-
-    # ★ st.chat_message は st.markdown の直後に配置
     if not st.session_state.messages:
         st.chat_message("assistant").write(
             "こんにちは！ビジネスメールの作成をお手伝いします。\n\n"
@@ -592,7 +542,7 @@ with col1:
 
     st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-    # 入力カード (変更なし)
+    # 入力カード
     st.markdown("<div class='card input-card'>", unsafe_allow_html=True)
     with st.form("message_form", clear_on_submit=True):
         user_message = st.text_area(
@@ -625,38 +575,37 @@ with col1:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ============================================
-# 右：プレビューエリア (HTMLレンダリングに変更)
+# 右：プレビューエリア（preview-main-wrapper 内にコンテンツを収容）
 # ============================================
 with col2:
     if st.session_state.generated_email is None:
+        # まだメールが生成されていない場合：プレースホルダだけカード内に表示
         st.markdown(
-            "<div class='preview-main-wrapper'><div class='preview-placeholder'>メールを生成すると、ここにプレビューが表示されます。</div></div>",
+            """
+            <div class="preview-main-wrapper">
+                <div class="preview-placeholder">
+                    メールを生成すると、ここにプレビューが表示されます。
+                </div>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
     else:
         email = st.session_state.generated_email
-
-        # 件名＋本文カード（HTML divの中に全て収める）
-        st.markdown("<div class='preview-main-wrapper'>", unsafe_allow_html=True)
-
-        # 1. 件名
-        st.markdown("<p class='preview-label'>件名</p>", unsafe_allow_html=True)
-        # HTMLエスケープして表示
-        st.markdown(
-            f"<p class='preview-subject'>{html.escape(email['subject'])}</p>",
-            unsafe_allow_html=True,
-        )
-
-        # 2. 本文（st.text_areaの代わりにHTML divを使用）
-        st.markdown("<p class='preview-label'>本文</p>", unsafe_allow_html=True)
-        # HTMLエスケープし、改行コード(\n)をHTMLの改行タグ(<br>)に置換
+        # 本文を HTML 用に整形
         body_html = html.escape(email["body"]).replace("\n", "<br>")
-        st.markdown(
-            f"<div class='preview-body'>{body_html}</div>",
-            unsafe_allow_html=True,
-        )
 
-        st.markdown("</div>", unsafe_allow_html=True) # /preview-main-wrapper の閉じタグ
+        # ★ 1回の markdown の中で preview-main-wrapper を完結させる
+        preview_html = f"""
+        <div class="preview-main-wrapper">
+            <p class="preview-label">件名</p>
+            <p class="preview-subject">{html.escape(email['subject'])}</p>
+
+            <p class="preview-label">本文</p>
+            <div class="preview-body">{body_html}</div>
+        </div>
+        """
+        st.markdown(preview_html, unsafe_allow_html=True)
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
@@ -673,7 +622,7 @@ with col2:
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-        # コピー／再生成ボタン（Streamlitコンポーネントのため、HTML divの外に配置）
+        # コピー／再生成ボタン
         st.markdown("<div class='preview-actions'>", unsafe_allow_html=True)
         btn_col1, btn_col2 = st.columns(2)
 
@@ -682,7 +631,6 @@ with col2:
                 full_text = f"件名: {email['subject']}\n\n{email['body']}"
                 st.info("以下のテキストをコピーしてご利用ください。")
                 st.markdown("<div class='copy-area'>", unsafe_allow_html=True)
-                # コピー用の text_area は Streamlit コンポーネント
                 st.text_area(
                     "コピー用テキスト",
                     full_text,
@@ -724,4 +672,4 @@ with col2:
 
                 st.rerun()
 
-        st.markdown("</div>", unsafe_allow_html=True) # /preview-actions の閉じタグ
+        st.markdown("</div>", unsafe_allow_html=True)
