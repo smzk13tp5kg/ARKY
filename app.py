@@ -188,6 +188,9 @@ body {
 
 main.block-container {
     padding-top: 0.5rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    max-width: 100%;
 }
 
 section.main > div {
@@ -318,8 +321,11 @@ section.main > div {
     border: 1px solid #ffd666;
     padding: 12px 16px;
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
-    height: 160px;
+    min-height: 180px;
+    max-height: 180px;
     overflow-y: auto;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .message-wrapper::-webkit-scrollbar {
@@ -341,20 +347,13 @@ section.main > div {
     background-color: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    padding: 2px 0 !important;
-    margin: 0 !important;
+    padding: 4px 0 !important;
 }
 
 .message-wrapper .stChatMessage p,
 .message-wrapper .stChatMessage span,
 .message-wrapper .stChatMessage div {
     color: #111827 !important;
-    font-size: 13px !important;
-    line-height: 1.5 !important;
-}
-
-.message-wrapper .stChatMessage .stChatMessageAvatar {
-    display: none !important;
 }
 
 /* 入力カード */
@@ -365,6 +364,8 @@ section.main > div {
     padding: 16px;
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
     color: #111827;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .input-card textarea {
@@ -395,7 +396,9 @@ section.main > div {
     border: 1px solid #e5e7eb;
     padding: 16px 20px;
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
-    height: auto;
+    min-height: 350px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .preview-main-wrapper textarea {
@@ -593,7 +596,7 @@ with st.sidebar:
 # ============================================
 # メイン 2 カラム
 # ============================================
-col1, col2 = st.columns([3, 2])
+col1, col2 = st.columns([1, 1], gap="medium")
 
 with col1:
     st.markdown("<div class='section-header'>💬 メッセージ</div>", unsafe_allow_html=True)
@@ -630,7 +633,7 @@ with col1:
         user_message = st.text_area(
             "メッセージを入力",
             placeholder="例：取引先に感謝を伝えるメールを作成したい",
-            height=90,
+            height=100,
             label_visibility="collapsed",
         )
         submitted = st.form_submit_button("✓ 送信")
@@ -678,7 +681,7 @@ with col2:
         st.text_area(
             "本文プレビュー",
             email["body"],
-            height=220,
+            height=280,
             label_visibility="collapsed",
             disabled=True,
         )
