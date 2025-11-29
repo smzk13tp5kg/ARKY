@@ -188,13 +188,31 @@ body {
 
 main.block-container {
     padding-top: 0.5rem;
-    padding-left: 2rem;
-    padding-right: 2rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
     max-width: 100%;
+}
+
+/* カラム間のギャップ調整 */
+.stColumn > div {
+    padding-right: 0.75rem !important;
+    padding-left: 0.75rem !important;
 }
 
 section.main > div {
     background: #050b23;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Streamlitのカラムの幅制御 */
+[data-testid="column"] {
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+div[data-testid="stHorizontalBlock"] {
+    gap: 1rem !important;
 }
 
 /* サイドバー */
@@ -319,12 +337,13 @@ section.main > div {
     background: #ffffff;
     border-radius: 16px;
     border: 1px solid #ffd666;
-    padding: 12px 16px;
+    padding: 12px 14px;
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
     min-height: 180px;
     max-height: 180px;
     overflow-y: auto;
     width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
 }
 
@@ -361,10 +380,11 @@ section.main > div {
     background: #ffffff;
     border-radius: 16px;
     border: 1px solid #e5e7eb;
-    padding: 16px;
+    padding: 14px;
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
     color: #111827;
     width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
 }
 
@@ -394,10 +414,11 @@ section.main > div {
     background: #ffffff;
     border-radius: 16px;
     border: 1px solid #e5e7eb;
-    padding: 16px 20px;
+    padding: 14px 16px;
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
     min-height: 350px;
     width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
 }
 
@@ -596,7 +617,7 @@ with st.sidebar:
 # ============================================
 # メイン 2 カラム
 # ============================================
-col1, col2 = st.columns([1, 1], gap="medium")
+col1, col2 = st.columns([3, 2], gap="medium")
 
 with col1:
     st.markdown("<div class='section-header'>💬 メッセージ</div>", unsafe_allow_html=True)
