@@ -802,6 +802,7 @@ with col1:
 # ============================================
 with col2:
     if st.session_state.generated_email is None:
+        # まだメール生成前：プレースホルダだけ表示
         st.markdown(
             "<div class='preview-main-wrapper'><div class='preview-placeholder'>メールを生成すると、ここにプレビューが表示されます。</div></div>",
             unsafe_allow_html=True,
@@ -809,10 +810,12 @@ with col2:
     else:
         email = st.session_state.generated_email
 
-        # 件名＋本文カード（白）
+        # 件名＋本文の白いカード（スクショ右上の大きいカード）
         st.markdown("<div class='preview-main-wrapper'>", unsafe_allow_html=True)
+
         st.markdown("**件名**", unsafe_allow_html=True)
         st.text(email["subject"])
+
         st.markdown("---", unsafe_allow_html=True)
 
         st.markdown("**本文**", unsafe_allow_html=True)
@@ -822,10 +825,13 @@ with col2:
             height=220,
             label_visibility="collapsed",
         )
+
         st.markdown("</div>", unsafe_allow_html=True)
 
-        # アドバイス＋ボタンカードはそのまま or 少し明るめに
+        # アドバイス＋コピー／再生成のカード（スクショ右下の薄緑＋青ボタン）
         st.markdown("<div class='card preview-card'>", unsafe_allow_html=True)
+
+        # アドバイスボックス
         st.markdown(
             f"""
             <div class="advice-box">
@@ -836,8 +842,11 @@ with col2:
             unsafe_allow_html=True,
         )
 
+        # コピー／再生成ボタン（青）
         st.markdown("<div class='preview-actions'>", unsafe_allow_html=True)
         btn_col1, btn_col2 = st.columns(2)
+
+        # コピー
         with btn_col1:
             if st.button("📋 コピー"):
                 full_text = f"件名: {email['subject']}\n\n{email['body']}"
@@ -851,39 +860,7 @@ with col2:
                 )
                 st.markdown("</div>", unsafe_allow_html=True)
 
-        with btn_col2:
-            if st.button("🔄 再生成"):
-                ...
-        st.markdown("</div>", unsafe_allow_html=True)  # /preview-actions
-        st.markdown("</div>", unsafe_allow_html=True)  # /card
-
-
-        # アドバイス＋ボタンカード
-        st.markdown("<div class='card preview-card'>", unsafe_allow_html=True)
-        st.markdown(
-            f"""
-            <div class="advice-box">
-                <strong>💡 アドバイス</strong><br>
-                {email['advice']}
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        btn_col1, btn_col2 = st.columns(2)
-        with btn_col1:
-            if st.button("📋 コピー"):
-                full_text = f"件名: {email['subject']}\n\n{email['body']}"
-                st.info("以下のテキストをコピーしてご利用ください。")
-                st.markdown("<div class='copy-area'>", unsafe_allow_html=True)
-                st.text_area(
-                    "コピー用テキスト",
-                    full_text,
-                    height=120,
-                    label_visibility="collapsed",
-                )
-                st.markdown("</div>", unsafe_allow_html=True)
-
+        # 再生成
         with btn_col2:
             if st.button("🔄 再生成"):
                 # チャットに「再生成しています...」
@@ -891,7 +868,7 @@ with col2:
                     {"role": "assistant", "content": "メールを再生成しています..."}
                 )
 
-                # 直近のユーザーメッセージを探す
+                # 直近の user メッセージを探す
                 last_user_message = None
                 for msg in reversed(st.session_state.messages):
                     if msg["role"] == "user":
@@ -916,7 +893,10 @@ with col2:
 
                 st.rerun()
 
-        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)  # /preview-actions
+        st.markdown("</div>", unsafe_allow_html=True)  # /card
+
+
 
 
 
