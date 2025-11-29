@@ -528,7 +528,8 @@ with st.sidebar:
 # ============================================
 # メイン 2 カラム (変更なし)
 # ============================================
-col1, col2 = st.columns([3, 2], gap="medium")
+col1, col2 = st.columns([4.5, 2], gap="medium")
+
 
 with col1:
     st.markdown("<div class='section-header'>💬 メッセージ</div>", unsafe_allow_html=True)
@@ -697,3 +698,4 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
