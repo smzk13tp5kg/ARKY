@@ -506,7 +506,7 @@ with st.sidebar:
 
     custom_recipient = None
     if recipient == "その他":
-        custom_recipient = st.text_input("カスタム相手", placeholder="例: 顧客")
+        custom_recipient = st.text_input("カスタマイズ相手", placeholder="例: 顧客")
         recipient = custom_recipient if custom_recipient else "その他"
 
     st.caption("© 2024 メール生成AI")
@@ -525,7 +525,7 @@ with col2:
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
 # ============================================
-# 左：メッセージエリア（今回はそのまま chat_message を使用）
+# 左：メッセージエリア
 # ============================================
 with col1:
     if not st.session_state.messages:
@@ -575,19 +575,19 @@ with col1:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ============================================
-# 右：プレビューエリア（preview-main-wrapper 内にコンテンツを収容）
+# 右：プレビューエリア
 # ============================================
 with col2:
     if st.session_state.generated_email is None:
         # まだメールが生成されていない場合：プレースホルダだけカード内に表示
         st.markdown(
             """
-            <div class="preview-main-wrapper">
-                <div class="preview-placeholder">
-                    メールを生成すると、ここにプレビューが表示されます。
-                </div>
-            </div>
-            """,
+<div class="preview-main-wrapper">
+    <div class="preview-placeholder">
+        メールを生成すると、ここにプレビューが表示されます。
+    </div>
+</div>
+""",
             unsafe_allow_html=True,
         )
     else:
@@ -595,30 +595,28 @@ with col2:
         # 本文を HTML 用に整形
         body_html = html.escape(email["body"]).replace("\n", "<br>")
 
-        # ★ 1回の markdown の中で preview-main-wrapper を完結させる
+        # preview-main-wrapper を 1 回の markdown で出力
         preview_html = f"""
-        <div class="preview-main-wrapper">
-            <p class="preview-label">件名</p>
-            <p class="preview-subject">{html.escape(email['subject'])}</p>
+<div class="preview-main-wrapper">
+    <p class="preview-label">件名</p>
+    <p class="preview-subject">{html.escape(email['subject'])}</p>
 
-            <p class="preview-label">本文</p>
-            <div class="preview-body">{body_html}</div>
-        </div>
-        """
+    <p class="preview-label">本文</p>
+    <div class="preview-body">{body_html}</div>
+</div>
+"""
         st.markdown(preview_html, unsafe_allow_html=True)
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
         # アドバイス
-        st.markdown(
-            f"""
-            <div class="advice-box">
-                <strong>💡 アドバイス</strong><br>
-                {email['advice']}
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        advice_html = f"""
+<div class="advice-box">
+    <strong>💡 アドバイス</strong><br>
+    {email['advice']}
+</div>
+"""
+        st.markdown(advice_html, unsafe_allow_html=True)
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
