@@ -173,42 +173,58 @@ st.markdown(
 
 /* 全体背景 */
 .stApp {
-    background-color: #050b23;
+    background-color: #050b23; /* 濃い紺色 */
 }
 [data-testid="stAppViewContainer"] {
-    background-color: #050b23;
+    background-color: #050b23; /* 濃い紺色 */
 }
 [data-testid="stHeader"] {
-    background-color: #050b23;
+    background-color: #050b23; /* 濃い紺色 */
 }
 
 body {
-    background-color: #050b23;
+    background-color: #050b23; /* 濃い紺色 */
 }
 
 main.block-container {
     padding-top: 0.5rem;
-    padding-left: 0.5rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    max-width: 100% !important;
+}
+
+/* カラム間のギャップ調整 */
+.stColumn > div {
     padding-right: 0.5rem !important;
-    max-width: 100% !important;
+    padding-left: 0.5rem !important;
 }
 
-section.main > div {
-    background: #050b23;
-    max-width: 100% !important;
-}
-
-/* カラムレイアウト */
-div[data-testid="stHorizontalBlock"] {
-    gap: 0.75rem !important;
-}
-
+/* カラム自体の調整 */
 [data-testid="column"] {
     padding: 0 !important;
 }
 
-[data-testid="column"] > div {
-    overflow: visible !important;
+section.main > div {
+    background: #050b23; /* 濃い紺色 */
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+}
+
+/* Streamlitのカラムの幅制御 */
+[data-testid="column"] {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+}
+
+div[data-testid="stHorizontalBlock"] {
+    gap: 0.5rem !important;
+    width: 100% !important;
+}
+
+/* 要素がはみ出さないようにする */
+[data-testid="stVerticalBlock"] > div {
+    max-width: 100% !important;
 }
 
 /* サイドバー */
@@ -216,8 +232,8 @@ div[data-testid="stHorizontalBlock"] {
     width: 240px !important;
     min-width: 240px !important;
     max-width: 240px !important;
-    background: #050b23;
-    border-right: 1px solid #29314f;
+    background: #050b23; /* 濃い紺色 */
+    border-right: 1px solid #29314f; /* 少し明るい紺色 */
 }
 [data-testid="stSidebar"] > div:first-child {
     padding: 12px 8px 16px 8px;
@@ -226,6 +242,7 @@ div[data-testid="stHorizontalBlock"] {
     color: #ffffff !important;
 }
 
+/* サイドバータイトル */
 .sidebar-app-title {
     font-size: 14px;
     font-weight: 600;
@@ -233,9 +250,10 @@ div[data-testid="stHorizontalBlock"] {
     padding: 4px 8px 10px 8px;
 }
 
+/* 新規作成ボタン */
 .sidebar-new-btn .stButton>button, .stSidebar .stButton>button {
-    background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%);
-    color: #1b2433;
+    background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%); /* Goldグラデーション */
+    color: #1b2433; /* 濃い紺色のテキスト */
     border: none;
     border-radius: 999px;
     font-weight: 700;
@@ -244,59 +262,64 @@ div[data-testid="stHorizontalBlock"] {
     box-shadow: 0 2px 4px rgba(0,0,0,0.25);
 }
 .sidebar-new-btn .stButton>button:hover, .stSidebar .stButton>button:hover {
-    background: linear-gradient(180deg, #ffe58f 0%, #f0a73a 100%);
+    background: linear-gradient(180deg, #ffe58f 0%, #f0a73a 100%); /* ホバー時のGoldグラデーション */
 }
 
+/* サイドバー：見出し */
 .nav-label {
     font-size: 12px;
     font-weight: 600;
-    color: #ffd666 !important;
+    color: #ffd666 !important; /* Gold */
     margin: 4px 0 6px 4px;
 }
 
+/* サイドバー：カード */
 .nav-section {
-    background: #050b23;
+    background: #050b23; /* 濃い紺色 */
     border-radius: 12px;
     padding: 6px 4px 10px 4px;
     margin-bottom: 12px;
-    border: 1px solid #29314f;
+    border: 1px solid #29314f; /* 少し明るい紺色 */
 }
 
+/* ラジオグループ */
 .nav-section div[role="radiogroup"] {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
+/* ラジオの各行 */
 .nav-section div[role="radiogroup"] > label {
     border-radius: 999px;
     padding: 6px 10px;
     border: 1px solid transparent;
     background: transparent;
     cursor: pointer;
-    color: #ffffff !important;
+    color: #ffffff !important; /* White */
     font-size: 13px;
 }
 .nav-section div[role="radiogroup"] > label:hover {
-    background: rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.06); /* Whiteの透明度 */
 }
 
+/* 選択中 */
 .nav-section div[role="radiogroup"] input:checked ~ div {
-    background: rgba(255,214,102,0.12);
-    border-color: #ffd666 !important;
-    color: #ffd666 !important;
+    background: rgba(255,214,102,0.12); /* Goldの透明度 */
+    border-color: #ffd666 !important; /* Gold */
+    color: #ffd666 !important; /* Gold */
 }
 
 /* トップバー */
 .top-bar {
-    background: #050b23;
+    background: #050b23; /* 濃い紺色 */
     padding: 16px 8px 8px 8px;
-    border-bottom: 1px solid #29314f;
+    border-bottom: 1px solid #29314f; /* 少し明るい紺色 */
 }
 .app-title {
     font-size: 24px;
     font-weight: 700;
-    color: #ffd666 !important;
+    color: #ffd666 !important; /* Gold */
     margin: 0;
 }
 
@@ -304,47 +327,56 @@ div[data-testid="stHorizontalBlock"] {
 .section-header {
     font-size: 14px;
     font-weight: 700;
-    color: #ffd666;
+    color: #ffd666; /* Gold */
     margin: 8px 0;
     display: flex;
     align-items: center;
     gap: 6px;
     position: relative;
+    padding-bottom: 8px; /* 下線とのスペース */
 }
 .section-header::after {
     content: "";
     position: absolute;
     left: 0;
     right: 0;
-    bottom: -6px;
+    bottom: 0; /* 見出しの下に配置 */
     height: 1px;
-    background: #ffd666;
+    background: #29314f; /* 少し明るい紺色 */
 }
+
 
 /* メッセージカード */
 .message-wrapper {
-    background: #ffffff;
+    background: #111827; /* 少し明るい紺色 */
     border-radius: 16px;
-    border: 1px solid #ffd666;
-    padding: 12px;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+    border: 1px solid #29314f; /* 少し明るい紺色 */
+    padding: 10px 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     min-height: 180px;
     max-height: 180px;
     overflow-y: auto;
     overflow-x: hidden;
+    width: calc(100% - 2px);
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .message-wrapper::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
 }
 .message-wrapper::-webkit-scrollbar-track {
     background: transparent;
 }
 .message-wrapper::-webkit-scrollbar-thumb {
-    background: #d1d5db;
-    border-radius: 3px;
+    background: #4a5568; /* 濃いめのグレー */
+    border-radius: 4px;
+}
+.message-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #2d3748; /* さらに濃いグレー */
 }
 
+/* チャットメッセージを透明に */
 .message-wrapper .stChatMessage {
     background-color: transparent !important;
     border: none !important;
@@ -355,30 +387,37 @@ div[data-testid="stHorizontalBlock"] {
 .message-wrapper .stChatMessage p,
 .message-wrapper .stChatMessage span,
 .message-wrapper .stChatMessage div {
-    color: #111827 !important;
+    color: #ffffff !important; /* White */
 }
 
 /* 入力カード */
 .card {
-    background: #ffffff;
+    background: #111827; /* 少し明るい紺色 */
     border-radius: 16px;
-    border: 1px solid #e5e7eb;
-    padding: 14px;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
-    color: #111827;
+    border: 1px solid #29314f; /* 少し明るい紺色 */
+    padding: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    color: #ffffff; /* White */
+    width: calc(100% - 2px);
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
 .input-card textarea {
-    background: #f9fafb !important;
+    background: #1a202c !important; /* さらに濃い紺色 */
     border-radius: 12px !important;
-    border: 1px solid #e5e7eb !important;
-    color: #111827 !important;
+    border: 1px solid #2d3748 !important; /* 濃いめのグレー */
+    color: #ffffff !important; /* White */
     font-size: 14px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 .input-card .stButton>button {
-    background: #1a73e8 !important;
-    color: #ffffff !important;
+    background: #ffd666 !important; /* Gold */
+    color: #1b2433 !important; /* 濃い紺色のテキスト */
     border-radius: 8px !important;
     border: none !important;
     font-weight: 600 !important;
@@ -386,47 +425,61 @@ div[data-testid="stHorizontalBlock"] {
     font-size: 14px !important;
 }
 .input-card .stButton>button:hover {
-    background: #3b82f6 !important;
+    background: #f4a021 !important; /* Goldの濃いめ */
 }
 
 /* プレビューカード */
 .preview-main-wrapper {
-    background: #ffffff;
+    background: #111827; /* 少し明るい紺色 */
     border-radius: 16px;
-    border: 1px solid #e5e7eb;
-    padding: 14px;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+    border: 1px solid #29314f; /* 少し明るい紺色 */
+    padding: 12px 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     min-height: 350px;
+    width: calc(100% - 2px);
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
 .preview-main-wrapper textarea {
-    background: #f9fafb !important;
+    background: #1a202c !important; /* さらに濃い紺色 */
     border-radius: 12px !important;
-    border: 1px solid #e5e7eb !important;
-    color: #111827 !important;
+    border: 1px solid #2d3748 !important; /* 濃いめのグレー */
+    color: #ffffff !important; /* White */
     font-size: 14px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.preview-main-wrapper p { /* 件名と本文のPタグのスタイル */
+    color: #ffffff !important; /* White */
 }
 
 .preview-placeholder {
-    color: #9ca3af;
+    color: #a0aec0; /* 薄いグレー */
     font-size: 14px;
     padding: 20px;
 }
 
 /* アドバイスボックス */
 .advice-box {
-    background: #ecfdf5;
-    border-left: 3px solid #16a34a;
+    background: #1a202c; /* さらに濃い紺色 */
+    border-left: 3px solid #ffd666; /* Gold */
     border-radius: 12px;
     padding: 12px 14px;
     margin-top: 10px;
     font-size: 13px;
-    color: #14532d;
+    color: #ffffff; /* White */
+}
+.advice-box strong {
+    color: #ffd666; /* Gold */
 }
 
 /* ボタン */
 .preview-actions .stButton>button {
-    background: #2563eb !important;
+    background: #2563eb !important; /* 青色（既存を維持、必要であれば変更） */
     color: #ffffff !important;
     border-radius: 8px !important;
     border: none !important;
@@ -435,15 +488,30 @@ div[data-testid="stHorizontalBlock"] {
     padding: 10px 20px !important;
 }
 .preview-actions .stButton>button:hover {
-    background: #1d4ed8 !important;
+    background: #1d4ed8 !important; /* 青色のホバー（既存を維持） */
+}
+/* コピーと再生成ボタンの配色を調整 */
+.preview-actions .stButton:first-child>button { /* コピーボタン */
+    background: #ffd666 !important; /* Gold */
+    color: #1b2433 !important; /* 濃い紺色のテキスト */
+}
+.preview-actions .stButton:first-child>button:hover {
+    background: #f4a021 !important; /* Goldの濃いめ */
+}
+.preview-actions .stButton:nth-child(2)>button { /* 再生成ボタン */
+    background: #29314f !important; /* 少し明るい紺色 */
+    color: #ffffff !important; /* White */
+}
+.preview-actions .stButton:nth-child(2)>button:hover {
+    background: #3c4463 !important; /* さらに明るい紺色 */
 }
 
 /* コピー用テキストエリア */
 .copy-area textarea {
-    background: #f9fafb !important;
+    background: #1a202c !important; /* さらに濃い紺色 */
     border-radius: 12px !important;
-    border: 1px solid #e5e7eb !important;
-    color: #111827 !important;
+    border: 1px solid #2d3748 !important; /* 濃いめのグレー */
+    color: #ffffff !important; /* White */
     font-size: 12px !important;
 }
 
@@ -479,6 +547,7 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
+    # 新規作成
     st.markdown("<div class='sidebar-new-btn'>", unsafe_allow_html=True)
     if st.button("新規作成", use_container_width=True):
         st.session_state.messages = []
@@ -487,6 +556,7 @@ with st.sidebar:
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
+    # テンプレート
     with st.container():
         st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
         st.markdown("<div class='nav-label'>テンプレート</div>", unsafe_allow_html=True)
@@ -521,6 +591,7 @@ with st.sidebar:
         custom_template = st.text_input("カスタムテンプレート", placeholder="例: 報告")
         template = custom_template if custom_template else "その他"
 
+    # トーン
     with st.container():
         st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
         st.markdown("<div class='nav-label'>トーン</div>", unsafe_allow_html=True)
@@ -550,6 +621,7 @@ with st.sidebar:
     }
     tone = display_to_tone[tone_display]
 
+    # 相手
     with st.container():
         st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
         st.markdown("<div class='nav-label'>相手</div>", unsafe_allow_html=True)
@@ -584,13 +656,13 @@ with st.sidebar:
         custom_recipient = st.text_input("カスタム相手", placeholder="例: 顧客")
         recipient = custom_recipient if custom_recipient else "その他"
 
-    st.markdown("---")
+    # st.markdown("---") # 不要になったのでコメントアウト
     st.caption("© 2024 メール生成AI")
 
 # ============================================
 # メイン 2 カラム
 # ============================================
-col1, col2 = st.columns([3, 2])
+col1, col2 = st.columns([3, 2], gap="medium")
 
 with col1:
     st.markdown("<div class='section-header'>💬 メッセージ</div>", unsafe_allow_html=True)
@@ -604,6 +676,7 @@ with col2:
 # 左：メッセージエリア
 # ============================================
 with col1:
+    # メッセージ表示カード
     st.markdown("<div class='message-wrapper'>", unsafe_allow_html=True)
     if not st.session_state.messages:
         st.chat_message("assistant").write(
@@ -620,6 +693,7 @@ with col1:
 
     st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
+    # 入力カード
     st.markdown("<div class='card input-card'>", unsafe_allow_html=True)
     with st.form("message_form", clear_on_submit=True):
         user_message = st.text_area(
@@ -663,12 +737,13 @@ with col2:
     else:
         email = st.session_state.generated_email
 
+        # 件名＋本文
         st.markdown("<div class='preview-main-wrapper'>", unsafe_allow_html=True)
 
-        st.markdown("<p style='font-weight: 700; font-size: 14px; color: #111827; margin-bottom: 8px;'>件名</p>", unsafe_allow_html=True)
-        st.markdown(f"<p style='color: #111827; font-size: 14px; margin-bottom: 16px;'>{email['subject']}</p>", unsafe_allow_html=True)
+        st.markdown("<p style='font-weight: 700; font-size: 14px; color: #ffffff; margin-bottom: 8px;'>件名</p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='color: #ffffff; font-size: 14px; margin-bottom: 16px;'>{email['subject']}</p>", unsafe_allow_html=True)
 
-        st.markdown("<p style='font-weight: 700; font-size: 14px; color: #111827; margin-bottom: 8px;'>本文</p>", unsafe_allow_html=True)
+        st.markdown("<p style='font-weight: 700; font-size: 14px; color: #ffffff; margin-bottom: 8px;'>本文</p>", unsafe_allow_html=True)
         st.text_area(
             "本文プレビュー",
             email["body"],
@@ -681,6 +756,7 @@ with col2:
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
+        # アドバイス
         st.markdown(
             f"""
             <div class="advice-box">
@@ -693,6 +769,7 @@ with col2:
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
+        # ボタン
         st.markdown("<div class='preview-actions'>", unsafe_allow_html=True)
         btn_col1, btn_col2 = st.columns(2)
 
@@ -705,38 +782,4 @@ with col2:
                     "コピー用テキスト",
                     full_text,
                     height=120,
-                    label_visibility="collapsed",
-                )
-                st.markdown("</div>", unsafe_allow_html=True)
-
-        with btn_col2:
-            if st.button("🔄 再生成", use_container_width=True):
-                st.session_state.messages.append(
-                    {"role": "assistant", "content": "メールを再生成しています..."}
-                )
-
-                last_user_message = None
-                for msg in reversed(st.session_state.messages):
-                    if msg["role"] == "user":
-                        last_user_message = msg["content"]
-                        break
-
-                if last_user_message:
-                    st.session_state.variation_count += 1
-                    st.session_state.generated_email = generate_email(
-                        template,
-                        tone,
-                        recipient,
-                        last_user_message,
-                        variation=st.session_state.variation_count,
-                    )
-                    st.session_state.messages.append(
-                        {
-                            "role": "assistant",
-                            "content": f"新しいバージョン（バリエーション {st.session_state.variation_count + 1}）を生成しました！プレビューをご確認ください。",
-                        }
-                    )
-
-                st.rerun()
-
-        st.markdown("</div>", unsafe_allow_html=True)
+                    label_visibility="
