@@ -188,31 +188,43 @@ body {
 
 main.block-container {
     padding-top: 0.5rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    max-width: 100%;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    max-width: 100% !important;
 }
 
 /* カラム間のギャップ調整 */
 .stColumn > div {
-    padding-right: 0.75rem !important;
-    padding-left: 0.75rem !important;
+    padding-right: 0.5rem !important;
+    padding-left: 0.5rem !important;
+}
+
+/* カラム自体の調整 */
+[data-testid="column"] {
+    padding: 0 !important;
 }
 
 section.main > div {
     background: #050b23;
-    max-width: 100%;
-    overflow-x: hidden;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
 }
 
 /* Streamlitのカラムの幅制御 */
 [data-testid="column"] {
     width: 100% !important;
     min-width: 0 !important;
+    padding: 0 !important;
 }
 
 div[data-testid="stHorizontalBlock"] {
-    gap: 1rem !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+}
+
+/* 要素がはみ出さないようにする */
+[data-testid="stVerticalBlock"] > div {
+    max-width: 100% !important;
 }
 
 /* サイドバー */
@@ -337,12 +349,13 @@ div[data-testid="stHorizontalBlock"] {
     background: #ffffff;
     border-radius: 16px;
     border: 1px solid #ffd666;
-    padding: 12px 14px;
+    padding: 10px 12px;
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
     min-height: 180px;
     max-height: 180px;
     overflow-y: auto;
-    width: 100%;
+    overflow-x: hidden;
+    width: calc(100% - 2px);
     max-width: 100%;
     box-sizing: border-box;
 }
@@ -380,11 +393,12 @@ div[data-testid="stHorizontalBlock"] {
     background: #ffffff;
     border-radius: 16px;
     border: 1px solid #e5e7eb;
-    padding: 14px;
+    padding: 12px;
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
     color: #111827;
-    width: 100%;
+    width: calc(100% - 2px);
     max-width: 100%;
+    overflow: hidden;
     box-sizing: border-box;
 }
 
@@ -394,6 +408,9 @@ div[data-testid="stHorizontalBlock"] {
     border: 1px solid #e5e7eb !important;
     color: #111827 !important;
     font-size: 14px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 .input-card .stButton>button {
@@ -414,11 +431,12 @@ div[data-testid="stHorizontalBlock"] {
     background: #ffffff;
     border-radius: 16px;
     border: 1px solid #e5e7eb;
-    padding: 14px 16px;
+    padding: 12px 14px;
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
     min-height: 350px;
-    width: 100%;
+    width: calc(100% - 2px);
     max-width: 100%;
+    overflow: hidden;
     box-sizing: border-box;
 }
 
@@ -428,6 +446,9 @@ div[data-testid="stHorizontalBlock"] {
     border: 1px solid #e5e7eb !important;
     color: #111827 !important;
     font-size: 14px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 .preview-placeholder {
