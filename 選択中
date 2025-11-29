@@ -147,26 +147,26 @@ st.set_page_config(
     layout="wide"
 )
 
-# ============================================
-# カスタムCSS
-# ============================================
 st.markdown("""
 <style>
+/* ===============================
+   全体リセット / ベース
+   =============================== */
 * {
     box-sizing: border-box;
 }
 
-/* 全体テーマ */
 body {
     background-color: #050b23;
 }
 
-/* ページ全体の余白調整 */
 main.block-container {
     padding-top: 0.5rem;
 }
 
-/* サイドバー（左） */
+/* ===============================
+   サイドバー
+   =============================== */
 [data-testid="stSidebar"] {
     width: 240px !important;
     min-width: 240px !important;
@@ -187,7 +187,7 @@ main.block-container {
     padding: 4px 8px 10px 8px;
 }
 
-/* 新規作成ボタン（ゴールド） */
+/* 新規作成ボタン */
 .sidebar-new-btn .stButton>button, .stSidebar .stButton>button {
     background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%);
     color: #1b2433;
@@ -202,15 +202,15 @@ main.block-container {
     background: linear-gradient(180deg, #ffe58f 0%, #f0a73a 100%);
 }
 
-/* サイドバー：見出し */
+/* セクション見出し */
 .nav-label {
     font-size: 12px;
     font-weight: 600;
-    color: #c3d3ff;
+    color: #ffd666;
     margin: 4px 0 6px 4px;
 }
 
-/* サイドバー：カード */
+/* カード枠 */
 .nav-section {
     background: #050b23;
     border-radius: 12px;
@@ -226,45 +226,34 @@ main.block-container {
     gap: 4px;
 }
 
-/* ラジオの各行（pill風） */
+/* ===============================
+   ★ ラジオボタンの文字色（重要）
+   =============================== */
 .nav-section div[role="radiogroup"] > label {
     border-radius: 999px;
-    padding: 4px 8px;
+    padding: 6px 10px;
     border: 1px solid transparent;
     background: transparent;
     cursor: pointer;
+    color: #ffffff !important;       /* ← 通常は白 */
+    font-size: 13px;
 }
+
+/* ホバー */
 .nav-section div[role="radiogroup"] > label:hover {
     background: rgba(255,255,255,0.06);
 }
-.nav-section div[role="radiogroup"] span {
-    font-size: 12px;
-    color: #e2e8ff;
-}
-st.markdown("""
-<style>
-/* ===== サイドバーのラジオ文字色を強制的に白／ゴールドにする ===== */
 
-/* 通常時：白っぽい色 */
-.nav-section div[role="radiogroup"] > label {
-    color: #ffffff !important;  /* ここを #ffd666 にすればゴールド系 */
-}
-
-/* 選択中はゴールド寄りに（お好みで） */
+/* 選択時の色 */
 .nav-section div[role="radiogroup"] input:checked ~ div {
-    color: #ffd666 !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-/* 選択中（だいたいのターゲット。バージョンによって微調整必要） */
-.nav-section div[role="radiogroup"] input:checked ~ div {
-    background: rgba(255,214,102,0.1);
-    border-color: #ffd666;
-    color: #ffd666;
+    background: rgba(255,214,102,0.12);
+    border-color: #ffd666 !important;
+    color: #ffd666 !important;      /* ← 選択中はゴールド */
 }
 
-/* メインタイトル（中央上部） */
+/* ===============================
+   トップバー（タイトル）
+   =============================== */
 .top-bar {
     background: #050b23;
     padding: 16px 8px 8px 8px;
@@ -282,18 +271,22 @@ section.main > div {
     background: #050b23;
 }
 
-/* セクション見出し（メッセージ／プレビュー） */
+/* ===============================
+   メッセージ・プレビュー見出し
+   =============================== */
 .section-header {
     font-size: 14px;
     font-weight: 700;
-    color: #ffb74d;
+    color: #ffd666;
     margin: 8px 0;
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
-/* ボックス共通（カード） */
+/* ===============================
+   カード共通
+   =============================== */
 .card {
     background: #0b1533;
     border-radius: 16px;
@@ -324,14 +317,13 @@ section.main > div {
 }
 .msg-icon {
     font-size: 16px;
-    margin-top: 2px;
 }
 .msg-text-main {
     font-size: 13px;
-    color: #f5f7ff;
+    color: #e5ecff;
 }
 
-/* 入力カード内のテキストエリア */
+/* 入力カードのテキストエリア */
 .input-card textarea {
     background: #020821;
     border-radius: 12px !important;
@@ -340,7 +332,7 @@ section.main > div {
     font-size: 13px;
 }
 
-/* 入力カードの送信ボタン */
+/* 送信ボタン */
 .input-card .stButton>button {
     background: #1a73e8;
     color: #ffffff;
@@ -354,7 +346,9 @@ section.main > div {
     background: #3b82f6;
 }
 
-/* プレビューカード（件名・本文） */
+/* ===============================
+   プレビューカード
+   =============================== */
 .preview-card {
     background: #0b1533;
     border-radius: 16px;
@@ -364,7 +358,6 @@ section.main > div {
     font-size: 13px;
 }
 
-/* プレビュー内テキストエリア */
 .preview-card textarea {
     background: #020821;
     border-radius: 12px !important;
@@ -373,7 +366,7 @@ section.main > div {
     font-size: 13px;
 }
 
-/* アドバイスカード */
+/* アドバイス */
 .advice-box {
     background: #1b4332;
     border-left: 3px solid #95d5b2;
@@ -398,7 +391,7 @@ section.main > div {
     background: #2563eb;
 }
 
-/* コピー用テキストエリア */
+/* コピー用エリア */
 .copy-area textarea {
     background: #020821;
     border-radius: 12px !important;
@@ -407,18 +400,15 @@ section.main > div {
     font-size: 12px;
 }
 
-/* プレースホルダーメッセージ */
+/* プレビュープレースホルダ */
 .preview-placeholder {
     color: #9ca3c7;
     font-size: 13px;
 }
 
-/* スクロールバー調整（メッセージカード） */
+/* スクロールバー */
 .message-card::-webkit-scrollbar {
     width: 8px;
-}
-.message-card::-webkit-scrollbar-track {
-    background: transparent;
 }
 .message-card::-webkit-scrollbar-thumb {
     background: #4b5563;
@@ -429,6 +419,7 @@ section.main > div {
 }
 </style>
 """, unsafe_allow_html=True)
+
 
 
 # ============================================
@@ -712,5 +703,6 @@ with col2:
                         })
                     
                     st.rerun()
+
 
 
