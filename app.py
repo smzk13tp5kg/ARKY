@@ -188,43 +188,27 @@ body {
 
 main.block-container {
     padding-top: 0.5rem;
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    max-width: 100% !important;
-}
-
-/* カラム間のギャップ調整 */
-.stColumn > div {
-    padding-right: 0.5rem !important;
     padding-left: 0.5rem !important;
-}
-
-/* カラム自体の調整 */
-[data-testid="column"] {
-    padding: 0 !important;
+    padding-right: 0.5rem !important;
+    max-width: 100% !important;
 }
 
 section.main > div {
     background: #050b23;
     max-width: 100% !important;
-    overflow-x: hidden !important;
 }
 
-/* Streamlitのカラムの幅制御 */
+/* カラムレイアウト */
+div[data-testid="stHorizontalBlock"] {
+    gap: 0.75rem !important;
+}
+
 [data-testid="column"] {
-    width: 100% !important;
-    min-width: 0 !important;
     padding: 0 !important;
 }
 
-div[data-testid="stHorizontalBlock"] {
-    gap: 0.5rem !important;
-    width: 100% !important;
-}
-
-/* 要素がはみ出さないようにする */
-[data-testid="stVerticalBlock"] > div {
-    max-width: 100% !important;
+[data-testid="column"] > div {
+    overflow: visible !important;
 }
 
 /* サイドバー */
@@ -242,7 +226,6 @@ div[data-testid="stHorizontalBlock"] {
     color: #ffffff !important;
 }
 
-/* サイドバータイトル */
 .sidebar-app-title {
     font-size: 14px;
     font-weight: 600;
@@ -250,7 +233,6 @@ div[data-testid="stHorizontalBlock"] {
     padding: 4px 8px 10px 8px;
 }
 
-/* 新規作成ボタン */
 .sidebar-new-btn .stButton>button, .stSidebar .stButton>button {
     background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%);
     color: #1b2433;
@@ -265,7 +247,6 @@ div[data-testid="stHorizontalBlock"] {
     background: linear-gradient(180deg, #ffe58f 0%, #f0a73a 100%);
 }
 
-/* サイドバー：見出し */
 .nav-label {
     font-size: 12px;
     font-weight: 600;
@@ -273,7 +254,6 @@ div[data-testid="stHorizontalBlock"] {
     margin: 4px 0 6px 4px;
 }
 
-/* サイドバー：カード */
 .nav-section {
     background: #050b23;
     border-radius: 12px;
@@ -282,14 +262,12 @@ div[data-testid="stHorizontalBlock"] {
     border: 1px solid #29314f;
 }
 
-/* ラジオグループ */
 .nav-section div[role="radiogroup"] {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-/* ラジオの各行 */
 .nav-section div[role="radiogroup"] > label {
     border-radius: 999px;
     padding: 6px 10px;
@@ -303,7 +281,6 @@ div[data-testid="stHorizontalBlock"] {
     background: rgba(255,255,255,0.06);
 }
 
-/* 選択中 */
 .nav-section div[role="radiogroup"] input:checked ~ div {
     background: rgba(255,214,102,0.12);
     border-color: #ffd666 !important;
@@ -349,32 +326,25 @@ div[data-testid="stHorizontalBlock"] {
     background: #ffffff;
     border-radius: 16px;
     border: 1px solid #ffd666;
-    padding: 10px 12px;
+    padding: 12px;
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
     min-height: 180px;
     max-height: 180px;
     overflow-y: auto;
     overflow-x: hidden;
-    width: calc(100% - 2px);
-    max-width: 100%;
-    box-sizing: border-box;
 }
 
 .message-wrapper::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
 }
 .message-wrapper::-webkit-scrollbar-track {
     background: transparent;
 }
 .message-wrapper::-webkit-scrollbar-thumb {
     background: #d1d5db;
-    border-radius: 4px;
-}
-.message-wrapper::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af;
+    border-radius: 3px;
 }
 
-/* チャットメッセージを透明に */
 .message-wrapper .stChatMessage {
     background-color: transparent !important;
     border: none !important;
@@ -393,13 +363,9 @@ div[data-testid="stHorizontalBlock"] {
     background: #ffffff;
     border-radius: 16px;
     border: 1px solid #e5e7eb;
-    padding: 12px;
+    padding: 14px;
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
     color: #111827;
-    width: calc(100% - 2px);
-    max-width: 100%;
-    overflow: hidden;
-    box-sizing: border-box;
 }
 
 .input-card textarea {
@@ -408,9 +374,6 @@ div[data-testid="stHorizontalBlock"] {
     border: 1px solid #e5e7eb !important;
     color: #111827 !important;
     font-size: 14px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
 }
 
 .input-card .stButton>button {
@@ -431,13 +394,9 @@ div[data-testid="stHorizontalBlock"] {
     background: #ffffff;
     border-radius: 16px;
     border: 1px solid #e5e7eb;
-    padding: 12px 14px;
+    padding: 14px;
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
     min-height: 350px;
-    width: calc(100% - 2px);
-    max-width: 100%;
-    overflow: hidden;
-    box-sizing: border-box;
 }
 
 .preview-main-wrapper textarea {
@@ -446,9 +405,6 @@ div[data-testid="stHorizontalBlock"] {
     border: 1px solid #e5e7eb !important;
     color: #111827 !important;
     font-size: 14px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
 }
 
 .preview-placeholder {
@@ -523,7 +479,6 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    # 新規作成
     st.markdown("<div class='sidebar-new-btn'>", unsafe_allow_html=True)
     if st.button("新規作成", use_container_width=True):
         st.session_state.messages = []
@@ -532,7 +487,6 @@ with st.sidebar:
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # テンプレート
     with st.container():
         st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
         st.markdown("<div class='nav-label'>テンプレート</div>", unsafe_allow_html=True)
@@ -567,7 +521,6 @@ with st.sidebar:
         custom_template = st.text_input("カスタムテンプレート", placeholder="例: 報告")
         template = custom_template if custom_template else "その他"
 
-    # トーン
     with st.container():
         st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
         st.markdown("<div class='nav-label'>トーン</div>", unsafe_allow_html=True)
@@ -597,7 +550,6 @@ with st.sidebar:
     }
     tone = display_to_tone[tone_display]
 
-    # 相手
     with st.container():
         st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
         st.markdown("<div class='nav-label'>相手</div>", unsafe_allow_html=True)
@@ -638,7 +590,7 @@ with st.sidebar:
 # ============================================
 # メイン 2 カラム
 # ============================================
-col1, col2 = st.columns([3, 2], gap="medium")
+col1, col2 = st.columns([3, 2])
 
 with col1:
     st.markdown("<div class='section-header'>💬 メッセージ</div>", unsafe_allow_html=True)
@@ -652,7 +604,6 @@ with col2:
 # 左：メッセージエリア
 # ============================================
 with col1:
-    # メッセージ表示カード
     st.markdown("<div class='message-wrapper'>", unsafe_allow_html=True)
     if not st.session_state.messages:
         st.chat_message("assistant").write(
@@ -669,7 +620,6 @@ with col1:
 
     st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-    # 入力カード
     st.markdown("<div class='card input-card'>", unsafe_allow_html=True)
     with st.form("message_form", clear_on_submit=True):
         user_message = st.text_area(
@@ -713,7 +663,6 @@ with col2:
     else:
         email = st.session_state.generated_email
 
-        # 件名＋本文
         st.markdown("<div class='preview-main-wrapper'>", unsafe_allow_html=True)
 
         st.markdown("<p style='font-weight: 700; font-size: 14px; color: #111827; margin-bottom: 8px;'>件名</p>", unsafe_allow_html=True)
@@ -732,7 +681,6 @@ with col2:
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-        # アドバイス
         st.markdown(
             f"""
             <div class="advice-box">
@@ -745,7 +693,6 @@ with col2:
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-        # ボタン
         st.markdown("<div class='preview-actions'>", unsafe_allow_html=True)
         btn_col1, btn_col2 = st.columns(2)
 
