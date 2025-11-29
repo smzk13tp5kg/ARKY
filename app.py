@@ -749,8 +749,8 @@ with col2:
 # 左：メッセージエリア
 # ============================================
 with col1:
-    # メッセージ表示カード
-    st.markdown("<div class='card message-card'>", unsafe_allow_html=True)
+    # メッセージ表示カード（白＋金枠）
+    st.markdown("<div class='message-wrapper'>", unsafe_allow_html=True)
     if not st.session_state.messages:
         st.chat_message("assistant").write(
             "こんにちは！ビジネスメールの作成をお手伝いします。\n\n"
@@ -803,14 +803,14 @@ with col1:
 with col2:
     if st.session_state.generated_email is None:
         st.markdown(
-            "<div class='card preview-card'><div class='preview-placeholder'>メールを生成すると、ここにプレビューが表示されます。</div></div>",
+            "<div class='preview-main-wrapper'><div class='preview-placeholder'>メールを生成すると、ここにプレビューが表示されます。</div></div>",
             unsafe_allow_html=True,
         )
     else:
         email = st.session_state.generated_email
 
-        # 件名＋本文カード
-        st.markdown("<div class='card preview-card'>", unsafe_allow_html=True)
+        # 件名＋本文カード（白）
+        st.markdown("<div class='preview-main-wrapper'>", unsafe_allow_html=True)
         st.markdown("**件名**", unsafe_allow_html=True)
         st.text(email["subject"])
         st.markdown("---", unsafe_allow_html=True)
@@ -823,6 +823,40 @@ with col2:
             label_visibility="collapsed",
         )
         st.markdown("</div>", unsafe_allow_html=True)
+
+        # アドバイス＋ボタンカードはそのまま or 少し明るめに
+        st.markdown("<div class='card preview-card'>", unsafe_allow_html=True)
+        st.markdown(
+            f"""
+            <div class="advice-box">
+                <strong>💡 アドバイス</strong><br>
+                {email['advice']}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        st.markdown("<div class='preview-actions'>", unsafe_allow_html=True)
+        btn_col1, btn_col2 = st.columns(2)
+        with btn_col1:
+            if st.button("📋 コピー"):
+                full_text = f"件名: {email['subject']}\n\n{email['body']}"
+                st.info("以下のテキストをコピーしてご利用ください。")
+                st.markdown("<div class='copy-area'>", unsafe_allow_html=True)
+                st.text_area(
+                    "コピー用テキスト",
+                    full_text,
+                    height=120,
+                    label_visibility="collapsed",
+                )
+                st.markdown("</div>", unsafe_allow_html=True)
+
+        with btn_col2:
+            if st.button("🔄 再生成"):
+                ...
+        st.markdown("</div>", unsafe_allow_html=True)  # /preview-actions
+        st.markdown("</div>", unsafe_allow_html=True)  # /card
+
 
         # アドバイス＋ボタンカード
         st.markdown("<div class='card preview-card'>", unsafe_allow_html=True)
@@ -883,6 +917,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
