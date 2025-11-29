@@ -271,7 +271,7 @@ main.block-container {
 .app-title {
     font-size: 24px;
     font-weight: 700;
-    color: #ffd666;
+    color: #ffd666　!important;    /* ゴールド */
     margin: 0;
 }
 
@@ -706,5 +706,6 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
