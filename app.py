@@ -331,7 +331,6 @@ with st.sidebar:
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # 表示 → 内部で使う短いラベル
     display_to_tone = {
         "😊 カジュアル／フレンドリー（同僚・社内フラット向け）": "カジュアル／フレンドリー",
         "📄 標準ビジネス（最も一般的）": "標準ビジネス",
@@ -440,7 +439,7 @@ with col1:
                 })
                 
                 # メール生成
-                st.session_state.variation_count = 0  # 新規メッセージなので0にリセット
+                st.session_state.variation_count = 0
                 st.session_state.generated_email = generate_email(
                     template, tone, recipient, user_message, variation=0
                 )
@@ -453,13 +452,14 @@ with col1:
 with col2:
     st.subheader("📄 プレビュー")
     
-    if st.session_state.generated_email:
+    if st.session_state.generated_email is None:
+        st.info("メールを生成すると、ここにプレビューが表示されます。")
+    else:
         email = st.session_state.generated_email
         
         with st.container():
             st.markdown("**件名**")
             st.text(email['subject'])
-            
             st.markdown("---")
             
             st.markdown("**本文**")
@@ -469,49 +469,8 @@ with col2:
                 height=300,
                 label_visibility="collapsed"
             )
-            
             st.markdown("---")
             
-            # アドバイス
-            st.markdown(f"""
-            <div class="advice-box">
-                <strong>💡 アドバイス</strong><br>
-                {email['advice']}
-            </div>
-            """, unsafe_allow_html=True)
-            
-            st.markdown("")
-            
-            # ボタン
-            col_btn1, col_btn2 = st.columns(2)
-            
-            # コピー（常に手動コピーにする）
-            with col_btn1:
-                if st.button("📋 コピー"):
-                    full_text = f"件名: {email['subject']}\n\n{email['body']}"
-                    st.info("以下のテキストをコピーしてご利用ください。")
-                    st.text_area("コピー用テキスト", full_text, height=150)
-            
-with col2:
-    st.subheader("📄 プレビュー")
-    
-    # まだプレビューがないとき
-    if st.session_state.generated_email is None:
-        st.info("メールを生成すると、ここにプレビューが表示されます。")
-    
-    # プレビューがあるとき
-    else:
-        email = st.session_state.generated_email
-        
-        with st.container():
-            st.markdown("**件名**")
-            st.text(email['subject'])
-            st.markdown("---")
-
-            st.markdown("**本文**")
-            st.text_area("本文プレビュー", email['body'], height=300, label_visibility="collapsed")
-            st.markdown("---")
-
             st.markdown(
                 f"""
                 <div class="advice-box">
@@ -521,36 +480,34 @@ with col2:
                 """,
                 unsafe_allow_html=True
             )
-
+            
             st.markdown("")
             
-            # ボタン（プレビューがあるときだけ作る）
             col_btn1, col_btn2 = st.columns(2)
-
-            # ---- コピー ----
+            
+            # コピー（手動コピー）
             with col_btn1:
                 if st.button("📋 コピー"):
                     full_text = f"件名: {email['subject']}\n\n{email['body']}"
-                    st.info("以下の内容をコピーしてご利用ください。")
+                    st.info("以下のテキストをコピーしてご利用ください。")
                     st.text_area("コピー用テキスト", full_text, height=150)
-
-            # ---- 再生成 ----
+            
+            # 再生成
             with col_btn2:
                 if st.button("🔄 再生成"):
-
-                    # チャットに「再生成しています...」
+                    # 再生成しています... メッセージ
                     st.session_state.messages.append({
                         'role': 'assistant',
                         'content': 'メールを再生成しています...'
                     })
-
-                    # 最後の user メッセージを探す
+                    
+                    # 直近の user メッセージを後ろから探す
                     last_user_message = None
                     for msg in reversed(st.session_state.messages):
                         if msg['role'] == 'user':
                             last_user_message = msg['content']
                             break
-
+                    
                     if last_user_message:
                         st.session_state.variation_count += 1
                         st.session_state.generated_email = generate_email(
@@ -560,16 +517,11 @@ with col2:
                             last_user_message,
                             variation=st.session_state.variation_count
                         )
-
+                        
+                        # 完了メッセージ
                         st.session_state.messages.append({
                             'role': 'assistant',
                             'content': f'新しいバージョン（バリエーション {st.session_state.variation_count + 1}）を生成しました！プレビューをご確認ください。'
                         })
-
+                    
                     st.rerun()
-
-
-    else:
-        st.info("メールを生成すると、ここにプレビューが表示されます。")
-
-
