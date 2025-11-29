@@ -479,7 +479,6 @@ div[data-testid="stHorizontalBlock"] {
 
 /* ボタン */
 .preview-actions .stButton>button {
-    background: #2563eb !important; /* 青色（既存を維持、必要であれば変更） */
     color: #ffffff !important;
     border-radius: 8px !important;
     border: none !important;
@@ -487,10 +486,6 @@ div[data-testid="stHorizontalBlock"] {
     font-size: 14px !important;
     padding: 10px 20px !important;
 }
-.preview-actions .stButton>button:hover {
-    background: #1d4ed8 !important; /* 青色のホバー（既存を維持） */
-}
-/* コピーと再生成ボタンの配色を調整 */
 .preview-actions .stButton:first-child>button { /* コピーボタン */
     background: #ffd666 !important; /* Gold */
     color: #1b2433 !important; /* 濃い紺色のテキスト */
@@ -656,7 +651,6 @@ with st.sidebar:
         custom_recipient = st.text_input("カスタム相手", placeholder="例: 顧客")
         recipient = custom_recipient if custom_recipient else "その他"
 
-    # st.markdown("---") # 不要になったのでコメントアウト
     st.caption("© 2024 メール生成AI")
 
 # ============================================
@@ -782,4 +776,38 @@ with col2:
                     "コピー用テキスト",
                     full_text,
                     height=120,
-                    label_visibility="
+                    label_visibility="collapsed",
+                )
+                st.markdown("</div>", unsafe_allow_html=True) # 追加
+
+        with btn_col2:
+            if st.button("🔄 再生成", use_container_width=True):
+                st.session_state.messages.append(
+                    {"role": "assistant", "content": "メールを再生成しています..."}
+                )
+
+                last_user_message = None
+                for msg in reversed(st.session_state.messages):
+                    if msg["role"] == "user":
+                        last_user_message = msg["content"]
+                        break
+
+                if last_user_message:
+                    st.session_state.variation_count += 1
+                    st.session_state.generated_email = generate_email(
+                        template,
+                        tone,
+                        recipient,
+                        last_user_message,
+                        variation=st.session_state.variation_count,
+                    )
+                    st.session_state.messages.append(
+                        {
+                            "role": "assistant",
+                            "content": f"新しいバージョン（バリエーション {st.session_state.variation_count + 1}）を生成しました！プレビューをご確認ください。",
+                        }
+                    )
+
+                st.rerun()
+
+        st.markdown("</div>", unsafe_allow_html=True)
