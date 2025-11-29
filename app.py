@@ -492,17 +492,45 @@ with col2:
                     st.info("以下のテキストをコピーしてご利用ください。")
                     st.text_area("コピー用テキスト", full_text, height=150)
             
-            # 再生成
-            with col_btn2:
-                if st.button("🔄 再生成"):
-                    if len(st.session_state.messages) >= 2:
-                        last_user_message = st.session_state.messages[-2]['content']  # -2 = 直近のuser
-                        st.session_state.variation_count += 1
-                        st.session_state.generated_email = generate_email(
-                            template, tone, recipient, last_user_message, 
-                            variation=st.session_state.variation_count
-                        )
-                        st.success(f"✨ バリエーション {st.session_state.variation_count + 1} を生成しました！")
-                        st.rerun()
+# 再生成
+with col_btn2:
+    if st.button("🔄 再生成"):
+        # まず「再生成しています...」メッセージをチャットに追加
+        st.session_state.messages.append({
+            'role': 'assistant',
+            'content': 'メールを再生成しています...'
+        })
+
+        # 直近の user メッセージを後ろから探す（インデックス計算に依存しない）
+        last_user_message = None
+        for msg in reversed(st.session_state.messages):
+            if msg['role'] == 'user':
+                last_user_message = msg['content']
+                break
+
+        if last_user_message is None:
+            # ユーザーメッセージがなければ何もしない（安全側）
+            st.warning("再生成する元のメッセージが見つかりませんでした。")
+        else:
+            # バリエーションカウントを増やして別の表現を生成
+            st.session_state.variation_count += 1
+            st.session_state.generated_email = generate_email(
+                template,
+                tone,
+                recipient,
+                last_user_message,
+                variation=st.session_state.variation_count
+            )
+
+            # 「新しいバージョンを生成しました」メッセージを追加
+            st.session_state.messages.append({
+                'role': 'assistant',
+                'content': f'新しいバージョン（バリエーション {st.session_state.variation_count + 1}）を生成しました！プレビューをご確認ください。'
+            })
+
+        # 画面を再描画
+        st.rerun()
+
     else:
         st.info("メールを生成すると、ここにプレビューが表示されます。")
+
