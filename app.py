@@ -523,54 +523,16 @@ with st.sidebar:
         custom_recipient = st.text_input("カスタム相手", placeholder="例: 顧客")
         recipient = custom_recipient if custom_recipient else "その他"
 
-    st.caption("© 2024 メール生成AI")
-
-# ============================================
-# メイン 2 カラム (変更なし)
-# ============================================
-col1, col2 = st.columns([3, 2], gap="medium")
-
-
-with col1:
-    st.markdown("<div class='section-header'>💬 メッセージ</div>", unsafe_allow_html=True)
-    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
-
-with col2:
-    st.markdown("<div class='section-header'>📄 プレビュー</div>", unsafe_allow_html=True)
-    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
-
-# ============================================
-# 左：メッセージエリア (前回修正版の構造を維持)
-# ============================================
-with col1:
-    # ★ message-wrapper は高さ固定の親コンテナとして機能
-    st.markdown("<div class='message-wrapper'>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True) # 閉じタグを挿入
-
-    # ★ st.chat_message は st.markdown の直後に配置
-    if not st.session_state.messages:
-        # st.chat_messageの初期メッセージ
-        st.chat_message("assistant").write(
-            "こんにちは！ビジネスメールの作成をお手伝いします。\n\n"
-            "左側からメールの種類、トーン、相手を選択して、具体的な内容を入力してください。"
-        )
-    else:
-        # 過去のチャット履歴の表示
-        for msg in st.session_state.messages:
-            if msg["role"] == "user":
-                st.chat_message("user").write(msg["content"])
-            else:
-                st.chat_message("assistant").write(msg["content"])
-
-    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
-
-    # 入力カード (変更なし)
+    # ─────────────────────────────
+    # ナビゲーションエリア最下部：入力フォーム
+    # ─────────────────────────────
+    st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown("<div class='card input-card'>", unsafe_allow_html=True)
     with st.form("message_form", clear_on_submit=True):
         user_message = st.text_area(
             "メッセージを入力",
             placeholder="例：取引先に感謝を伝えるメールを作成したい",
-            height=100,
+            height=120,
             label_visibility="collapsed",
         )
         submitted = st.form_submit_button("✓ 送信")
@@ -595,6 +557,40 @@ with col1:
                 )
                 st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
+    
+    st.caption("© 2024 メール生成AI")
+
+# ============================================
+# メイン 2 カラム (変更なし)
+# ============================================
+col1, col2 = st.columns([3, 2], gap="medium")
+
+
+with col1:
+    st.markdown("<div class='section-header'>💬 メッセージ</div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+
+with col2:
+    st.markdown("<div class='section-header'>📄 プレビュー</div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+
+# ============================================
+# 左：メッセージエリア（チャットのみ）
+# ============================================
+with col1:
+    if not st.session_state.messages:
+        st.chat_message("assistant").write(
+            "こんにちは！ビジネスメールの作成をお手伝いします。\n\n"
+            "左側のナビゲーションエリアでテンプレートやトーン、相手を選び、"
+            "下部の入力欄からメッセージ内容を入力してください。"
+        )
+    else:
+        for msg in st.session_state.messages:
+            if msg["role"] == "user":
+                st.chat_message("user").write(msg["content"])
+            else:
+                st.chat_message("assistant").write(msg["content"])
+
 
 # ============================================
 # 右：プレビューエリア
@@ -698,6 +694,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
