@@ -206,9 +206,9 @@ div[data-testid="stHorizontalBlock"] {
    サイドバー
 ------------------------------------------- */
 [data-testid="stSidebar"] {
-    width: 500px !important;
-    min-width: 500px !important;
-    max-width: 500px !important;
+    width: 480px !important;
+    min-width: 480px !important;
+    max-width: 480px !important;
     background: #050b23;
     border-right: 1px solid #cfae63;
 }
@@ -465,7 +465,7 @@ with st.sidebar:
         tone_display = st.radio(
             "トーン",
             [
-                "😊 カジュアル／フレンドリー（同僚・社内フラット向け）",
+                "😊 カジュアル／フレンドリー（同僚向け）",
                 "📄 標準ビジネス（最も一般的）",
                 "📘 フォーマル（社外顧客／上位者／依頼交渉）",
                 "🙏 厳粛・儀礼的（謝罪・不祥事・クレーム対応）",
@@ -698,6 +698,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
