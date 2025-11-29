@@ -318,8 +318,7 @@ section.main > div {
     border: 1px solid #ffd666;
     padding: 12px 16px;
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
-    min-height: 180px;
-    max-height: 180px;
+    height: 160px;
     overflow-y: auto;
 }
 
