@@ -163,7 +163,7 @@ st.set_page_config(
 )
 
 # ============================================
-# カスタムCSS (プレビュー本文のスタイルを追加)
+# カスタムCSS (左側メッセージエリアのCSSを再強化)
 # ============================================
 st.markdown(
     """
@@ -266,14 +266,15 @@ div[data-testid="stHorizontalBlock"] {
     margin: 8px 0;
 }
 
-/* ★★★ 左：メッセージ表示カードの高さ制御（前回修正分） ★★★ */
+/* ★★★ 左：メッセージ表示カード（Flexboxで高さを厳密に制御） ★★★ */
 .message-wrapper {
     background: #ffffff;
     border-radius: 12px;
     border: 1px solid #ffd666;
     padding: 10px 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    height: 180px; 
+    /* 高さを固定し、Flexコンテナとして設定 */
+    height: 180px; /* <--- 親コンテナの高さを固定 */
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
@@ -281,21 +282,34 @@ div[data-testid="stHorizontalBlock"] {
     
     display: flex;
     flex-direction: column; 
-    overflow: hidden; 
+    overflow: hidden; /* 親コンテナのスクロールは禁止 */
 }
 
-.message-wrapper + div > div[data-testid="stVerticalBlock"] {
+/* 1. message-wrapper の直後に Streamlit が挿入する div (Flexboxの子として振る舞わせる) */
+.message-wrapper + div {
+    /* この div が .message-wrapper の高さを埋めるよう強制 */
     height: 100%; 
-    overflow-y: auto; 
-    padding-right: 8px; 
+    min-height: 0;
+    flex: 1; /* 高さを継承させるためのFlexプロパティ */
+    display: flex;
+    flex-direction: column;
 }
 
+/* 2. st.chat_message が配置される Streamlit のメインブロック (スクロールを担当) */
+.message-wrapper + div > div[data-testid="stVerticalBlock"] {
+    flex: 1; /* 残りのスペースを全て埋める */
+    overflow-y: auto; /* ここでスクロールさせる */
+    padding-right: 8px; /* スクロールバーのためのスペースを確保 */
+    min-height: 0; /* Flexアイテムの最小高さを0にする */
+}
+
+/* Streamlitのチャットメッセージの調整 */
 div[data-testid="stChatMessage"] {
     width: 100% !important;
     max-width: 100% !important;
     margin: 4px 0 !important;
     padding: 4px 0 !important;
-    flex-shrink: 0;
+    flex-shrink: 0; /* 高さが固定の親内で縮まないように */
 }
 
 /* チャットのテキスト部分に強制的な折り返しを設定 (念のため) */
@@ -309,6 +323,9 @@ div[data-testid="stChatMessage"] {
     max-width: 100% !important;
 }
 
+/* -------------------------------------------
+   右：プレビューカード（前回の修正でHTMLレンダリング済み）
+------------------------------------------- */
 /* 入力カード */
 .card {
     background: #ffffff;
@@ -333,7 +350,7 @@ div[data-testid="stChatMessage"] {
     width: 100% !important;
 }
 
-/* ★★★ 右：プレビューカード（HTML要素を全て内包するためのスタイル） ★★★ */
+/* プレビューカード（HTML要素を全て内包するためのスタイル） */
 .preview-main-wrapper {
     background: #ffffff;
     border-radius: 12px;
@@ -396,7 +413,6 @@ div[data-testid="stChatMessage"] {
     font-size: 12px !important;
     width: 100% !important;
 }
-
 </style>
 """,
     unsafe_allow_html=True,
@@ -554,7 +570,7 @@ with col2:
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
 # ============================================
-# 左：メッセージエリア (変更なし)
+# 左：メッセージエリア
 # ============================================
 with col1:
     # ★ message-wrapper は高さ固定の親コンテナとして機能
