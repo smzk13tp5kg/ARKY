@@ -341,13 +341,20 @@ section.main > div {
     background-color: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    padding: 4px 0 !important;
+    padding: 2px 0 !important;
+    margin: 0 !important;
 }
 
 .message-wrapper .stChatMessage p,
 .message-wrapper .stChatMessage span,
 .message-wrapper .stChatMessage div {
     color: #111827 !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+}
+
+.message-wrapper .stChatMessage .stChatMessageAvatar {
+    display: none !important;
 }
 
 /* 入力カード */
@@ -388,7 +395,7 @@ section.main > div {
     border: 1px solid #e5e7eb;
     padding: 16px 20px;
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
-    min-height: 350px;
+    height: auto;
 }
 
 .preview-main-wrapper textarea {
@@ -623,7 +630,7 @@ with col1:
         user_message = st.text_area(
             "メッセージを入力",
             placeholder="例：取引先に感謝を伝えるメールを作成したい",
-            height=100,
+            height=90,
             label_visibility="collapsed",
         )
         submitted = st.form_submit_button("✓ 送信")
@@ -671,7 +678,7 @@ with col2:
         st.text_area(
             "本文プレビュー",
             email["body"],
-            height=280,
+            height=220,
             label_visibility="collapsed",
             disabled=True,
         )
