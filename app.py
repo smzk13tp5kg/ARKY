@@ -206,9 +206,9 @@ div[data-testid="stHorizontalBlock"] {
    サイドバー
 ------------------------------------------- */
 [data-testid="stSidebar"] {
-    width: 240px !important;
-    min-width: 240px !important;
-    max-width: 240px !important;
+    width: 360px !important;
+    min-width: 360px !important;
+    max-width: 360px !important;
     background: #050b23;
     border-right: 1px solid #cfae63;
 }
@@ -528,7 +528,7 @@ with st.sidebar:
 # ============================================
 # メイン 2 カラム (変更なし)
 # ============================================
-col1, col2 = st.columns([4.5, 2], gap="medium")
+col1, col2 = st.columns([3, 2], gap="medium")
 
 
 with col1:
@@ -698,4 +698,5 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
