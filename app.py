@@ -241,6 +241,21 @@ main.block-container {
     font-size: 12px;
     color: #e2e8ff;
 }
+st.markdown("""
+<style>
+/* ===== サイドバーのラジオ文字色を強制的に白／ゴールドにする ===== */
+
+/* 通常時：白っぽい色 */
+.nav-section div[role="radiogroup"] > label {
+    color: #ffffff !important;  /* ここを #ffd666 にすればゴールド系 */
+}
+
+/* 選択中はゴールド寄りに（お好みで） */
+.nav-section div[role="radiogroup"] input:checked ~ div {
+    color: #ffd666 !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 /* 選択中（だいたいのターゲット。バージョンによって微調整必要） */
 .nav-section div[role="radiogroup"] input:checked ~ div {
@@ -697,4 +712,5 @@ with col2:
                         })
                     
                     st.rerun()
+
 
