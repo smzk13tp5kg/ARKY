@@ -2,6 +2,7 @@ import streamlit as st
 from datetime import datetime
 import random
 import html  # HTMLエスケープ用
+import textwrap  # ← 追加：インデント除去用
 
 # ============================================
 # メール生成関数
@@ -506,7 +507,7 @@ with st.sidebar:
 
     custom_recipient = None
     if recipient == "その他":
-        custom_recipient = st.text_input("カスタマイズ相手", placeholder="例: 顧客")
+        custom_recipient = st.text_input("カスタム相手", placeholder="例: 顧客")
         recipient = custom_recipient if custom_recipient else "その他"
 
     st.caption("© 2024 メール生成AI")
@@ -580,42 +581,46 @@ with col1:
 with col2:
     if st.session_state.generated_email is None:
         # まだメールが生成されていない場合：プレースホルダだけカード内に表示
-        st.markdown(
+        placeholder_html = textwrap.dedent(
             """
-<div class="preview-main-wrapper">
-    <div class="preview-placeholder">
-        メールを生成すると、ここにプレビューが表示されます。
-    </div>
-</div>
-""",
-            unsafe_allow_html=True,
+            <div class="preview-main-wrapper">
+                <div class="preview-placeholder">
+                    メールを生成すると、ここにプレビューが表示されます。
+                </div>
+            </div>
+            """
         )
+        st.markdown(placeholder_html, unsafe_allow_html=True)
     else:
         email = st.session_state.generated_email
         # 本文を HTML 用に整形
         body_html = html.escape(email["body"]).replace("\n", "<br>")
 
-        # preview-main-wrapper を 1 回の markdown で出力
-        preview_html = f"""
-<div class="preview-main-wrapper">
-    <p class="preview-label">件名</p>
-    <p class="preview-subject">{html.escape(email['subject'])}</p>
+        # preview-main-wrapper を 1 回の markdown で出力（dedent で先頭スペース除去）
+        preview_html = textwrap.dedent(
+            f"""
+            <div class="preview-main-wrapper">
+                <p class="preview-label">件名</p>
+                <p class="preview-subject">{html.escape(email['subject'])}</p>
 
-    <p class="preview-label">本文</p>
-    <div class="preview-body">{body_html}</div>
-</div>
-"""
+                <p class="preview-label">本文</p>
+                <div class="preview-body">{body_html}</div>
+            </div>
+            """
+        )
         st.markdown(preview_html, unsafe_allow_html=True)
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-        # アドバイス
-        advice_html = f"""
-<div class="advice-box">
-    <strong>💡 アドバイス</strong><br>
-    {email['advice']}
-</div>
-"""
+        # アドバイス（こちらも dedent）
+        advice_html = textwrap.dedent(
+            f"""
+            <div class="advice-box">
+                <strong>💡 アドバイス</strong><br>
+                {email['advice']}
+            </div>
+            """
+        )
         st.markdown(advice_html, unsafe_allow_html=True)
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
