@@ -152,97 +152,269 @@ st.set_page_config(
 # ============================================
 st.markdown("""
 <style>
-/* メイン背景 */
-.main {
-    background-color: #f5f7fa;
+* {
+    box-sizing: border-box;
 }
 
-/* サイドバー全体の背景 */
+/* 全体テーマ */
+body {
+    background-color: #050b23;
+}
+
+/* ページ全体の余白調整 */
+main.block-container {
+    padding-top: 0.5rem;
+}
+
+/* サイドバー（左） */
 [data-testid="stSidebar"] {
-    background-color: #f5f7fa;
+    width: 240px !important;
+    min-width: 240px !important;
+    max-width: 240px !important;
+    background: #050b23;
+    border-right: 1px solid #29314f;
 }
 
-/* サイドバー上部タイトル */
+[data-testid="stSidebar"] > div:first-child {
+    padding: 12px 8px 16px 8px;
+}
+
+/* サイドバータイトル */
 .sidebar-app-title {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-/* ナビカードの共通スタイル */
-.nav-section {
-    background-color: #ffffff;
-    border-radius: 12px;
-    padding: 10px 10px 12px;
-    margin-bottom: 16px;
-    border: 1px solid #e4e7f2;
-}
-
-/* セクションラベル */
-.nav-label {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
-    color: #6b7280;
-    margin-bottom: 6px;
+    color: #ffffff;
+    padding: 4px 8px 10px 8px;
 }
 
-/* ラジオグループ全体を縦方向に詰める */
+/* 新規作成ボタン（ゴールド） */
+.sidebar-new-btn .stButton>button, .stSidebar .stButton>button {
+    background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%);
+    color: #1b2433;
+    border: none;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 10px 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+}
+.sidebar-new-btn .stButton>button:hover, .stSidebar .stButton>button:hover {
+    background: linear-gradient(180deg, #ffe58f 0%, #f0a73a 100%);
+}
+
+/* サイドバー：見出し */
+.nav-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #c3d3ff;
+    margin: 4px 0 6px 4px;
+}
+
+/* サイドバー：カード */
+.nav-section {
+    background: #050b23;
+    border-radius: 12px;
+    padding: 6px 4px 10px 4px;
+    margin-bottom: 12px;
+    border: 1px solid #29314f;
+}
+
+/* ラジオグループ */
 .nav-section div[role="radiogroup"] {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-/* ラジオの各行を pill っぽくする */
+/* ラジオの各行（pill風） */
 .nav-section div[role="radiogroup"] > label {
-    border-radius: 8px;
-    padding: 6px 10px;
-    border: 1px solid #e5e7eb;
-    background-color: #ffffff;
+    border-radius: 999px;
+    padding: 4px 8px;
+    border: 1px solid transparent;
+    background: transparent;
     cursor: pointer;
 }
-
-/* ホバー時 */
 .nav-section div[role="radiogroup"] > label:hover {
-    background-color: #f3f4ff;
+    background: rgba(255,255,255,0.06);
+}
+.nav-section div[role="radiogroup"] span {
+    font-size: 12px;
+    color: #e2e8ff;
 }
 
-/* テキストを少し小さめに */
-.nav-section div[role="radiogroup"] span {
+/* 選択中（だいたいのターゲット。バージョンによって微調整必要） */
+.nav-section div[role="radiogroup"] input:checked ~ div {
+    background: rgba(255,214,102,0.1);
+    border-color: #ffd666;
+    color: #ffd666;
+}
+
+/* メインタイトル（中央上部） */
+.top-bar {
+    background: #050b23;
+    padding: 16px 8px 8px 8px;
+    border-bottom: 1px solid #29314f;
+}
+.app-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+}
+
+/* メイン領域の背景 */
+section.main > div {
+    background: #050b23;
+}
+
+/* セクション見出し（メッセージ／プレビュー） */
+.section-header {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffb74d;
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ボックス共通（カード） */
+.card {
+    background: #0b1533;
+    border-radius: 16px;
+    border: 1px solid #3b4468;
+    padding: 16px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+    color: #e5ecff;
+}
+
+/* メッセージカード */
+.message-card {
+    max-height: 260px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+/* メッセージ行 */
+.msg-row {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: flex-start;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.msg-row:last-child {
+    border-bottom: none;
+}
+.msg-icon {
+    font-size: 16px;
+    margin-top: 2px;
+}
+.msg-text-main {
+    font-size: 13px;
+    color: #f5f7ff;
+}
+
+/* 入力カード内のテキストエリア */
+.input-card textarea {
+    background: #020821;
+    border-radius: 12px !important;
+    border-color: #3b4468 !important;
+    color: #e5ecff !important;
     font-size: 13px;
 }
 
-/* 選択中（checked）のスタイル */
-.nav-section div[role="radiogroup"] input:checked + div {
-    background-color: #e8f0ff;
-    border-color: #1a73e8;
-    color: #1a73e8;
-}
-
-/* メインボタン */
-.stButton>button {
-    width: 100%;
-    background-color: #1a73e8;
-    color: white;
-    font-weight: 600;
-    border-radius: 8px;
-    padding: 12px;
+/* 入力カードの送信ボタン */
+.input-card .stButton>button {
+    background: #1a73e8;
+    color: #ffffff;
+    border-radius: 999px;
     border: none;
+    font-weight: 600;
+    padding: 6px 18px;
+    font-size: 13px;
 }
-.stButton>button:hover {
-    background-color: #1557b0;
+.input-card .stButton>button:hover {
+    background: #3b82f6;
 }
 
-/* アドバイスボックス */
+/* プレビューカード（件名・本文） */
+.preview-card {
+    background: #0b1533;
+    border-radius: 16px;
+    border: 1px solid #3b4468;
+    padding: 12px 14px;
+    color: #e5ecff;
+    font-size: 13px;
+}
+
+/* プレビュー内テキストエリア */
+.preview-card textarea {
+    background: #020821;
+    border-radius: 12px !important;
+    border-color: #3b4468 !important;
+    color: #e5ecff !important;
+    font-size: 13px;
+}
+
+/* アドバイスカード */
 .advice-box {
-    background-color: #e8f5e9;
-    border-left: 3px solid #4caf50;
-    padding: 15px;
+    background: #1b4332;
+    border-left: 3px solid #95d5b2;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #e9f5f0;
+}
+
+/* コピー／再生成ボタン */
+.preview-actions .stButton>button {
+    background: #1e40af;
+    color: #ffffff;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 6px 16px;
+}
+.preview-actions .stButton>button:hover {
+    background: #2563eb;
+}
+
+/* コピー用テキストエリア */
+.copy-area textarea {
+    background: #020821;
+    border-radius: 12px !important;
+    border-color: #3b4468 !important;
+    color: #e5ecff !important;
+    font-size: 12px;
+}
+
+/* プレースホルダーメッセージ */
+.preview-placeholder {
+    color: #9ca3c7;
+    font-size: 13px;
+}
+
+/* スクロールバー調整（メッセージカード） */
+.message-card::-webkit-scrollbar {
+    width: 8px;
+}
+.message-card::-webkit-scrollbar-track {
+    background: transparent;
+}
+.message-card::-webkit-scrollbar-thumb {
+    background: #4b5563;
     border-radius: 4px;
-    margin-top: 15px;
+}
+.message-card::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
 }
 </style>
 """, unsafe_allow_html=True)
+
 
 # ============================================
 # セッション状態の初期化
@@ -525,3 +697,4 @@ with col2:
                         })
                     
                     st.rerun()
+
