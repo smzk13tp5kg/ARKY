@@ -492,45 +492,84 @@ with col2:
                     st.info("以下のテキストをコピーしてご利用ください。")
                     st.text_area("コピー用テキスト", full_text, height=150)
             
-# 再生成
-with col_btn2:
-    if st.button("🔄 再生成"):
-        # まず「再生成しています...」メッセージをチャットに追加
-        st.session_state.messages.append({
-            'role': 'assistant',
-            'content': 'メールを再生成しています...'
-        })
+with col2:
+    st.subheader("📄 プレビュー")
+    
+    # まだプレビューがないとき
+    if st.session_state.generated_email is None:
+        st.info("メールを生成すると、ここにプレビューが表示されます。")
+    
+    # プレビューがあるとき
+    else:
+        email = st.session_state.generated_email
+        
+        with st.container():
+            st.markdown("**件名**")
+            st.text(email['subject'])
+            st.markdown("---")
 
-        # 直近の user メッセージを後ろから探す（インデックス計算に依存しない）
-        last_user_message = None
-        for msg in reversed(st.session_state.messages):
-            if msg['role'] == 'user':
-                last_user_message = msg['content']
-                break
+            st.markdown("**本文**")
+            st.text_area("本文プレビュー", email['body'], height=300, label_visibility="collapsed")
+            st.markdown("---")
 
-        if last_user_message is None:
-            # ユーザーメッセージがなければ何もしない（安全側）
-            st.warning("再生成する元のメッセージが見つかりませんでした。")
-        else:
-            # バリエーションカウントを増やして別の表現を生成
-            st.session_state.variation_count += 1
-            st.session_state.generated_email = generate_email(
-                template,
-                tone,
-                recipient,
-                last_user_message,
-                variation=st.session_state.variation_count
+            st.markdown(
+                f"""
+                <div class="advice-box">
+                    <strong>💡 アドバイス</strong><br>
+                    {email['advice']}
+                </div>
+                """,
+                unsafe_allow_html=True
             )
 
-            # 「新しいバージョンを生成しました」メッセージを追加
-            st.session_state.messages.append({
-                'role': 'assistant',
-                'content': f'新しいバージョン（バリエーション {st.session_state.variation_count + 1}）を生成しました！プレビューをご確認ください。'
-            })
+            st.markdown("")
+            
+            # ボタン（プレビューがあるときだけ作る）
+            col_btn1, col_btn2 = st.columns(2)
 
-        # 画面を再描画
-        st.rerun()
+            # ---- コピー ----
+            with col_btn1:
+                if st.button("📋 コピー"):
+                    full_text = f"件名: {email['subject']}\n\n{email['body']}"
+                    st.info("以下の内容をコピーしてご利用ください。")
+                    st.text_area("コピー用テキスト", full_text, height=150)
+
+            # ---- 再生成 ----
+            with col_btn2:
+                if st.button("🔄 再生成"):
+
+                    # チャットに「再生成しています...」
+                    st.session_state.messages.append({
+                        'role': 'assistant',
+                        'content': 'メールを再生成しています...'
+                    })
+
+                    # 最後の user メッセージを探す
+                    last_user_message = None
+                    for msg in reversed(st.session_state.messages):
+                        if msg['role'] == 'user':
+                            last_user_message = msg['content']
+                            break
+
+                    if last_user_message:
+                        st.session_state.variation_count += 1
+                        st.session_state.generated_email = generate_email(
+                            template,
+                            tone,
+                            recipient,
+                            last_user_message,
+                            variation=st.session_state.variation_count
+                        )
+
+                        st.session_state.messages.append({
+                            'role': 'assistant',
+                            'content': f'新しいバージョン（バリエーション {st.session_state.variation_count + 1}）を生成しました！プレビューをご確認ください。'
+                        })
+
+                    st.rerun()
+
 
     else:
         st.info("メールを生成すると、ここにプレビューが表示されます。")
+
 
