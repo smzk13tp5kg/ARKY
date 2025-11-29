@@ -419,6 +419,25 @@ div[data-testid="stChatMessage"] {
     color: #ffffff;
 }
 
+/* 入力フォームの送信ボタン（通常時） */
+.stSidebar .input-card .stButton > button {
+    background: #ffffff !important;              /* 背景：白 */
+    color: #111827 !important;                   /* 文字：黒 */
+    border-radius: 999px !important;
+    border: 1px solid #ffd666 !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    padding: 6px 14px !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15) !important;
+}
+
+/* 入力フォームの送信ボタン（ホバー時） */
+.stSidebar .input-card .stButton > button:hover {
+    background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%) !important; /* Gold */
+    color: #ffffff !important;                                                /* 文字：白 */
+    border: none !important;
+}
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -751,6 +770,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
