@@ -1,6 +1,7 @@
 import streamlit as st
 from datetime import datetime
 import random
+import pyperclip  # クリップボード操作用
 
 # ============================================
 # メール生成関数（最初に定義）
@@ -358,7 +359,13 @@ with col2:
             with col_btn1:
                 if st.button("📋 コピー"):
                     full_text = f"件名: {email['subject']}\n\n{email['body']}"
-                    st.toast("✓ コピーしました！", icon="✅")
+                    try:
+                        import pyperclip
+                        pyperclip.copy(full_text)
+                        st.success("✓ クリップボードにコピーしました！")
+                    except:
+                        # pyperclipが使えない場合、テキストエリアで表示
+                        st.text_area("以下をコピーしてください:", full_text, height=150)
             
             with col_btn2:
                 if st.button("🔄 再生成"):
