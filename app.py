@@ -8,7 +8,6 @@ import textwrap
 # メール生成関数 (変更なし)
 # ============================================
 def generate_email(template, tone, recipient, message, variation=0):
-    # ... (変更なし)
     subject_variations = {
         "依頼": [
             f"【ご依頼】{message[:20]}",
@@ -148,7 +147,7 @@ def generate_email(template, tone, recipient, message, variation=0):
     }
 
 # ============================================
-# ページ設定 (変更なし)
+# ページ設定
 # ============================================
 st.set_page_config(
     page_title="ビジネスメール作成アシスタント",
@@ -157,7 +156,7 @@ st.set_page_config(
 )
 
 # ============================================
-# カスタムCSS (変更なし - メッセージエリアのCSSは前回修正したものを維持)
+# カスタムCSS
 # ============================================
 st.markdown(
     """
@@ -216,18 +215,31 @@ div[data-testid="stHorizontalBlock"] {
     color: #ffffff !important;
 }
 
-/* 新規作成ボタン (Goldグラデーション) */
-.sidebar-new-btn .stButton>button {
-    background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%);
-    color: #1b2433 !important;
-    border: none;
-    border-radius: 999px;
-    font-weight: 700;
-    font-size: 14px;
-    padding: 10px 16px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+/* 新規作成ボタン用のラッパ（レイアウトだけ） */
+.sidebar-new-btn {
+    margin-bottom: 8px;
 }
 
+/* ★ サイドバー内のボタン共通スタイル ★ */
+/* 通常時：Gold 背景＋白文字 */
+[data-testid="stSidebar"] .stButton > button {
+    background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%) !important;
+    color: #ffffff !important;
+    border-radius: 999px !important;
+    border: none !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    padding: 8px 16px !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.25) !important;
+}
+
+/* ホバー時：白背景＋黒文字＋Gold枠 */
+[data-testid="stSidebar"] .stButton > button:hover {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border: 1px solid #ffd666 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
+}
 
 /* サイドバー：選択中の項目 */
 .nav-section div[role="radiogroup"] input:checked ~ div {
@@ -261,27 +273,22 @@ div[data-testid="stHorizontalBlock"] {
     margin: 8px 0;
 }
 
-/* ★★★ 左：メッセージ表示カード（Flexboxで高さを厳密に制御 - 前回修正を維持） ★★★ */
+/* （メッセージラッパ関連のCSSは省略せず維持） */
 .message-wrapper {
     background: #ffffff;
     border-radius: 12px;
     border: 1px solid #ffd666;
     padding: 10px 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    /* 高さを固定し、Flexコンテナとして設定 */
-    height: 180px; /* <--- 親コンテナの高さを固定 */
+    height: 180px;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
     color: #111827;
-    
     display: flex;
     flex-direction: column; 
-    overflow: hidden; /* 親コンテナのスクロールは禁止 */
+    overflow: hidden;
 }
-
-/* 1. message-wrapper の直後に Streamlit が挿入する div (Flexboxの子として振る舞わせる) */
-/* ここが、st.chat_messageの親ブロックの高さ制御のキモ */
 .message-wrapper + div {
     height: 100%; 
     min-height: 0;
@@ -289,16 +296,12 @@ div[data-testid="stHorizontalBlock"] {
     display: flex;
     flex-direction: column;
 }
-
-/* 2. st.chat_message が配置される Streamlit のメインブロック (スクロールを担当) */
 .message-wrapper + div > div[data-testid="stVerticalBlock"] {
-    flex: 1; /* 残りのスペースを全て埋める */
-    overflow-y: auto; /* ここでスクロールさせる */
-    padding-right: 8px; /* スクロールバーのためのスペースを確保 */
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 8px;
     min-height: 0; 
 }
-
-/* Streamlitのチャットメッセージの調整 */
 div[data-testid="stChatMessage"] {
     width: 100% !important;
     max-width: 100% !important;
@@ -306,8 +309,6 @@ div[data-testid="stChatMessage"] {
     padding: 4px 0 !important;
     flex-shrink: 0; 
 }
-
-/* チャットのテキスト部分に強制的な折り返しを設定 (念のため) */
 .message-wrapper p,
 .message-wrapper span,
 .message-wrapper div {
@@ -318,10 +319,7 @@ div[data-testid="stChatMessage"] {
     max-width: 100% !important;
 }
 
-/* -------------------------------------------
-   右：プレビューカード（HTML要素を全て内包するためのスタイル）
-------------------------------------------- */
-/* ★★★ プレビューカードのラッパーCSSを修正 ★★★ */
+/* 右：プレビューカード */
 .preview-main-wrapper {
     background: #ffffff;
     border-radius: 12px;
@@ -334,18 +332,14 @@ div[data-testid="stChatMessage"] {
     box-sizing: border-box;
     display: flex;
     flex-direction: column; 
-    overflow: hidden; /* コンテナ自体はスクロールさせない */
+    overflow: hidden;
 }
-
-/* プレビュー：件名（HTML p要素）*/
 .preview-subject {
     color: #111827; 
     font-size: 14px; 
     margin-bottom: 16px;
     font-weight: bold;
 }
-
-/* プレビュー：本文（HTML div要素） - スクロールを担当させる */
 .preview-body {
     background: #f3f4f6;
     border-radius: 8px;
@@ -353,17 +347,12 @@ div[data-testid="stChatMessage"] {
     color: #111827;
     font-size: 14px;
     padding: 12px;
-    
-    flex-grow: 1; /* 残りの高さを全て使う */
-    min-height: 200px; /* 最小高さを保証 */
-    overflow-y: auto; /* ここでスクロールさせる */
-    
-    /* 適切に改行と表示を行うための設定 */
+    flex-grow: 1;
+    min-height: 200px;
+    overflow-y: auto;
     word-break: break-word; 
-    white-space: pre-wrap; /* \nの代わりに<br>を使うためpre-wrapは不要かもしれないが念のため */
+    white-space: pre-wrap;
 }
-
-/* アドバイスボックス */
 .advice-box {
     background: #fffbe6;
     border: 1px solid #ffd666;
@@ -373,8 +362,6 @@ div[data-testid="stChatMessage"] {
     font-size: 13px;
     margin-top: 12px;
 }
-
-/* コピー用テキストエリア (変更なし) */
 .copy-area textarea {
     background: #f3f4f6 !important;
     border-radius: 8px !important;
@@ -383,10 +370,10 @@ div[data-testid="stChatMessage"] {
     font-size: 12px !important;
     width: 100% !important;
 }
+
 /* ============================================
    チャットメッセージ（自前バブル表示）
 ============================================ */
-
 .chat-log {
     display: flex;
     flex-direction: column;
@@ -395,8 +382,6 @@ div[data-testid="stChatMessage"] {
     overflow-y: auto;
     padding-right: 8px;
 }
-
-/* 共通バブル */
 .chat-bubble {
     border-radius: 12px;
     padding: 8px 12px;
@@ -406,36 +391,13 @@ div[data-testid="stChatMessage"] {
     word-break: break-word;
     box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
-
-/* ユーザー（あなた） */
 .chat-bubble.user {
     background: #ffffff;
     color: #111827;
 }
-
-/* アシスタント（AI） */
 .chat-bubble.assistant {
     background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%);
     color: #ffffff;
-}
-
-/* 入力フォームの送信ボタン（通常時） */
-.stSidebar .input-card .stButton > button {
-    background: #ffffff !important;              /* 背景：白 */
-    color: #111827 !important;                   /* 文字：黒 */
-    border-radius: 999px !important;
-    border: 1px solid #ffd666 !important;
-    font-weight: 600 !important;
-    font-size: 13px !important;
-    padding: 6px 14px !important;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.15) !important;
-}
-
-/* 入力フォームの送信ボタン（ホバー時） */
-.stSidebar .input-card .stButton > button:hover {
-    background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%) !important; /* Gold */
-    color: #ffffff !important;                                                /* 文字：白 */
-    border: none !important;
 }
 
 </style>
@@ -444,7 +406,7 @@ div[data-testid="stChatMessage"] {
 )
 
 # ============================================
-# セッション状態初期化 (変更なし)
+# セッション状態初期化
 # ============================================
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -454,7 +416,7 @@ if "variation_count" not in st.session_state:
     st.session_state.variation_count = 0
 
 # ============================================
-# トップバー (変更なし)
+# トップバー
 # ============================================
 st.markdown(
     "<div class='top-bar'><h1 class='app-title'>✉️ ビジネスメール作成アシスタント</h1></div>",
@@ -462,7 +424,7 @@ st.markdown(
 )
 
 # ============================================
-# サイドバー (変更なし)
+# サイドバー
 # ============================================
 with st.sidebar:
     st.markdown(
@@ -579,9 +541,7 @@ with st.sidebar:
         custom_recipient = st.text_input("カスタム相手", placeholder="例: 顧客")
         recipient = custom_recipient if custom_recipient else "その他"
 
-    # ─────────────────────────────
     # ナビゲーションエリア最下部：入力フォーム
-    # ─────────────────────────────
     st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown("<div class='card input-card'>", unsafe_allow_html=True)
     with st.form("message_form", clear_on_submit=True):
@@ -613,14 +573,13 @@ with st.sidebar:
                 )
                 st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
-    
-    st.caption("© 2024 メール生成AI")
+
+    st.caption("© 2025 ARKY")
 
 # ============================================
-# メイン 2 カラム (変更なし)
+# メイン 2 カラム
 # ============================================
 col1, col2 = st.columns([3, 2], gap="medium")
-
 
 with col1:
     st.markdown("<div class='section-header'>💬 メッセージ</div>", unsafe_allow_html=True)
@@ -634,12 +593,10 @@ with col2:
 # 左：メッセージエリア（自前チャット表示）
 # ============================================
 with col1:
-    # メッセージ一覧をHTMLとして組み立て
     chat_html_parts = []
     chat_html_parts.append("<div class='chat-log'>")
 
     if not st.session_state.messages:
-        # 初回案内メッセージ（assistant）
         initial_msg = (
             "こんにちは！ビジネスメールの作成をお手伝いします。<br><br>"
             "左側のナビゲーションエリアでテンプレートやトーン、相手を選び、"
@@ -651,7 +608,6 @@ with col1:
     else:
         for msg in st.session_state.messages:
             role = msg["role"]
-            # 改行を <br> に変換しつつエスケープ
             text = html.escape(msg["content"]).replace("\n", "<br>")
             if role == "user":
                 chat_html_parts.append(
@@ -662,18 +618,14 @@ with col1:
                     f"<div class='chat-bubble assistant'>{text}</div>"
                 )
 
-    chat_html_parts.append("</div>")  # /chat-log
-
+    chat_html_parts.append("</div>")
     st.markdown("\n".join(chat_html_parts), unsafe_allow_html=True)
-
-
 
 # ============================================
 # 右：プレビューエリア
 # ============================================
 with col2:
     if st.session_state.generated_email is None:
-        # まだメールが生成されていない場合：プレースホルダだけカード内に表示
         placeholder_html = textwrap.dedent(
             """
             <div class="preview-main-wrapper">
@@ -686,11 +638,9 @@ with col2:
     else:
         email = st.session_state.generated_email
 
-        # 本文を HTML（改行→<br>）用に整形
         body_html = html.escape(email["body"]).replace("\n", "<br>")
         subject_html = html.escape(email["subject"])
 
-        # ★ 内側のタグから class 属性を全部やめる
         preview_html = textwrap.dedent(
             f"""
             <div class="preview-main-wrapper">
@@ -706,7 +656,6 @@ with col2:
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-        # アドバイス（これもシンプルなタグ構成にする）
         advice_html = textwrap.dedent(
             f"""
             <div class="advice-box">
@@ -719,7 +668,6 @@ with col2:
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-        # コピー／再生成ボタン
         st.markdown("<div class='preview-actions'>", unsafe_allow_html=True)
         btn_col1, btn_col2 = st.columns(2)
 
@@ -770,14 +718,3 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
-
-
-
-
-
-
-
-
-
-
-
