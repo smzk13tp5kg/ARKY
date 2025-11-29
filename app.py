@@ -265,33 +265,48 @@ div[data-testid="stHorizontalBlock"] {
     margin: 8px 0;
 }
 
-/* メッセージ表示カード (コンテンツ強制収容) */
+/* ★★★ 最終修正：メッセージ表示カードの高さ制御 ★★★ */
 .message-wrapper {
     background: #ffffff;
     border-radius: 12px;
     border: 1px solid #ffd666;
     padding: 10px 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    min-height: 180px;
-    max-height: 180px;
+    /* 高さを固定し、Flexコンテナとして設定 */
+    height: 180px; /* max-heightではなくheightで固定 */
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
     color: #111827;
     
-    /* コンテンツを強制的に収めるための設定 */
     display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    overflow-x: hidden;
+    flex-direction: column; 
+    overflow: hidden; /* 親コンテナのスクロールは禁止 */
+}
+
+/* .message-wrapper の内部に st.markdown で作成した div の直後にある Streamlit のメインブロックをターゲット */
+/* st.chat_message が配置される親要素を特定 */
+.message-wrapper + div > div[data-testid="stVerticalBlock"] {
+    /* この要素に高さを継承させ、オーバーフローさせる */
+    height: 100%; 
+    overflow-y: auto; /* ここでスクロールさせる */
+    padding-right: 8px; /* スクロールバーのためのスペースを確保 */
+}
+
+/* プレビュー内の st.text_area の親要素に対する調整 (念のため再設定) */
+div[data-testid="stVerticalBlock"] div[data-testid="stTextarea"] {
+    max-height: 280px !important;
+    min-height: 280px !important;
+    height: 280px !important;
 }
 
 /* Streamlitのチャットメッセージの調整 */
 div[data-testid="stChatMessage"] {
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 !important;
+    margin: 4px 0 !important; /* 上下のマージンを微調整 */
     padding: 4px 0 !important;
+    flex-shrink: 0; /* 高さが固定の親内で縮まないように */
 }
 
 /* チャットのテキスト部分に強制的な折り返しを設定 (念のため) */
@@ -304,7 +319,6 @@ div[data-testid="stChatMessage"] {
     white-space: pre-wrap !important; 
     max-width: 100% !important;
 }
-
 
 /* 入力カード */
 .card {
@@ -330,7 +344,7 @@ div[data-testid="stChatMessage"] {
     width: 100% !important;
 }
 
-/* プレビューカード (コンテンツ強制収容) */
+/* プレビューカード */
 .preview-main-wrapper {
     background: #ffffff;
     border-radius: 12px;
@@ -341,19 +355,9 @@ div[data-testid="stChatMessage"] {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    /* コンテンツを強制的に収めるための設定 */
     display: flex;
     flex-direction: column; 
     overflow: hidden;
-}
-
-/* プレビュー内の st.text_area の親要素に対する調整 */
-/* st.text_area の高さが親に収まるように */
-div[data-testid="stVerticalBlock"] div[data-testid="stTextarea"] {
-    /* プレビューエリア内の text_area の親要素に対して */
-    max-height: 280px !important;
-    min-height: 280px !important;
-    height: 280px !important;
 }
 
 .preview-main-wrapper textarea {
@@ -376,13 +380,10 @@ div[data-testid="stVerticalBlock"] div[data-testid="stTextarea"] {
 }
 
 /* スクロールバー調整 */
-.message-wrapper::-webkit-scrollbar {
-    width: 6px;
-}
-.message-wrapper::-webkit-scrollbar-thumb {
-    background: #d1d5db;
-    border-radius: 3px;
-}
+/* .message-wrapper ではなく、内部の Streamlit ブロックにスクロールを適用するため、この設定は削除または無効化 */
+/* .message-wrapper::-webkit-scrollbar {
+    width: 0;
+} */
 
 </style>
 """,
@@ -541,11 +542,15 @@ with col2:
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
 # ============================================
-# 左：メッセージエリア (変更なし)
+# 左：メッセージエリア
 # ============================================
 with col1:
-    # メッセージ表示カード
+    # ★ message-wrapper は高さ固定の親コンテナとして機能
     st.markdown("<div class='message-wrapper'>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True) # 閉じタグを挿入
+
+    # ★ st.chat_message は st.markdown の直後に配置
+    # CSSでこの st.chat_message の親コンテナ (st.VerticalBlock) をターゲットにしてスクロールを制御する
     if not st.session_state.messages:
         st.chat_message("assistant").write(
             "こんにちは！ビジネスメールの作成をお手伝いします。\n\n"
@@ -557,11 +562,13 @@ with col1:
                 st.chat_message("user").write(msg["content"])
             else:
                 st.chat_message("assistant").write(msg["content"])
-    st.markdown("</div>", unsafe_allow_html=True)
+
+    # st.markdownの div (message-wrapper) の直後に Streamlit コンテンツが続くため、
+    # CSSの `.message-wrapper + div > div[data-testid="stVerticalBlock"]` が適用されることを期待します。
 
     st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-    # 入力カード
+    # 入力カード (変更なし)
     st.markdown("<div class='card input-card'>", unsafe_allow_html=True)
     with st.form("message_form", clear_on_submit=True):
         user_message = st.text_area(
@@ -570,7 +577,7 @@ with col1:
             height=100,
             label_visibility="collapsed",
         )
-        submitted = st.form_submit_button("✓ 送信") # ★入力エリアの送信ボタンは残す
+        submitted = st.form_submit_button("✓ 送信")
 
         if submitted and user_message:
             if template == "その他" and not custom_template:
@@ -594,7 +601,7 @@ with col1:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ============================================
-# 右：プレビューエリア (エラーの原因となる st.form を削除)
+# 右：プレビューエリア (変更なし)
 # ============================================
 with col2:
     if st.session_state.generated_email is None:
@@ -612,7 +619,7 @@ with col2:
         st.markdown(f"<p style='color: #111827; font-size: 14px; margin-bottom: 16px;'>{email['subject']}</p>", unsafe_allow_html=True)
 
         st.markdown("<p class='preview-label'>本文</p>", unsafe_allow_html=True)
-        # ★ st.form を削除し、st.text_area を直接配置
+        
         st.text_area(
             "本文プレビュー",
             email["body"],
