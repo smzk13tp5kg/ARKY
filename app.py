@@ -596,52 +596,44 @@ with col1:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ============================================
-# 右：プレビューエリア (HTML一括レンダリングに修正)
+# 右：プレビューエリア
 # ============================================
 with col2:
     if st.session_state.generated_email is None:
-        # まだメールが生成されていない場合
+        # まだメールが生成されていない場合：プレースホルダだけカード内に表示
         placeholder_html = textwrap.dedent(
             """
             <div class="preview-main-wrapper">
-                <div class="preview-placeholder">
-                    メールを生成すると、ここにプレビューが表示されます。
-                </div>
+                <p><em>メールを生成すると、ここにプレビューが表示されます。</em></p>
             </div>
             """
         )
         st.markdown(placeholder_html, unsafe_allow_html=True)
+
     else:
         email = st.session_state.generated_email
-        
-        # 1. 本文を HTML 用に整形: 改行を <br> に置き換え
-        # この時、本文を textwrap.dedent の内側で定義する際にインデントが入るのを防ぐため、
-        # generate_email内の body_variations の文字列定義に注意し、
-        # ここでは純粋に改行コード \n を <br> に変換する
-        
-        # まずHTMLエスケープ (タグの誤認識を防ぐ)
-        escaped_body = html.escape(email["body"])
-        # 改行コードを <br> に置き換え
-        body_html_formatted = escaped_body.replace("\n", "<br>")
 
-        # 2. 件名と本文の全てを、一つの大きなHTML文字列として構築
+        # 本文を HTML（改行→<br>）用に整形
+        body_html = html.escape(email["body"]).replace("\n", "<br>")
+        subject_html = html.escape(email["subject"])
+
+        # ★ 内側のタグから class 属性を全部やめる
         preview_html = textwrap.dedent(
             f"""
             <div class="preview-main-wrapper">
-                <p class="preview-label">件名</p>
-                <p class="preview-subject">{html.escape(email['subject'])}</p>
-
-                <p class="preview-label">本文</p>
-                <div class="preview-body">{body_html_formatted}</div>
+                <p><strong>件名</strong></p>
+                <p>{subject_html}</p>
+                <hr>
+                <p><strong>本文</strong></p>
+                <p>{body_html}</p>
             </div>
             """
         )
-        # 3. 一度の st.markdown で出力
         st.markdown(preview_html, unsafe_allow_html=True)
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-        # アドバイス
+        # アドバイス（これもシンプルなタグ構成にする）
         advice_html = textwrap.dedent(
             f"""
             <div class="advice-box">
@@ -654,7 +646,7 @@ with col2:
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-        # コピー／再生成ボタン（Streamlitコンポーネントのため、HTML divの外に配置）
+        # コピー／再生成ボタン
         st.markdown("<div class='preview-actions'>", unsafe_allow_html=True)
         btn_col1, btn_col2 = st.columns(2)
 
