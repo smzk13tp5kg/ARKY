@@ -2,9 +2,9 @@ import streamlit as st
 from datetime import datetime
 import random
 
-# クリップボード操作（ローカル専用扱い）
+# クリップボード操作用（環境に pyperclip が無い場合でもアプリが落ちないようにする）
 try:
-    import pyperclip
+    import pyperclip  # クリップボード操作用
     PYPERCLIP_AVAILABLE = True
 except ImportError:
     PYPERCLIP_AVAILABLE = False
@@ -366,39 +366,26 @@ with col2:
                 if st.button("📋 コピー"):
                     full_text = f"件名: {email['subject']}\n\n{email['body']}"
                     if PYPERCLIP_AVAILABLE:
-                        # ローカルなど pyperclip が使える環境向け
+                        # pyperclip が使える環境（ローカルなど）の場合は自動コピー
                         pyperclip.copy(full_text)
                         st.success("✓ クリップボードにコピーしました！")
                     else:
-                        # Web版など pyperclip が使えない環境向け
+                        # pyperclip が使えない環境（Streamlit Cloud 等）は手動コピーにフォールバック
                         st.info("この環境では自動コピーが使えません。以下のテキストを手動でコピーしてください。")
                         st.text_area("以下をコピーしてください:", full_text, height=150)
             
             with col_btn2:
                 if st.button("🔄 再生成"):
                     if len(st.session_state.messages) >= 2:
-                        # 「再生成しています...」メッセージを追加
-                        st.session_state.messages.append({
-                            'role': 'assistant',
-                            'content': 'メールを再生成しています...'
-                        })
-                        
-                        # 直近のユーザーメッセージ（簡易版：今の仕様前提で -3 を使用）
-                        last_user_message = st.session_state.messages[-3]['content']
-                        
+                        # 直近のユーザーメッセージ（-2 が user、その次 -1 が assistant）
+                        last_user_message = st.session_state.messages[-2]['content']
                         # バリエーションカウントを増やして別の表現を生成
                         st.session_state.variation_count += 1
                         st.session_state.generated_email = generate_email(
                             template, tone, recipient, last_user_message, 
                             variation=st.session_state.variation_count
                         )
-                        
-                        # 「生成完了」メッセージを追加
-                        st.session_state.messages.append({
-                            'role': 'assistant',
-                            'content': f'新しいバージョン（バリエーション {st.session_state.variation_count + 1}）を生成しました！プレビューをご確認ください。'
-                        })
-                        
+                        st.success(f"✨ バリエーション {st.session_state.variation_count + 1} を生成しました！")
                         st.rerun()
     else:
         st.info("メールを生成すると、ここにプレビューが表示されます。")
