@@ -402,6 +402,17 @@ section.main > div {
 .message-card::-webkit-scrollbar-thumb:hover {
     background: #6b7280;
 }
+
+/* サイドバー内の文字色を強制的に白にする */
+[data-testid="stSidebar"] * {
+    color: #ffffff !important;
+}
+
+/* ただしセクション見出し(nav-label)だけはゴールドで上書き */
+.nav-label {
+    color: #ffd666 !important;
+}
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -695,3 +706,4 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
