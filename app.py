@@ -265,7 +265,7 @@ div[data-testid="stHorizontalBlock"] {
     margin: 8px 0;
 }
 
-/* ★★★ 修正点：メッセージ表示カード (コンテンツ強制収容) ★★★ */
+/* メッセージ表示カード (コンテンツ強制収容) */
 .message-wrapper {
     background: #ffffff;
     border-radius: 12px;
@@ -280,19 +280,18 @@ div[data-testid="stHorizontalBlock"] {
     color: #111827;
     
     /* コンテンツを強制的に収めるための設定 */
-    display: flex; /* Flexboxコンテナにする */
-    flex-direction: column; /* 縦方向に配置 */
-    overflow-y: auto; /* 縦スクロールを有効にする */
-    overflow-x: hidden; /* 横方向のはみ出しを隠す */
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /* Streamlitのチャットメッセージの調整 */
-/* stChatMessage要素が親の幅を尊重し、不要なマージンを排除する */
 div[data-testid="stChatMessage"] {
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 !important; /* マージンをリセット */
-    padding: 4px 0 !important; /* パディングを調整 */
+    margin: 0 !important;
+    padding: 4px 0 !important;
 }
 
 /* チャットのテキスト部分に強制的な折り返しを設定 (念のため) */
@@ -331,7 +330,7 @@ div[data-testid="stChatMessage"] {
     width: 100% !important;
 }
 
-/* ★★★ 修正点：プレビューカード (コンテンツ強制収容) ★★★ */
+/* プレビューカード (コンテンツ強制収容) */
 .preview-main-wrapper {
     background: #ffffff;
     border-radius: 12px;
@@ -345,15 +344,16 @@ div[data-testid="stChatMessage"] {
     /* コンテンツを強制的に収めるための設定 */
     display: flex;
     flex-direction: column; 
-    overflow: hidden; /* プレビューエリアは縦スクロールさせない（本文入力欄のみスクロールさせる） */
+    overflow: hidden;
 }
 
-/* プレビュー内のテキストエリア (本文) の調整 */
-div[data-testid="stForm"] > div > div > div > textarea {
-    /* プレビューエリア内の st.text_area の高さが親に収まるように */
+/* プレビュー内の st.text_area の親要素に対する調整 */
+/* st.text_area の高さが親に収まるように */
+div[data-testid="stVerticalBlock"] div[data-testid="stTextarea"] {
+    /* プレビューエリア内の text_area の親要素に対して */
+    max-height: 280px !important;
     min-height: 280px !important;
     height: 280px !important;
-    width: 100% !important;
 }
 
 .preview-main-wrapper textarea {
@@ -541,7 +541,7 @@ with col2:
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
 # ============================================
-# 左：メッセージエリア
+# 左：メッセージエリア (変更なし)
 # ============================================
 with col1:
     # メッセージ表示カード
@@ -552,8 +552,6 @@ with col1:
             "左側からメールの種類、トーン、相手を選択して、具体的な内容を入力してください。"
         )
     else:
-        # メッセージコンテナのラッパーを設けて st.chat_message を含む
-        # st.chat_message は Markdown の div の内側にレンダリングされるはず
         for msg in st.session_state.messages:
             if msg["role"] == "user":
                 st.chat_message("user").write(msg["content"])
@@ -572,7 +570,7 @@ with col1:
             height=100,
             label_visibility="collapsed",
         )
-        submitted = st.form_submit_button("✓ 送信")
+        submitted = st.form_submit_button("✓ 送信") # ★入力エリアの送信ボタンは残す
 
         if submitted and user_message:
             if template == "その他" and not custom_template:
@@ -596,7 +594,7 @@ with col1:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ============================================
-# 右：プレビューエリア
+# 右：プレビューエリア (エラーの原因となる st.form を削除)
 # ============================================
 with col2:
     if st.session_state.generated_email is None:
@@ -614,19 +612,15 @@ with col2:
         st.markdown(f"<p style='color: #111827; font-size: 14px; margin-bottom: 16px;'>{email['subject']}</p>", unsafe_allow_html=True)
 
         st.markdown("<p class='preview-label'>本文</p>", unsafe_allow_html=True)
-        # st.text_areaをst.formでラップすることで、preview-main-wrapperの内部に収まりやすくなることがある
-        # ここでは、CSSで直接 st.text_areaの親要素に介入しています。
-        with st.form("preview_form", clear_on_submit=False):
-            st.text_area(
-                "本文プレビュー",
-                email["body"],
-                height=280,
-                label_visibility="collapsed",
-                disabled=True,
-                key="preview_text_area"
-            )
-            # ダミーのサブミットボタン。これにより st.form が成立し、text_areaがフォーム内に収まる
-            st.form_submit_button("Submit (Hidden)", disabled=True, label_visibility="collapsed")
+        # ★ st.form を削除し、st.text_area を直接配置
+        st.text_area(
+            "本文プレビュー",
+            email["body"],
+            height=280,
+            label_visibility="collapsed",
+            disabled=True,
+            key="preview_text_area"
+        )
             
         st.markdown("</div>", unsafe_allow_html=True)
 
