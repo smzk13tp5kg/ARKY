@@ -1,6 +1,11 @@
 import streamlit as st
 from datetime import datetime
 import random
+import html  # ← 追加
+import streamlit as st
+from datetime import datetime
+import random
+
 
 # ============================================
 # メール生成関数 (変更なし)
@@ -612,24 +617,27 @@ with col2:
     else:
         email = st.session_state.generated_email
 
-        # 件名＋本文
+        # 件名＋本文カード（全部この中に収める）
         st.markdown("<div class='preview-main-wrapper'>", unsafe_allow_html=True)
 
+        # 件名
         st.markdown("<p class='preview-label'>件名</p>", unsafe_allow_html=True)
-        st.markdown(f"<p style='color: #111827; font-size: 14px; margin-bottom: 16px;'>{email['subject']}</p>", unsafe_allow_html=True)
-
-        st.markdown("<p class='preview-label'>本文</p>", unsafe_allow_html=True)
-        
-        st.text_area(
-            "本文プレビュー",
-            email["body"],
-            height=280,
-            label_visibility="collapsed",
-            disabled=True,
-            key="preview_text_area"
+        st.markdown(
+            f"<p class='preview-subject'>{html.escape(email['subject'])}</p>",
+            unsafe_allow_html=True,
         )
-            
-        st.markdown("</div>", unsafe_allow_html=True)
+
+        # 本文（text_area をやめて HTML の div にする）
+        st.markdown("<p class='preview-label'>本文</p>", unsafe_allow_html=True)
+        body_html = html.escape(email["body"]).replace("\n", "<br>")
+        st.markdown(
+            f"<div class='preview-body'>{body_html}</div>",
+            unsafe_allow_html=True,
+        )
+
+        st.markdown("</div>", unsafe_allow_html=True)  # /preview-main-wrapper
+
+        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
         # アドバイス
         st.markdown(
@@ -642,7 +650,9 @@ with col2:
             unsafe_allow_html=True,
         )
 
-        # ボタン
+        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+
+        # コピー／再生成ボタン（今までと同じ処理）
         st.markdown("<div class='preview-actions'>", unsafe_allow_html=True)
         btn_col1, btn_col2 = st.columns(2)
 
@@ -683,10 +693,14 @@ with col2:
                     st.session_state.messages.append(
                         {
                             "role": "assistant",
-                            "content": f"新しいバージョン（バリエーション {st.session_state.variation_count + 1}）を生成しました！プレビューをご確認ください。",
+                            "content": (
+                                f"新しいバージョン（バリエーション "
+                                f"{st.session_state.variation_count + 1}）を生成しました！プレビューをご確認ください。"
+                            ),
                         }
                     )
 
                 st.rerun()
 
-        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)  # /preview-actions
+
