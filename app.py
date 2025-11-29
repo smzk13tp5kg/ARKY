@@ -370,14 +370,26 @@ with col2:
             with col_btn2:
                 if st.button("🔄 再生成"):
                     if len(st.session_state.messages) >= 2:
-                        last_user_message = st.session_state.messages[-2]['content']
+                        # 「再生成しています...」メッセージを追加
+                        st.session_state.messages.append({
+                            'role': 'assistant',
+                            'content': 'メールを再生成しています...'
+                        })
+                        
+                        last_user_message = st.session_state.messages[-3]['content']  # -3に変更（新しいメッセージを追加したため）
                         # バリエーションカウントを増やして別の表現を生成
                         st.session_state.variation_count += 1
                         st.session_state.generated_email = generate_email(
                             template, tone, recipient, last_user_message, 
                             variation=st.session_state.variation_count
                         )
-                        st.success(f"✨ バリエーション {st.session_state.variation_count + 1} を生成しました！")
+                        
+                        # 「生成完了」メッセージを追加
+                        st.session_state.messages.append({
+                            'role': 'assistant',
+                            'content': f'新しいバージョン（バリエーション {st.session_state.variation_count + 1}）を生成しました！プレビューをご確認ください。'
+                        })
+                        
                         st.rerun()
     else:
         st.info("メールを生成すると、ここにプレビューが表示されます。")
