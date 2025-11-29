@@ -1,11 +1,7 @@
 import streamlit as st
 from datetime import datetime
 import random
-import html  # ← 追加
-import streamlit as st
-from datetime import datetime
-import random
-
+import html # ← HTMLエスケープのために必要
 
 # ============================================
 # メール生成関数 (変更なし)
@@ -167,7 +163,7 @@ st.set_page_config(
 )
 
 # ============================================
-# カスタムCSS (コンテナへの強制収容を強化)
+# カスタムCSS (プレビュー本文のスタイルを追加)
 # ============================================
 st.markdown(
     """
@@ -270,15 +266,14 @@ div[data-testid="stHorizontalBlock"] {
     margin: 8px 0;
 }
 
-/* ★★★ 最終修正：メッセージ表示カードの高さ制御 ★★★ */
+/* ★★★ 左：メッセージ表示カードの高さ制御（前回修正分） ★★★ */
 .message-wrapper {
     background: #ffffff;
     border-radius: 12px;
     border: 1px solid #ffd666;
     padding: 10px 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    /* 高さを固定し、Flexコンテナとして設定 */
-    height: 180px; /* max-heightではなくheightで固定 */
+    height: 180px; 
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
@@ -286,32 +281,21 @@ div[data-testid="stHorizontalBlock"] {
     
     display: flex;
     flex-direction: column; 
-    overflow: hidden; /* 親コンテナのスクロールは禁止 */
+    overflow: hidden; 
 }
 
-/* .message-wrapper の内部に st.markdown で作成した div の直後にある Streamlit のメインブロックをターゲット */
-/* st.chat_message が配置される親要素を特定 */
 .message-wrapper + div > div[data-testid="stVerticalBlock"] {
-    /* この要素に高さを継承させ、オーバーフローさせる */
     height: 100%; 
-    overflow-y: auto; /* ここでスクロールさせる */
-    padding-right: 8px; /* スクロールバーのためのスペースを確保 */
+    overflow-y: auto; 
+    padding-right: 8px; 
 }
 
-/* プレビュー内の st.text_area の親要素に対する調整 (念のため再設定) */
-div[data-testid="stVerticalBlock"] div[data-testid="stTextarea"] {
-    max-height: 280px !important;
-    min-height: 280px !important;
-    height: 280px !important;
-}
-
-/* Streamlitのチャットメッセージの調整 */
 div[data-testid="stChatMessage"] {
     width: 100% !important;
     max-width: 100% !important;
-    margin: 4px 0 !important; /* 上下のマージンを微調整 */
+    margin: 4px 0 !important;
     padding: 4px 0 !important;
-    flex-shrink: 0; /* 高さが固定の親内で縮まないように */
+    flex-shrink: 0;
 }
 
 /* チャットのテキスト部分に強制的な折り返しを設定 (念のため) */
@@ -349,32 +333,61 @@ div[data-testid="stChatMessage"] {
     width: 100% !important;
 }
 
-/* プレビューカード */
+/* ★★★ 右：プレビューカード（HTML要素を全て内包するためのスタイル） ★★★ */
 .preview-main-wrapper {
     background: #ffffff;
     border-radius: 12px;
     border: 1px solid #e5e7eb;
     padding: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    min-height: 350px;
+    /* st.text_area を使わないため、高さを固定して要素を収める */
+    min-height: 350px; 
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
     display: flex;
     flex-direction: column; 
-    overflow: hidden;
+    overflow: hidden; /* コンテナ自体はスクロールさせない */
 }
 
-.preview-main-wrapper textarea {
-    background: #f3f4f6 !important;
-    border-radius: 8px !important;
-    border: 1px solid #d1d5db !important;
-    color: #111827 !important;
-    font-size: 14px !important;
-    width: 100% !important;
+/* プレビュー：件名（HTML p要素）*/
+.preview-subject {
+    color: #111827; 
+    font-size: 14px; 
+    margin-bottom: 16px;
+    font-weight: bold;
 }
 
-/* コピー用テキストエリア */
+/* プレビュー：本文（HTML div要素） - スクロールを担当させる */
+.preview-body {
+    background: #f3f4f6;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    color: #111827;
+    font-size: 14px;
+    padding: 12px;
+    
+    /* 高さを確保し、スクロール可能にする */
+    flex-grow: 1; /* 残りの高さを全て使う */
+    min-height: 200px; /* 最小高さを保証 */
+    overflow-y: auto; /* ここでスクロールさせる */
+    
+    word-break: break-word; 
+    white-space: pre-wrap; /* <br>がなくても改行を保持する */
+}
+
+/* アドバイスボックス */
+.advice-box {
+    background: #fffbe6;
+    border: 1px solid #ffd666;
+    border-radius: 8px;
+    padding: 10px;
+    color: #4b5563;
+    font-size: 13px;
+    margin-top: 12px;
+}
+
+/* コピー用テキストエリア (変更なし) */
 .copy-area textarea {
     background: #f3f4f6 !important;
     border-radius: 8px !important;
@@ -383,12 +396,6 @@ div[data-testid="stChatMessage"] {
     font-size: 12px !important;
     width: 100% !important;
 }
-
-/* スクロールバー調整 */
-/* .message-wrapper ではなく、内部の Streamlit ブロックにスクロールを適用するため、この設定は削除または無効化 */
-/* .message-wrapper::-webkit-scrollbar {
-    width: 0;
-} */
 
 </style>
 """,
@@ -547,7 +554,7 @@ with col2:
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
 # ============================================
-# 左：メッセージエリア
+# 左：メッセージエリア (変更なし)
 # ============================================
 with col1:
     # ★ message-wrapper は高さ固定の親コンテナとして機能
@@ -555,7 +562,6 @@ with col1:
     st.markdown("</div>", unsafe_allow_html=True) # 閉じタグを挿入
 
     # ★ st.chat_message は st.markdown の直後に配置
-    # CSSでこの st.chat_message の親コンテナ (st.VerticalBlock) をターゲットにしてスクロールを制御する
     if not st.session_state.messages:
         st.chat_message("assistant").write(
             "こんにちは！ビジネスメールの作成をお手伝いします。\n\n"
@@ -567,9 +573,6 @@ with col1:
                 st.chat_message("user").write(msg["content"])
             else:
                 st.chat_message("assistant").write(msg["content"])
-
-    # st.markdownの div (message-wrapper) の直後に Streamlit コンテンツが続くため、
-    # CSSの `.message-wrapper + div > div[data-testid="stVerticalBlock"]` が適用されることを期待します。
 
     st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
@@ -606,7 +609,7 @@ with col1:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ============================================
-# 右：プレビューエリア 修正版
+# 右：プレビューエリア (HTMLレンダリングに変更)
 # ============================================
 with col2:
     if st.session_state.generated_email is None:
@@ -617,24 +620,31 @@ with col2:
     else:
         email = st.session_state.generated_email
 
-        # 本文を HTML 用に整形
+        # 件名＋本文カード（HTML divの中に全て収める）
+        st.markdown("<div class='preview-main-wrapper'>", unsafe_allow_html=True)
+
+        # 1. 件名
+        st.markdown("<p class='preview-label'>件名</p>", unsafe_allow_html=True)
+        # HTMLエスケープして表示
+        st.markdown(
+            f"<p class='preview-subject'>{html.escape(email['subject'])}</p>",
+            unsafe_allow_html=True,
+        )
+
+        # 2. 本文（st.text_areaの代わりにHTML divを使用）
+        st.markdown("<p class='preview-label'>本文</p>", unsafe_allow_html=True)
+        # HTMLエスケープし、改行コード(\n)をHTMLの改行タグ(<br>)に置換
         body_html = html.escape(email["body"]).replace("\n", "<br>")
+        st.markdown(
+            f"<div class='preview-body'>{body_html}</div>",
+            unsafe_allow_html=True,
+        )
 
-        # ★ 件名＋本文を 1 つの div.preview-main-wrapper の中にまとめて出力
-        preview_html = f"""
-        <div class="preview-main-wrapper">
-            <p class='preview-label'>件名</p>
-            <p class='preview-subject'>{html.escape(email['subject'])}</p>
-
-            <p class='preview-label'>本文</p>
-            <div class='preview-body'>{body_html}</div>
-        </div>
-        """
-        st.markdown(preview_html, unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True) # /preview-main-wrapper の閉じタグ
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-        # アドバイスボックス（これはカードの外で OK）
+        # アドバイス
         st.markdown(
             f"""
             <div class="advice-box">
@@ -647,7 +657,7 @@ with col2:
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-        # コピー／再生成ボタン
+        # コピー／再生成ボタン（Streamlitコンポーネントのため、HTML divの外に配置）
         st.markdown("<div class='preview-actions'>", unsafe_allow_html=True)
         btn_col1, btn_col2 = st.columns(2)
 
@@ -656,6 +666,7 @@ with col2:
                 full_text = f"件名: {email['subject']}\n\n{email['body']}"
                 st.info("以下のテキストをコピーしてご利用ください。")
                 st.markdown("<div class='copy-area'>", unsafe_allow_html=True)
+                # コピー用の text_area は Streamlit コンポーネント
                 st.text_area(
                     "コピー用テキスト",
                     full_text,
@@ -697,4 +708,4 @@ with col2:
 
                 st.rerun()
 
-        st.markdown("</div>", unsafe_allow_html=True)  # /preview-actions
+        st.markdown("</div>", unsafe_allow_html=True) # /preview-actions の閉じタグ
