@@ -382,6 +382,40 @@ div[data-testid="stChatMessage"] {
     font-size: 12px !important;
     width: 100% !important;
 }
+/* ============================================
+   チャットメッセージ カスタムデザイン
+============================================ */
+
+/* ユーザーメッセージ（左のあなた） */
+[data-testid="stChatMessage"][data-testid-user="true"] .stChatMessageContent {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
+}
+
+/* アシスタントメッセージ（AI側） */
+[data-testid="stChatMessage"][data-testid-user="false"] .stChatMessageContent {
+    background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%) !important;
+    color: #ffffff !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.25) !important;
+}
+
+/* 文字折り返し強制 */
+.stChatMessageContent {
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+    white-space: pre-wrap !important;
+}
+
+/* バブルの横幅を自然に調整 */
+.stChatMessageContent {
+    max-width: 95% !important;
+}
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -694,6 +728,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
