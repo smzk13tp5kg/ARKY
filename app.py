@@ -810,26 +810,24 @@ with col2:
     else:
         email = st.session_state.generated_email
 
-        # 件名＋本文の白いカード（スクショ右上の大きいカード）
+        # 件名＋本文の白いカード
         st.markdown("<div class='preview-main-wrapper'>", unsafe_allow_html=True)
 
-        st.markdown("**件名**", unsafe_allow_html=True)
-        st.text(email["subject"])
+        st.markdown("<p style='font-weight: 700; font-size: 14px; color: #111827; margin-bottom: 8px;'>件名</p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='color: #111827; font-size: 14px; margin-bottom: 16px;'>{email['subject']}</p>", unsafe_allow_html=True)
 
-        st.markdown("---", unsafe_allow_html=True)
-
-        st.markdown("**本文**", unsafe_allow_html=True)
+        st.markdown("<p style='font-weight: 700; font-size: 14px; color: #111827; margin-bottom: 8px;'>本文</p>", unsafe_allow_html=True)
         st.text_area(
             "本文プレビュー",
             email["body"],
-            height=220,
+            height=280,
             label_visibility="collapsed",
+            disabled=True,
         )
 
         st.markdown("</div>", unsafe_allow_html=True)
 
-        # アドバイス＋コピー／再生成のカード（スクショ右下の薄緑＋青ボタン）
-        st.markdown("<div class='card preview-card'>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
         # アドバイスボックス
         st.markdown(
@@ -842,13 +840,15 @@ with col2:
             unsafe_allow_html=True,
         )
 
-        # コピー／再生成ボタン（青）
+        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+
+        # コピー／再生成ボタン
         st.markdown("<div class='preview-actions'>", unsafe_allow_html=True)
         btn_col1, btn_col2 = st.columns(2)
 
         # コピー
         with btn_col1:
-            if st.button("📋 コピー"):
+            if st.button("📋 コピー", use_container_width=True):
                 full_text = f"件名: {email['subject']}\n\n{email['body']}"
                 st.info("以下のテキストをコピーしてご利用ください。")
                 st.markdown("<div class='copy-area'>", unsafe_allow_html=True)
@@ -862,13 +862,11 @@ with col2:
 
         # 再生成
         with btn_col2:
-            if st.button("🔄 再生成"):
-                # チャットに「再生成しています...」
+            if st.button("🔄 再生成", use_container_width=True):
                 st.session_state.messages.append(
                     {"role": "assistant", "content": "メールを再生成しています..."}
                 )
 
-                # 直近の user メッセージを探す
                 last_user_message = None
                 for msg in reversed(st.session_state.messages):
                     if msg["role"] == "user":
@@ -893,8 +891,7 @@ with col2:
 
                 st.rerun()
 
-        st.markdown("</div>", unsafe_allow_html=True)  # /preview-actions
-        st.markdown("</div>", unsafe_allow_html=True)  # /card
+        st.markdown("</div>", unsafe_allow_html=True)
 
 
 
