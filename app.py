@@ -217,7 +217,7 @@ div[data-testid="stHorizontalBlock"] {
 }
 
 /* 新規作成ボタン (Goldグラデーション) */
-.sidebar-new-btn .stButton>button, .stSidebar .stButton>button {
+.sidebar-new-btn .stButton>button {
     background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%);
     color: #1b2433 !important;
     border: none;
@@ -227,6 +227,7 @@ div[data-testid="stHorizontalBlock"] {
     padding: 10px 16px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.25);
 }
+
 
 /* サイドバー：選択中の項目 */
 .nav-section div[role="radiogroup"] input:checked ~ div {
@@ -750,6 +751,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
