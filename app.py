@@ -383,37 +383,39 @@ div[data-testid="stChatMessage"] {
     width: 100% !important;
 }
 /* ============================================
-   チャットメッセージ カスタムデザイン
+   チャットメッセージ（自前バブル表示）
 ============================================ */
 
-/* ユーザーメッセージ（左のあなた） */
-[data-testid="stChatMessage"][data-testid-user="true"] .stChatMessageContent {
-    background: #ffffff !important;
-    color: #111827 !important;
-    border-radius: 12px !important;
-    padding: 12px !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
+.chat-log {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 420px;
+    overflow-y: auto;
+    padding-right: 8px;
 }
 
-/* アシスタントメッセージ（AI側） */
-[data-testid="stChatMessage"][data-testid-user="false"] .stChatMessageContent {
-    background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%) !important;
-    color: #ffffff !important;
-    border-radius: 12px !important;
-    padding: 12px !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.25) !important;
+/* 共通バブル */
+.chat-bubble {
+    border-radius: 12px;
+    padding: 8px 12px;
+    max-width: 100%;
+    font-size: 14px;
+    line-height: 1.5;
+    word-break: break-word;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 
-/* 文字折り返し強制 */
-.stChatMessageContent {
-    word-wrap: break-word !important;
-    word-break: break-word !important;
-    white-space: pre-wrap !important;
+/* ユーザー（あなた） */
+.chat-bubble.user {
+    background: #ffffff;
+    color: #111827;
 }
 
-/* バブルの横幅を自然に調整 */
-.stChatMessageContent {
-    max-width: 95% !important;
+/* アシスタント（AI） */
+.chat-bubble.assistant {
+    background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%);
+    color: #ffffff;
 }
 
 </style>
@@ -609,21 +611,41 @@ with col2:
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
 # ============================================
-# 左：メッセージエリア（チャットのみ）
+# 左：メッセージエリア（自前チャット表示）
 # ============================================
 with col1:
+    # メッセージ一覧をHTMLとして組み立て
+    chat_html_parts = []
+    chat_html_parts.append("<div class='chat-log'>")
+
     if not st.session_state.messages:
-        st.chat_message("assistant").write(
-            "こんにちは！ビジネスメールの作成をお手伝いします。\n\n"
+        # 初回案内メッセージ（assistant）
+        initial_msg = (
+            "こんにちは！ビジネスメールの作成をお手伝いします。<br><br>"
             "左側のナビゲーションエリアでテンプレートやトーン、相手を選び、"
             "下部の入力欄からメッセージ内容を入力してください。"
         )
+        chat_html_parts.append(
+            f"<div class='chat-bubble assistant'>{initial_msg}</div>"
+        )
     else:
         for msg in st.session_state.messages:
-            if msg["role"] == "user":
-                st.chat_message("user").write(msg["content"])
+            role = msg["role"]
+            # 改行を <br> に変換しつつエスケープ
+            text = html.escape(msg["content"]).replace("\n", "<br>")
+            if role == "user":
+                chat_html_parts.append(
+                    f"<div class='chat-bubble user'>{text}</div>"
+                )
             else:
-                st.chat_message("assistant").write(msg["content"])
+                chat_html_parts.append(
+                    f"<div class='chat-bubble assistant'>{text}</div>"
+                )
+
+    chat_html_parts.append("</div>")  # /chat-log
+
+    st.markdown("\n".join(chat_html_parts), unsafe_allow_html=True)
+
 
 
 # ============================================
@@ -728,6 +750,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
