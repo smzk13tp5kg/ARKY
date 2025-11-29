@@ -70,9 +70,8 @@ def generate_email(template, tone, recipient, message, variation=0):
     greeting_list = greetings_variations.get(recipient, ["お世話になっております。"])
     greeting = greeting_list[variation % len(greeting_list)]
 
-    # 本文バリエーション（トーンは今は使わず共通ロジック）
+    # 本文バリエーション
     body_variations = [
-        # バリエーション0: 標準
         f"""{greeting}
 
 {message}に関しまして、ご連絡させていただきます。
@@ -82,7 +81,6 @@ def generate_email(template, tone, recipient, message, variation=0):
 
 お忙しいところ恐れ入りますが、
 """,
-        # バリエーション1: 丁寧
         f"""{greeting}
 
 {message}の件につきまして、ご連絡申し上げます。
@@ -92,7 +90,6 @@ def generate_email(template, tone, recipient, message, variation=0):
 
 ご多忙中誠に恐縮ではございますが、
 """,
-        # バリエーション2: 簡潔
         f"""{greeting}
 
 {message}についてご連絡いたします。
@@ -165,7 +162,7 @@ st.set_page_config(
 )
 
 # ============================================
-# カスタムCSS（ネイビー×ゴールド＋サイドバー文字色）
+# カスタムCSS
 # ============================================
 st.markdown(
     """
@@ -174,12 +171,27 @@ st.markdown(
     box-sizing: border-box;
 }
 
+/* 全体背景 */
+.stApp {
+    background-color: #050b23;
+}
+[data-testid="stAppViewContainer"] {
+    background-color: #050b23;
+}
+[data-testid="stHeader"] {
+    background-color: #050b23;
+}
+
 body {
     background-color: #050b23;
 }
 
 main.block-container {
     padding-top: 0.5rem;
+}
+
+section.main > div {
+    background: #050b23;
 }
 
 /* サイドバー */
@@ -192,6 +204,9 @@ main.block-container {
 }
 [data-testid="stSidebar"] > div:first-child {
     padding: 12px 8px 16px 8px;
+}
+[data-testid="stSidebar"] * {
+    color: #ffffff !important;
 }
 
 /* サイドバータイトル */
@@ -221,7 +236,7 @@ main.block-container {
 .nav-label {
     font-size: 12px;
     font-weight: 600;
-    color: #ffd666;
+    color: #ffd666 !important;
     margin: 4px 0 6px 4px;
 }
 
@@ -241,28 +256,28 @@ main.block-container {
     gap: 4px;
 }
 
-/* ラジオの各行（pill）＋文字色 */
+/* ラジオの各行 */
 .nav-section div[role="radiogroup"] > label {
     border-radius: 999px;
     padding: 6px 10px;
     border: 1px solid transparent;
     background: transparent;
     cursor: pointer;
-    color: #ffffff !important;  /* 通常は白 */
+    color: #ffffff !important;
     font-size: 13px;
 }
 .nav-section div[role="radiogroup"] > label:hover {
     background: rgba(255,255,255,0.06);
 }
 
-/* 選択中（checked）のスタイル） */
+/* 選択中 */
 .nav-section div[role="radiogroup"] input:checked ~ div {
     background: rgba(255,214,102,0.12);
     border-color: #ffd666 !important;
-    color: #ffd666 !important;    /* ゴールド */
+    color: #ffd666 !important;
 }
 
-/* トップバー（タイトル行） */
+/* トップバー */
 .top-bar {
     background: #050b23;
     padding: 16px 8px 8px 8px;
@@ -271,16 +286,11 @@ main.block-container {
 .app-title {
     font-size: 24px;
     font-weight: 700;
-    color: #ffd666 !important;    /* ゴールド */
+    color: #ffd666 !important;
     margin: 0;
 }
 
-/* メイン背景 */
-section.main > div {
-    background: #050b23;
-}
-
-/* セクション見出し（メッセージ／プレビュー） */
+/* セクション見出し */
 .section-header {
     font-size: 14px;
     font-weight: 700;
@@ -289,294 +299,6 @@ section.main > div {
     display: flex;
     align-items: center;
     gap: 6px;
-}
-
-/* カード共通 */
-.card {
-    background: #0b1533;
-    border-radius: 16px;
-    border: 1px solid #3b4468;
-    padding: 16px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.35);
-    color: #e5ecff;
-}
-
-/* メッセージカード */
-.message-card {
-    max-height: 260px;
-    overflow-y: auto;
-    margin-bottom: 10px;
-}
-
-/* 入力カード内のテキストエリア */
-.input-card textarea {
-    background: #020821;
-    border-radius: 12px !important;
-    border-color: #3b4468 !important;
-    color: #e5ecff !important;
-    font-size: 13px;
-}
-
-/* 入力カードの送信ボタン */
-.input-card .stButton>button {
-    background: #1a73e8;
-    color: #ffffff;
-    border-radius: 999px;
-    border: none;
-    font-weight: 600;
-    padding: 6px 18px;
-    font-size: 13px;
-}
-.input-card .stButton>button:hover {
-    background: #3b82f6;
-}
-
-/* プレビューカード */
-.preview-card {
-    background: #0b1533;
-    border-radius: 16px;
-    border: 1px solid #3b4468;
-    padding: 12px 14px;
-    color: #e5ecff;
-    font-size: 13px;
-}
-.preview-card textarea {
-    background: #020821;
-    border-radius: 12px !important;
-    border-color: #3b4468 !important;
-    color: #e5ecff !important;
-    font-size: 13px;
-}
-
-/* アドバイスボックス */
-.advice-box {
-    background: #1b4332;
-    border-left: 3px solid #95d5b2;
-    border-radius: 12px;
-    padding: 12px 14px;
-    margin-top: 10px;
-    font-size: 12px;
-    color: #e9f5f0;
-}
-
-/* コピー／再生成ボタン */
-.preview-actions .stButton>button {
-    background: #1e40af;
-    color: #ffffff;
-    border-radius: 8px;
-    border: none;
-    font-weight: 600;
-    font-size: 13px;
-    padding: 6px 16px;
-}
-.preview-actions .stButton>button:hover {
-    background: #2563eb;
-}
-
-/* コピー用テキストエリア */
-.copy-area textarea {
-    background: #020821;
-    border-radius: 12px !important;
-    border-color: #3b4468 !important;
-    color: #e5ecff !important;
-    font-size: 12px;
-}
-
-/* プレビューがない時のプレースホルダ */
-.preview-placeholder {
-    color: #9ca3c7;
-    font-size: 13px;
-}
-
-/* メッセージカードのスクロールバー */
-.message-card::-webkit-scrollbar {
-    width: 8px;
-}
-.message-card::-webkit-scrollbar-track {
-    background: transparent;
-}
-.message-card::-webkit-scrollbar-thumb {
-    background: #4b5563;
-    border-radius: 4px;
-}
-.message-card::-webkit-scrollbar-thumb:hover {
-    background: #6b7280;
-}
-
-/* サイドバー内の文字色を強制的に白にする */
-[data-testid="stSidebar"] * {
-    color: #ffffff !important;
-}
-
-/* ただしセクション見出し(nav-label)だけはゴールドで上書き */
-.nav-label {
-    color: #ffd666 !important;
-}
-/* 画面全体の背景をサイドバーと揃える */
-.stApp {
-    background-color: #050b23;
-}
-[data-testid="stAppViewContainer"] {
-    background-color: #050b23;
-}
-[data-testid="stHeader"] {
-    background-color: #050b23;
-}
-
-/* カード類を「白いカード」にする（メッセージ／入力／プレビュー共通） */
-.card,
-.preview-card {
-    background: #ffffff;
-    border-radius: 16px;
-    border: 1px solid #e5e7eb;
-    padding: 16px;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
-    color: #111827;
-}
-
-/* メッセージカード内のテキスト色 */
-.message-card .stChatMessage {
-    color: #111827;
-}
-
-/* 入力カード内のテキストエリア */
-.input-card textarea {
-    background: #f9fafb;
-    border-radius: 12px !important;
-    border-color: #e5e7eb !important;
-    color: #111827 !important;
-}
-
-/* プレビュー内テキストエリア */
-.preview-card textarea {
-    background: #f9fafb;
-    border-radius: 12px !important;
-    border-color: #e5e7eb !important;
-    color: #111827 !important;
-}
-
-/* アドバイスカードは少しだけ色を残す */
-.advice-box {
-    background: #ecfdf5;
-    border-left: 3px solid #16a34a;
-    border-radius: 12px;
-    padding: 12px 14px;
-    margin-top: 10px;
-    font-size: 12px;
-    color: #14532d;
-}
-
-/* コピー／再生成ボタンを青系に統一 */
-.preview-actions .stButton>button {
-    background: #2563eb;
-    color: #ffffff;
-    border-radius: 8px;
-    border: none;
-    font-weight: 600;
-    font-size: 13px;
-    padding: 6px 16px;
-}
-.preview-actions .stButton>button:hover {
-    background: #1d4ed8;
-}
-
-/* コピー用テキストエリアも白カード風に */
-.copy-area textarea {
-    background: #f9fafb;
-    border-radius: 12px !important;
-    border-color: #e5e7eb !important;
-    color: #111827 !important;
-}
-
-
-/* =========================================================
-   チャットメッセージを白背景＋黒文字に強制上書き
-   ========================================================= */
-
-/* チャットメッセージ全体（assistant/user 共通） */
-.stChatMessage {
-    background-color: #ffffff !important;  /* 白背景 */
-    color: #111827 !important;             /* 黒に近い濃いグレー */
-    border-radius: 12px;
-    padding: 12px 16px !important;
-    border: 1px solid #e5e7eb;
-    margin-bottom: 10px;
-}
-
-/* 吹き出し内のテキスト */
-.stChatMessage p,
-.stChatMessage span,
-.stChatMessage div {
-    color: #111827 !important;
-}
-
-/* ユーザーとAIの区別を無くしたい場合（白統一） */
-.stChatMessage[data-testid="chatMessageUser"] {
-    background-color: #ffffff !important;
-}
-.stChatMessage[data-testid="chatMessageAssistant"] {
-    background-color: #ffffff !important;
-}
-
-/* チャット内のアイコン（左の丸） */
-.stChatMessage .stChatMessageAvatar {
-    background-color: #ffffff !important;
-    color: #111827 !important;
-    border: 1px solid #e5e7eb;
-}
-
-/* チャットメッセージの影（お好みで） */
-.stChatMessage {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-
-/* =========================================================
-   メッセージカード／プレビューカードを白いカードにする
-   ========================================================= */
-
-/* メッセージ全体のカード（左） */
-.message-wrapper {
-    background: #ffffff;
-    border-radius: 16px;
-    border: 1px solid #f5b742;   /* メッセージ側は金色枠に寄せる */
-    padding: 12px 16px;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
-}
-
-/* プレビュー側カード（右） */
-.preview-main-wrapper {
-    background: #ffffff;
-    border-radius: 16px;
-    border: 1px solid #e5e7eb;
-    padding: 12px 16px;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
-}
-
-/* チャットメッセージを「カードの上に乗るテキスト」にする */
-.message-wrapper .stChatMessage {
-    background-color: transparent !important;  /* 紺色の吹き出しを消す */
-    border: none !important;
-    box-shadow: none !important;
-    padding: 4px 0 !important;
-}
-
-/* チャット内のテキストを黒っぽく */
-.message-wrapper .stChatMessage p,
-.message-wrapper .stChatMessage span,
-.message-wrapper .stChatMessage div {
-    color: #111827 !important;
-}
-
-/* 入力カードは薄グレーのボックスに */
-.input-card textarea {
-    background: #f9fafb;
-    border-radius: 12px !important;
-    border-color: #e5e7eb !important;
-    color: #111827 !important;
-}
-
-/* セクション見出しの下に細い金ラインを引く */
-.section-header {
     position: relative;
 }
 .section-header::after {
@@ -589,6 +311,134 @@ section.main > div {
     background: #ffd666;
 }
 
+/* メッセージカード */
+.message-wrapper {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #ffd666;
+    padding: 12px 16px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+    min-height: 180px;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.message-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+.message-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+}
+.message-wrapper::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+}
+.message-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* チャットメッセージを透明に */
+.message-wrapper .stChatMessage {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 4px 0 !important;
+}
+
+.message-wrapper .stChatMessage p,
+.message-wrapper .stChatMessage span,
+.message-wrapper .stChatMessage div {
+    color: #111827 !important;
+}
+
+/* 入力カード */
+.card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+    color: #111827;
+}
+
+.input-card textarea {
+    background: #f9fafb !important;
+    border-radius: 12px !important;
+    border: 1px solid #e5e7eb !important;
+    color: #111827 !important;
+    font-size: 14px !important;
+}
+
+.input-card .stButton>button {
+    background: #1a73e8 !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    border: none !important;
+    font-weight: 600 !important;
+    padding: 8px 20px !important;
+    font-size: 14px !important;
+}
+.input-card .stButton>button:hover {
+    background: #3b82f6 !important;
+}
+
+/* プレビューカード */
+.preview-main-wrapper {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    padding: 16px 20px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+    min-height: 350px;
+}
+
+.preview-main-wrapper textarea {
+    background: #f9fafb !important;
+    border-radius: 12px !important;
+    border: 1px solid #e5e7eb !important;
+    color: #111827 !important;
+    font-size: 14px !important;
+}
+
+.preview-placeholder {
+    color: #9ca3af;
+    font-size: 14px;
+    padding: 20px;
+}
+
+/* アドバイスボックス */
+.advice-box {
+    background: #ecfdf5;
+    border-left: 3px solid #16a34a;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: #14532d;
+}
+
+/* ボタン */
+.preview-actions .stButton>button {
+    background: #2563eb !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    border: none !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    padding: 10px 20px !important;
+}
+.preview-actions .stButton>button:hover {
+    background: #1d4ed8 !important;
+}
+
+/* コピー用テキストエリア */
+.copy-area textarea {
+    background: #f9fafb !important;
+    border-radius: 12px !important;
+    border: 1px solid #e5e7eb !important;
+    color: #111827 !important;
+    font-size: 12px !important;
+}
 
 </style>
 """,
@@ -666,7 +516,7 @@ with st.sidebar:
         custom_template = st.text_input("カスタムテンプレート", placeholder="例: 報告")
         template = custom_template if custom_template else "その他"
 
-    # トーン（6種類）
+    # トーン
     with st.container():
         st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
         st.markdown("<div class='nav-label'>トーン</div>", unsafe_allow_html=True)
@@ -741,15 +591,17 @@ col1, col2 = st.columns([3, 2])
 
 with col1:
     st.markdown("<div class='section-header'>💬 メッセージ</div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
 with col2:
     st.markdown("<div class='section-header'>📄 プレビュー</div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
 # ============================================
 # 左：メッセージエリア
 # ============================================
 with col1:
-    # メッセージ表示カード（白＋金枠）
+    # メッセージ表示カード
     st.markdown("<div class='message-wrapper'>", unsafe_allow_html=True)
     if not st.session_state.messages:
         st.chat_message("assistant").write(
@@ -764,19 +616,20 @@ with col1:
                 st.chat_message("assistant").write(msg["content"])
     st.markdown("</div>", unsafe_allow_html=True)
 
+    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+
     # 入力カード
     st.markdown("<div class='card input-card'>", unsafe_allow_html=True)
     with st.form("message_form", clear_on_submit=True):
         user_message = st.text_area(
             "メッセージを入力",
             placeholder="例：取引先に感謝を伝えるメールを作成したい",
-            height=80,
+            height=100,
             label_visibility="collapsed",
         )
         submitted = st.form_submit_button("✓ 送信")
 
         if submitted and user_message:
-            # バリデーション
             if template == "その他" and not custom_template:
                 st.error("⚠️ カスタムテンプレートを入力してください")
             elif recipient == "その他" and not custom_recipient:
@@ -802,7 +655,6 @@ with col1:
 # ============================================
 with col2:
     if st.session_state.generated_email is None:
-        # まだメール生成前：プレースホルダだけ表示
         st.markdown(
             "<div class='preview-main-wrapper'><div class='preview-placeholder'>メールを生成すると、ここにプレビューが表示されます。</div></div>",
             unsafe_allow_html=True,
@@ -810,7 +662,7 @@ with col2:
     else:
         email = st.session_state.generated_email
 
-        # 件名＋本文の白いカード
+        # 件名＋本文
         st.markdown("<div class='preview-main-wrapper'>", unsafe_allow_html=True)
 
         st.markdown("<p style='font-weight: 700; font-size: 14px; color: #111827; margin-bottom: 8px;'>件名</p>", unsafe_allow_html=True)
@@ -829,7 +681,7 @@ with col2:
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-        # アドバイスボックス
+        # アドバイス
         st.markdown(
             f"""
             <div class="advice-box">
@@ -842,11 +694,10 @@ with col2:
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-        # コピー／再生成ボタン
+        # ボタン
         st.markdown("<div class='preview-actions'>", unsafe_allow_html=True)
         btn_col1, btn_col2 = st.columns(2)
 
-        # コピー
         with btn_col1:
             if st.button("📋 コピー", use_container_width=True):
                 full_text = f"件名: {email['subject']}\n\n{email['body']}"
@@ -860,7 +711,6 @@ with col2:
                 )
                 st.markdown("</div>", unsafe_allow_html=True)
 
-        # 再生成
         with btn_col2:
             if st.button("🔄 再生成", use_container_width=True):
                 st.session_state.messages.append(
