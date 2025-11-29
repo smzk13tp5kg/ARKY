@@ -707,5 +707,9 @@ with col2:
 
         st.markdown("</div>", unsafe_allow_html=True)
 
+/* タイトル文字（ビジネスメール作成アシスタント）をゴールドに */
+.app-title {
+    color: #ffd666 !important;
+}
 
 
