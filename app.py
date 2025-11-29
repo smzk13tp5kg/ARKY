@@ -206,9 +206,9 @@ div[data-testid="stHorizontalBlock"] {
    サイドバー
 ------------------------------------------- */
 [data-testid="stSidebar"] {
-    width: 480px !important;
-    min-width: 480px !important;
-    max-width: 480px !important;
+    width: 450px !important;
+    min-width: 450px !important;
+    max-width: 450px !important;
     background: #050b23;
     border-right: 1px solid #cfae63;
 }
@@ -694,6 +694,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
