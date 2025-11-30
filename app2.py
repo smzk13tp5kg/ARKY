@@ -294,14 +294,14 @@ button[title="Close sidebar"] svg {
 
 /* サイドバー内のメッセージ入力エリア */
 .sidebar-input-section {
-    margin-top: 24px;
+    margin-top: 16px;
     padding-top: 16px;
-    border-top: 1px solid #cfae63;
+    border-top: 1px solid rgba(207, 174, 99, 0.3);
 }
 
 .sidebar-input-label {
-    color: #ffd666 !important;
-    font-size: 14px;
+    color: #ffffff !important;
+    font-size: 13px;
     font-weight: 700;
     margin-bottom: 8px;
 }
@@ -312,7 +312,8 @@ button[title="Close sidebar"] svg {
     border: 1px solid #cfae63 !important;
     border-radius: 8px !important;
     color: #ffffff !important;
-    font-size: 14px !important;
+    font-size: 13px !important;
+    padding: 10px !important;
 }
 
 [data-testid="stSidebar"] textarea::placeholder {
@@ -337,7 +338,7 @@ button[title="Close sidebar"] svg {
     position: absolute;
     inset: 0;
     border-radius: 16px;
-    padding: 4px;
+    padding: 3px;
 
     background: linear-gradient(120deg, #6559ae, #ff7159, #6559ae);
     background-size: 400% 400%;
@@ -354,21 +355,69 @@ button[title="Close sidebar"] svg {
 .sidebar-welcome-text {
     position: relative;
     display: block;
-    padding: 16px;
-    border-radius: 12px;
+    padding: 12px 16px;
+    border-radius: 13px;
 
-    background: rgba(5, 11, 35, 0.85);
+    background: rgba(5, 11, 35, 0.95);
     background-image: linear-gradient(120deg, #fdfbff, #ffd7b2, #ffe6ff);
     background-size: 400% 400%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
-    line-height: 1.6;
+    line-height: 1.5;
     text-align: center;
 
     animation: intro-gradient 3s ease-in-out infinite;
+}
+
+/* -------------------------------------------
+   サイドバー：セクションスタイル（コンパクト版）
+------------------------------------------- */
+.nav-section {
+    margin-bottom: 16px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border: 1px solid rgba(207, 174, 99, 0.3);
+}
+
+.nav-label {
+    color: #ffffff !important;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* ラジオボタンのスタイル調整 */
+[data-testid="stSidebar"] .stRadio > div {
+    gap: 4px !important;
+}
+
+[data-testid="stSidebar"] .stRadio label {
+    font-size: 12px !important;
+    padding: 4px 0 !important;
+    color: #ffffff !important;
+}
+
+[data-testid="stSidebar"] .stRadio > div > label > div:first-child {
+    margin-right: 6px !important;
+}
+
+/* テキスト入力フィールドのスタイル */
+[data-testid="stSidebar"] input[type="text"] {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid #cfae63 !important;
+    border-radius: 6px !important;
+    color: #ffffff !important;
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+}
+
+[data-testid="stSidebar"] input[type="text"]::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
 }
 
 /* -------------------------------------------
@@ -745,8 +794,7 @@ with st.sidebar:
           <div class="sidebar-welcome-text">
             ようこそ！<br>
             ビジネスメールの作成をお手伝いします。<br>
-            以下のメニューからテンプレートやトーン、相手を選び、
-            メッセージ内容を入力してください。
+            以下のメニューから選択し、メッセージを入力してください。
           </div>
         </div>
         """,
@@ -754,24 +802,23 @@ with st.sidebar:
     )
 
     # テンプレート
-    with st.container():
-        st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
-        st.markdown("<div class='nav-label'>テンプレート</div>", unsafe_allow_html=True)
-        template_display = st.radio(
-            "テンプレート",
-            [
-                "📧 依頼メール",
-                "✉️ 交渉メール",
-                "🙏 お礼メール",
-                "💼 謝罪メール",
-                "📩 挨拶メール",
-                "➕ その他",
-            ],
-            index=0,
-            label_visibility="collapsed",
-            key="template_radio",
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-label'>テンプレート</div>", unsafe_allow_html=True)
+    template_display = st.radio(
+        "テンプレート",
+        [
+            "📧 依頼メール",
+            "✉️ 交渉メール",
+            "🙏 お礼メール",
+            "💼 謝罪メール",
+            "📩 挨拶メール",
+            "➕ その他",
+        ],
+        index=0,
+        label_visibility="collapsed",
+        key="template_radio",
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
 
     display_to_template = {
         "📧 依頼メール": "依頼",
@@ -785,58 +832,56 @@ with st.sidebar:
 
     custom_template = None
     if template == "その他":
-        custom_template = st.text_input("カスタムテンプレート", placeholder="例: 報告")
+        custom_template = st.text_input("カスタムテンプレート", placeholder="例: 報告", label_visibility="collapsed")
         template = custom_template if custom_template else "その他"
 
     # トーン
-    with st.container():
-        st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
-        st.markdown("<div class='nav-label'>トーン</div>", unsafe_allow_html=True)
-        tone_display = st.radio(
-            "トーン",
-            [
-                "😊 カジュアル／フレンドリー（同僚向け）",
-                "📄 標準ビジネス（最も一般的）",
-                "📘 フォーマル（社外顧客／上位者／依頼交渉）",
-                "🙏 厳粛・儀礼的（謝罪・クレーム対応）",
-                "⏱️ 緊急・簡潔（即時対応が必要な通知）",
-                "🌿 柔らかめ（関係維持・お礼・広報向け）",
-            ],
-            index=1,
-            label_visibility="collapsed",
-            key="tone_radio",
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-label'>トーン</div>", unsafe_allow_html=True)
+    tone_display = st.radio(
+        "トーン",
+        [
+            "😊 カジュアル／フレンドリー",
+            "📄 標準ビジネス",
+            "📘 フォーマル",
+            "🙏 厳粛・儀礼的",
+            "⏱️ 緊急・簡潔",
+            "🌿 柔らかめ",
+        ],
+        index=1,
+        label_visibility="collapsed",
+        key="tone_radio",
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
 
     display_to_tone = {
-        "😊 カジュアル／フレンドリー（同僚向け）": "カジュアル／フレンドリー",
-        "📄 標準ビジネス（最も一般的）": "標準ビジネス",
-        "📘 フォーマル（社外顧客／上位者／依頼交渉）": "フォーマル",
-        "🙏 厳粛・儀礼的（謝罪・クレーム対応）": "厳粛・儀礼的",
-        "⏱️ 緊急・簡潔（即時対応が必要な通知）": "緊急・簡潔",
-        "🌿 柔らかめ（関係維持・お礼・広報向け）": "柔らかめ",
+        "😊 カジュアル／フレンドリー": "カジュアル／フレンドリー",
+        "📄 標準ビジネス": "標準ビジネス",
+        "📘 フォーマル": "フォーマル",
+        "🙏 厳粛・儀礼的": "厳粛・儀礼的",
+        "⏱️ 緊急・簡潔": "緊急・簡潔",
+        "🌿 柔らかめ": "柔らかめ",
     }
     tone = display_to_tone[tone_display]
 
     # 相手
-    with st.container():
-        st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
-        st.markdown("<div class='nav-label'>相手</div>", unsafe_allow_html=True)
-        recipient_display = st.radio(
-            "相手",
-            [
-                "👤 上司",
-                "😊 同僚",
-                "👔 部下",
-                "🏢 社外企業社員",
-                "🏪 取引先",
-                "➕ その他",
-            ],
-            index=0,
-            label_visibility="collapsed",
-            key="recipient_radio",
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-label'>相手</div>", unsafe_allow_html=True)
+    recipient_display = st.radio(
+        "相手",
+        [
+            "👤 上司",
+            "😊 同僚",
+            "👔 部下",
+            "🏢 社外企業社員",
+            "🏪 取引先",
+            "➕ その他",
+        ],
+        index=0,
+        label_visibility="collapsed",
+        key="recipient_radio",
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
 
     display_to_recipient = {
         "👤 上司": "上司",
@@ -850,37 +895,36 @@ with st.sidebar:
 
     custom_recipient = None
     if recipient == "その他":
-        custom_recipient = st.text_input("カスタム相手", placeholder="例: 顧客")
+        custom_recipient = st.text_input("カスタム相手", placeholder="例: 顧客", label_visibility="collapsed")
         recipient = custom_recipient if custom_recipient else "その他"
 
     # 時候の挨拶
-    with st.container():
-        st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
-        st.markdown("<div class='nav-label'>時候の挨拶</div>", unsafe_allow_html=True)
-        seasonal_option = st.radio(
-            "時候の挨拶",
-            ["不要", "追加する"],
-            index=0,
-            label_visibility="collapsed",
-            key="seasonal_radio",
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-label'>時候の挨拶</div>", unsafe_allow_html=True)
+    seasonal_option = st.radio(
+        "時候の挨拶",
+        ["不要", "追加する"],
+        index=0,
+        label_visibility="collapsed",
+        key="seasonal_radio",
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
 
     add_seasonal = seasonal_option == "追加する"
     seasonal_text = get_seasonal_greeting() if add_seasonal else ""
 
     # メッセージ入力エリア
     st.markdown("<div class='sidebar-input-section'>", unsafe_allow_html=True)
-    st.markdown("<div class='sidebar-input-label'>💬 メッセージ入力</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sidebar-input-label'>メッセージ入力</div>", unsafe_allow_html=True)
     
     with st.form("message_form", clear_on_submit=True):
         user_message = st.text_area(
             "メッセージを入力",
             placeholder="例：取引先に感謝を伝えるメールを作成したい",
-            height=100,
+            height=80,
             label_visibility="collapsed",
         )
-        submitted = st.form_submit_button("✓ 送信", use_container_width=True)
+        submitted = st.form_submit_button("送信", use_container_width=True)
 
         if submitted and user_message:
             if template == "その他" and not custom_template:
