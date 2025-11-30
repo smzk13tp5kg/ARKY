@@ -174,8 +174,8 @@ st.markdown(
     content: '';
     position: fixed;
     top: 0;
-    left: 0;
-    width: 100%;
+    left: 450px;
+    right: 0;
     height: 100%;
     background-image: url('https://raw.githubusercontent.com/smzk13tp5kg/ARKY/main/ARKY%20background%20image.png');
     background-size: cover;
