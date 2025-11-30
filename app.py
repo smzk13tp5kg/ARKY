@@ -126,7 +126,6 @@ def generate_email(template, tone, recipient, message, variation=0):
         ],
     }
     closing_list = closings_variations.get(recipient, ["よろしくお願いいたします。"])
-    # variation に応じて正しくインデックスするため len(closing_list) を使用
     closing = closing_list[variation % len(closing_list)]
 
     body = body_start + closing
@@ -657,7 +656,7 @@ with st.sidebar:
 col1, col2 = st.columns([3, 2], gap="medium")
 
 # --------------------------------------------
-# 左：メッセージ＋送信エリア
+# 左：メッセージ＋フォーム
 # --------------------------------------------
 with col1:
     st.markdown("<div class='section-header'>💬 メッセージ</div>", unsafe_allow_html=True)
@@ -682,26 +681,7 @@ with col1:
 
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-    # 送信済みメッセージ一覧（ユーザー＆アシスタント）
-    chat_html_parts = []
-    chat_html_parts.append("<div class='chat-log'>")
-
-    for msg in st.session_state.messages:
-        role = msg["role"]
-        text = html.escape(msg["content"]).replace("\n", "<br>")
-        if role == "user":
-            chat_html_parts.append(
-                f"<div class='chat-bubble user'>{text}</div>"
-            )
-        else:
-            chat_html_parts.append(
-                f"<div class='chat-bubble assistant'>{text}</div>"
-            )
-
-    chat_html_parts.append("</div>")
-    st.markdown("\n".join(chat_html_parts), unsafe_allow_html=True)
-
-    # ==== ここに送信フォームを移動 ====
+    # ★ .intro-bubble の直下に送信フォームを配置 ★
     st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown("<div class='card input-card'>", unsafe_allow_html=True)
     with st.form("message_form", clear_on_submit=True):
@@ -734,6 +714,27 @@ with col1:
                 st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
+    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+
+    # 送信済みメッセージ一覧（ユーザー＆アシスタント）
+    chat_html_parts = []
+    chat_html_parts.append("<div class='chat-log'>")
+
+    for msg in st.session_state.messages:
+        role = msg["role"]
+        text = html.escape(msg["content"]).replace("\n", "<br>")
+        if role == "user":
+            chat_html_parts.append(
+                f"<div class='chat-bubble user'>{text}</div>"
+            )
+        else:
+            chat_html_parts.append(
+                f"<div class='chat-bubble assistant'>{text}</div>"
+            )
+
+    chat_html_parts.append("</div>")
+    st.markdown("\n".join(chat_html_parts), unsafe_allow_html=True)
+
 # --------------------------------------------
 # 右：プレビュー
 # --------------------------------------------
@@ -741,7 +742,6 @@ with col2:
     st.markdown("<div class='section-header'>📄 プレビュー</div>", unsafe_allow_html=True)
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-    # 右：プレビューエリア
     if st.session_state.generated_email is None:
         placeholder_html = textwrap.dedent(
             """
