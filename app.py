@@ -16,7 +16,7 @@ def generate_email(template, tone, recipient, message, variation=0):
         ],
         "交渉": [
             f"【ご相談】{message[:20]}",
-            f"【打ち合わせ依頼】{message[:20]}"
+            f"【打ち合わせ依頼】{message[:20]}",
             f"{message[:20]}に関するご相談",
         ],
         "お礼": [
@@ -35,7 +35,10 @@ def generate_email(template, tone, recipient, message, variation=0):
             f"{message[:20]}",
         ],
     }
-    template_subjects = subject_variations.get(template, [f"{template} - {message[:20]}"])
+    template_subjects = subject_variations.get(
+        template,
+        [f"{template} - {message[:20]}"],
+    )
     subject = template_subjects[variation % len(template_subjects)]
 
     greetings_variations = {
@@ -145,6 +148,7 @@ def generate_email(template, tone, recipient, message, variation=0):
         "advice": advice,
         "variation": variation,
     }
+
 
 # ============================================
 # ページ設定
@@ -444,6 +448,13 @@ button[title="Close sidebar"] svg {
     width: 100% !important;
 }
 
+/* コピー案内テキスト（白文字） */
+.copy-info {
+    color: #ffffff;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
 /* ============================================
    チャットメッセージ（自前バブル表示）
 ============================================ */
@@ -473,6 +484,7 @@ button[title="Close sidebar"] svg {
     color: #ffffff;
 }
 
+/* Streamlit の要素コンテナ余白を削る */
 .stElementContainer {
     margin: 0 !important;
     padding: 0 !important;
@@ -612,7 +624,7 @@ with st.sidebar:
         "😊 カジュアル／フレンドリー（同僚向け）": "カジュアル／フレンドリー",
         "📄 標準ビジネス（最も一般的）": "標準ビジネス",
         "📘 フォーマル（社外顧客／上位者／依頼交渉）": "フォーマル",
-        "🙏 厳粛・儀礼的（謝罪・不祥事・クレーム対応）": "厳粛・儀礼的",
+        "🙏 厳粛・儀礼的（謝罪・クレーム対応）": "厳粛・儀礼的",
         "⏱️ 緊急・簡潔（即時対応が必要な通知）": "緊急・簡潔",
         "🌿 柔らかめ（関係維持・お礼・広報向け）": "柔らかめ",
     }
@@ -686,8 +698,7 @@ with col1:
 
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-    # ★ .intro-bubble の直下に送信フォームを配置 ★
-
+    # フォーム（intro-bubble の直下）
     with st.form("message_form", clear_on_submit=True):
         user_message = st.text_area(
             "メッセージを入力",
@@ -716,7 +727,6 @@ with col1:
                     template, tone, recipient, user_message, variation=0
                 )
                 st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
@@ -794,23 +804,22 @@ with col2:
 
         with btn_col1:
             if st.button("📋 コピー", use_container_width=True):
-        full_text = f"件名: {email['subject']}\n\n{email['body']}"
+                full_text = f"件名: {email['subject']}\n\n{email['body']}"
 
-        # ▼ st.info の代わりに自前の白文字メッセージ
-        st.markdown(
-            "<div class='copy-info'>以下のテキストをコピーしてご利用ください。</div>",
-            unsafe_allow_html=True,
-        )
+                # 白文字のコピー案内
+                st.markdown(
+                    "<div class='copy-info'>以下のテキストをコピーしてご利用ください。</div>",
+                    unsafe_allow_html=True,
+                )
 
-        st.markdown("<div class='copy-area'>", unsafe_allow_html=True)
-        st.text_area(
-            "コピー用テキスト",
-            full_text,
-            height=120,
-            label_visibility="collapsed",
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
-
+                st.markdown("<div class='copy-area'>", unsafe_allow_html=True)
+                st.text_area(
+                    "コピー用テキスト",
+                    full_text,
+                    height=120,
+                    label_visibility="collapsed",
+                )
+                st.markdown("</div>", unsafe_allow_html=True)
 
         with btn_col2:
             if st.button("🔄 再生成", use_container_width=True):
@@ -846,12 +855,3 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
-
-
-
-
-
-
-
-
-
