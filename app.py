@@ -374,8 +374,8 @@ button[title="Close sidebar"] svg {
     margin-bottom: 12px;
 }
 .intro-icon {
-    width: 72px;
-    height: 72px;
+    width: 94px;
+    height: 94px;
     flex-shrink: 0;
 }
 .intro-icon img {
@@ -831,3 +831,4 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
