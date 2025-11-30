@@ -310,34 +310,6 @@ div[data-testid="stHorizontalBlock"] {
   color: #ffffff;
 }
 
-/* JavaScriptでボタンテキストをdata-text属性にコピー */
-<script>
-(function() {
-  function updateButtonText() {
-    const buttons = document.querySelectorAll('.stButton > button, .stFormSubmitButton > button');
-    buttons.forEach(btn => {
-      const textDiv = btn.querySelector('div');
-      if (textDiv && textDiv.textContent) {
-        btn.setAttribute('data-text', textDiv.textContent.trim());
-      }
-    });
-  }
-  
-  // 初回実行
-  updateButtonText();
-  
-  // MutationObserverで動的に追加されるボタンも監視
-  const observer = new MutationObserver(updateButtonText);
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-  
-  // 定期的にも実行（保険）
-  setInterval(updateButtonText, 1000);
-})();
-</script>
-
 /* -------------------------------------------
    メインエリア
 ------------------------------------------- */
@@ -447,6 +419,41 @@ div[data-testid="stHorizontalBlock"] {
 </style>
 """,
     unsafe_allow_html=True,
+)
+
+# ============================================
+# JavaScriptでボタンテキストを動的に設定
+# ============================================
+st.components.v1.html(
+    """
+    <script>
+    (function() {
+      function updateButtonText() {
+        const buttons = parent.document.querySelectorAll('.stButton > button, .stFormSubmitButton > button');
+        buttons.forEach(btn => {
+          const textDiv = btn.querySelector('div');
+          if (textDiv && textDiv.textContent) {
+            btn.setAttribute('data-text', textDiv.textContent.trim());
+          }
+        });
+      }
+      
+      // 初回実行
+      setTimeout(updateButtonText, 500);
+      
+      // MutationObserverで動的に追加されるボタンも監視
+      const observer = new MutationObserver(updateButtonText);
+      observer.observe(parent.document.body, {
+        childList: true,
+        subtree: true
+      });
+      
+      // 定期的にも実行
+      setInterval(updateButtonText, 1000);
+    })();
+    </script>
+    """,
+    height=0,
 )
 
 # ============================================
