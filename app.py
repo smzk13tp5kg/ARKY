@@ -282,17 +282,19 @@ button[title="Close sidebar"] svg {
 }
 
 /* -------------------------------------------
-   3D フリップボタン（Pure CSS）
+   サイドバー限定：3D フリップボタン
 ------------------------------------------- */
-.stButton,
-.stFormSubmitButton {
+
+/* 3D を効かせるのはサイドバー内のボタンだけ */
+[data-testid="stSidebar"] .stButton,
+[data-testid="stSidebar"] .stFormSubmitButton {
   perspective: 1000px;
   display: inline-block;
   width: 100%;
 }
 
-.stButton > button,
-.stFormSubmitButton > button {
+[data-testid="stSidebar"] .stButton > button,
+[data-testid="stSidebar"] .stFormSubmitButton > button {
   position: relative;
   width: 100%;
   height: 50px;
@@ -308,10 +310,10 @@ button[title="Close sidebar"] svg {
   color: transparent !important;
 }
 
-.stButton > button::before,
-.stButton > button::after,
-.stFormSubmitButton > button::before,
-.stFormSubmitButton > button::after {
+[data-testid="stSidebar"] .stButton > button::before,
+[data-testid="stSidebar"] .stButton > button::after,
+[data-testid="stSidebar"] .stFormSubmitButton > button::before,
+[data-testid="stSidebar"] .stFormSubmitButton > button::after {
   position: absolute;
   width: 100%;
   height: 50px;
@@ -326,8 +328,8 @@ button[title="Close sidebar"] svg {
 }
 
 /* 前面（オレンジ背景×白文字） */
-.stButton > button::before,
-.stFormSubmitButton > button::before {
+[data-testid="stSidebar"] .stButton > button::before,
+[data-testid="stSidebar"] .stFormSubmitButton > button::before {
   content: attr(data-text);
   background-color: #ff8c00;
   color: #ffffff;
@@ -336,8 +338,8 @@ button[title="Close sidebar"] svg {
 }
 
 /* 背面（黄色背景×白文字） */
-.stButton > button::after,
-.stFormSubmitButton > button::after {
+[data-testid="stSidebar"] .stButton > button::after,
+[data-testid="stSidebar"] .stFormSubmitButton > button::after {
   content: attr(data-text);
   background-color: #ffd700;
   color: #ffffff;
@@ -346,14 +348,14 @@ button[title="Close sidebar"] svg {
 }
 
 /* ホバー時：X軸90度回転でフリップ */
-.stButton > button:hover,
-.stFormSubmitButton > button:hover {
+[data-testid="stSidebar"] .stButton > button:hover,
+[data-testid="stSidebar"] .stFormSubmitButton > button:hover {
   transform: translateZ(-25px) rotateX(-90deg);
 }
 
 /* ボタン内部のdivは表示するが、透明度を下げる */
-.stButton > button > div,
-.stFormSubmitButton > button > div {
+[data-testid="stSidebar"] .stButton > button > div,
+[data-testid="stSidebar"] .stFormSubmitButton > button > div {
   position: relative;
   z-index: 10;
   color: #ffffff !important;
@@ -362,13 +364,13 @@ button[title="Close sidebar"] svg {
 }
 
 /* 新規作成ボタン用のラッパ（緑系の3Dフリップ） */
-.create-button-container .stButton > button::before {
+[data-testid="stSidebar"] .create-button-container .stButton > button::before {
   background-color: #10b981;
   border-color: #10b981;
   color: #ffffff;
 }
 
-.create-button-container .stButton > button::after {
+[data-testid="stSidebar"] .create-button-container .stButton > button::after {
   background-color: #059669;
   border-color: #059669;
   color: #ffffff;
@@ -1108,5 +1110,6 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
