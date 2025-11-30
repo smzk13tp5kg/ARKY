@@ -972,62 +972,63 @@ with col2:
         st.markdown("<div class='preview-actions'>", unsafe_allow_html=True)
         btn_col1, btn_col2 = st.columns(2)
 
+        # ---------- コピー ボタン ----------
         with btn_col1:
-    # コピー用テキスト
-    full_text = f"件名: {email['subject']}\n\n{email['body']}"
-    escaped_text = json.dumps(full_text)  # JSに安全に渡す
+            # コピー用テキスト
+            full_text = f"件名: {email['subject']}\n\n{email['body']}"
+            escaped_text = json.dumps(full_text)  # JSに安全に渡す
 
-    # Streamlit標準ボタン（3DフリップCSSが適用される）
-    if st.button("📋 コピー", use_container_width=True):
-        # JSを実行するHTMLを埋め込む（ボタン押下時にのみ発火）
-        st.components.v1.html(
-            f"""
-            <script>
-            (function() {{
-                const text = {escaped_text};
+            # Streamlit標準ボタン（3DフリップCSSが適用される）
+            if st.button("📋 コピー", use_container_width=True):
+                # JSを実行するHTMLを埋め込む（ボタン押下時にのみ発火）
+                st.components.v1.html(
+                    f"""
+                    <script>
+                    (function() {{
+                        const text = {escaped_text};
 
-                // 1. まず navigator.clipboard（新しめのAPI）を試す
-                if (navigator.clipboard && navigator.clipboard.writeText) {{
-                    navigator.clipboard.writeText(text).then(function() {{
-                        console.log("Copied with navigator.clipboard");
-                    }}).catch(function(err) {{
-                        console.warn("navigator.clipboard failed:", err);
-                        fallbackCopy(text);
-                    }});
-                }} else {{
-                    // 2. 非対応ブラウザや iframe 制限時はこちら
-                    fallbackCopy(text);
-                }}
+                        // 1. まず navigator.clipboard（新しめのAPI）を試す
+                        if (navigator.clipboard && navigator.clipboard.writeText) {{
+                            navigator.clipboard.writeText(text).then(function() {{
+                                console.log("Copied with navigator.clipboard");
+                            }}).catch(function(err) {{
+                                console.warn("navigator.clipboard failed:", err);
+                                fallbackCopy(text);
+                            }});
+                        }} else {{
+                            // 2. 非対応ブラウザや iframe 制限時はこちら
+                            fallbackCopy(text);
+                        }}
 
-                function fallbackCopy(text) {{
-                    try {{
-                        const textarea = document.createElement('textarea');
-                        textarea.value = text;
-                        textarea.style.position = 'fixed';
-                        textarea.style.left = '-9999px';
-                        document.body.appendChild(textarea);
-                        textarea.focus();
-                        textarea.select();
-                        const ok = document.execCommand('copy');
-                        document.body.removeChild(textarea);
-                        console.log("Copied with execCommand, result:", ok);
-                    }} catch (e) {{
-                        console.error("Fallback copy failed:", e);
-                    }}
-                }}
-            }})();
-            </script>
-            """,
-            height=0,
-        )
+                        function fallbackCopy(text) {{
+                            try {{
+                                const textarea = document.createElement('textarea');
+                                textarea.value = text;
+                                textarea.style.position = 'fixed';
+                                textarea.style.left = '-9999px';
+                                document.body.appendChild(textarea);
+                                textarea.focus();
+                                textarea.select();
+                                const ok = document.execCommand('copy');
+                                document.body.removeChild(textarea);
+                                console.log("Copied with execCommand, result:", ok);
+                            }} catch (e) {{
+                                console.error("Fallback copy failed:", e);
+                            }}
+                        }}
+                    }})();
+                    </script>
+                    """,
+                    height=0,
+                )
 
-        # 視覚フィードバック
-        st.markdown(
-            "<div class='copy-info'>✔ コピーしました</div>",
-            unsafe_allow_html=True,
-        )
+                # 視覚フィードバック
+                st.markdown(
+                    "<div class='copy-info'>✔ コピーしました</div>",
+                    unsafe_allow_html=True,
+                )
 
-
+        # ---------- 再生成 ボタン ----------
         with btn_col2:
             if st.button("🔄 再生成", use_container_width=True):
                 st.session_state.messages.append(
@@ -1063,8 +1064,3 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
-
-
-
-
-
