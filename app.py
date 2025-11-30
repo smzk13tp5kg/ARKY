@@ -16,7 +16,7 @@ def generate_email(template, tone, recipient, message, variation=0):
         ],
         "交渉": [
             f"【ご相談】{message[:20]}",
-            f"【打ち合わせ依頼】{message[:20]}",
+            f"【打ち合わせ依頼】{message[:20]}"
             f"{message[:20]}に関するご相談",
         ],
         "お礼": [
@@ -675,7 +675,7 @@ with col1:
             <img src="https://raw.githubusercontent.com/smzk13tp5kg/ARKY/main/AIhontai.png">
           </div>
           <div class="intro-bubble">
-            ようこそ！ビジネスメールの作成をお手伝いします。<br>
+            ようこそ！<br>ビジネスメールの作成をお手伝いします。<br>
             左側のナビゲーションエリアでテンプレートやトーン、相手を選び、
             下部の入力欄からメッセージ内容を入力してください。
           </div>
@@ -840,6 +840,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
