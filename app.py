@@ -568,7 +568,7 @@ button[title="Close sidebar"] svg {
 
 /* サイドバーコンテンツの上パディングも少しだけにする */
 [data-testid="stSidebarContent"] {
-    padding-top: 4px !important;   /* 0でもいいけど、4pxくらいが自然 */
+    padding-top: 7px !important;   /* 0でもいいけど、開閉アイコンが見えなくなるからこれくらいが自然かも */
 }
 
 
@@ -956,4 +956,5 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
