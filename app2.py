@@ -323,30 +323,52 @@ button[title="Close sidebar"] svg {
    サイドバー：ようこそメッセージエリア
 ------------------------------------------- */
 .sidebar-welcome {
+    position: relative;
     margin-bottom: 24px;
-    padding: 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    border: 1px solid #cfae63;
+    padding: 0;
+    border-radius: 16px;
+    background: transparent;
+    overflow: visible;
 }
 
-.sidebar-welcome-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 12px;
+/* 外側の光るグラデーション枠 */
+.sidebar-welcome::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 4px;
+
+    background: linear-gradient(120deg, #6559ae, #ff7159, #6559ae);
+    background-size: 400% 400%;
+    animation: intro-gradient 3s ease-in-out infinite;
+
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
 }
 
-.sidebar-welcome-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
+/* 内側テキストのグラデーション */
 .sidebar-welcome-text {
-    color: #ffffff !important;
+    position: relative;
+    display: block;
+    padding: 16px;
+    border-radius: 12px;
+
+    background: rgba(5, 11, 35, 0.85);
+    background-image: linear-gradient(120deg, #fdfbff, #ffd7b2, #ffe6ff);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
     font-size: 13px;
+    font-weight: 600;
     line-height: 1.6;
     text-align: center;
+
+    animation: intro-gradient 3s ease-in-out infinite;
 }
 
 /* -------------------------------------------
@@ -610,12 +632,11 @@ button[title="Close sidebar"] svg {
 }
 
 /* ============================================
-   メインエリア：金色グラデボタン（送信／再生成／リセット）
+   メインエリア：金色グラデボタン（再生成／リセット）
+   ※サイドバーの送信ボタンは3Dフリップが適用される
 ============================================ */
 
-/* 左カラム（col1）の送信ボタン */
-[data-testid="column"]:nth-of-type(1) .stFormSubmitButton > button,
-/* 右カラム（col2）の再生成・リセットボタン */
+/* 右カラム（col2）の再生成・リセットボタンのみ */
 [data-testid="column"]:nth-of-type(2) .stButton > button {
     position: relative;
     width: 100%;
@@ -639,7 +660,6 @@ button[title="Close sidebar"] svg {
 }
 
 /* ホバー時：白背景＋金枠＋黒文字 */
-[data-testid="column"]:nth-of-type(1) .stFormSubmitButton > button:hover,
 [data-testid="column"]:nth-of-type(2) .stButton > button:hover {
     background: #ffffff;
     color: #111827 !important;
@@ -649,8 +669,6 @@ button[title="Close sidebar"] svg {
 }
 
 /* 念のため：3D用の ::before / ::after を完全に消す */
-[data-testid="column"]:nth-of-type(1) .stFormSubmitButton > button::before,
-[data-testid="column"]:nth-of-type(1) .stFormSubmitButton > button::after,
 [data-testid="column"]:nth-of-type(2) .stButton > button::before,
 [data-testid="column"]:nth-of-type(2) .stButton > button::after {
     content: none !important;
@@ -720,13 +738,10 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    # ようこそメッセージ + AIロゴ
+    # ようこそメッセージ（画像なし、グラデーションテキストのみ）
     st.markdown(
         """
         <div class="sidebar-welcome">
-          <div class="sidebar-welcome-icon">
-            <img src="https://raw.githubusercontent.com/smzk13tp5kg/ARKY/main/AIhontai.png">
-          </div>
           <div class="sidebar-welcome-text">
             ようこそ！<br>
             ビジネスメールの作成をお手伝いします。<br>
@@ -854,29 +869,18 @@ with st.sidebar:
     add_seasonal = seasonal_option == "追加する"
     seasonal_text = get_seasonal_greeting() if add_seasonal else ""
 
-    st.caption("© 2025 ARKY")
-
-# ============================================
-# メイン 2 カラム（1:3の比率）
-# ============================================
-col1, col2 = st.columns([3, 2], gap="medium")
-
-# --------------------------------------------
-# 左：メッセージ＋フォーム
-# --------------------------------------------
-with col1:
-    st.markdown("<div class='section-header'>💬 メッセージ</div>", unsafe_allow_html=True)
-    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
-
-    # フォーム
+    # メッセージ入力エリア
+    st.markdown("<div class='sidebar-input-section'>", unsafe_allow_html=True)
+    st.markdown("<div class='sidebar-input-label'>💬 メッセージ入力</div>", unsafe_allow_html=True)
+    
     with st.form("message_form", clear_on_submit=True):
         user_message = st.text_area(
             "メッセージを入力",
             placeholder="例：取引先に感謝を伝えるメールを作成したい",
-            height=120,
+            height=100,
             label_visibility="collapsed",
         )
-        submitted = st.form_submit_button("✓ 送信")
+        submitted = st.form_submit_button("✓ 送信", use_container_width=True)
 
         if submitted and user_message:
             if template == "その他" and not custom_template:
@@ -897,8 +901,22 @@ with col1:
                     template, tone, recipient, user_message, variation=0, seasonal_text=seasonal_text
                 )
                 st.rerun()
+    
+    st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+    st.caption("© 2025 ARKY")
+
+# ============================================
+# メイン 2 カラム（1:2の比率）
+# ============================================
+col1, col2 = st.columns([1, 2], gap="medium")
+
+# --------------------------------------------
+# 左：チャット履歴表示エリア
+# --------------------------------------------
+with col1:
+    st.markdown("<div class='section-header'>💬 会話履歴</div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
     # 送信済みメッセージ一覧（ユーザー＆アシスタント）
     chat_html_parts = []
