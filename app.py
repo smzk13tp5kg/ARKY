@@ -472,6 +472,11 @@ button[title="Close sidebar"] svg {
     background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%);
     color: #ffffff;
 }
+
+.stElementContainer {
+    margin: 0 !important;
+    padding: 0 !important;
+}
 </style>
 """,
     unsafe_allow_html=True,
@@ -835,5 +840,6 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
