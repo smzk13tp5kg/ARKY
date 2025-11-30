@@ -4,16 +4,28 @@ import random
 import html
 import textwrap
 import json
-from supabase import create_client, Client  # requirements.txt に supabase-py を追加しておく
+from supabase import create_client, Client  # requirements.txt に supabase を追加しておく
 
 # ============================================
-# Supabase クライアント設定
+# Supabase クライアント設定（無ければオフ）
 # ============================================
-SUPABASE_URL = st.secrets["supabase_url"]      # Streamlit Cloud の secrets に設定しておく
-SUPABASE_KEY = st.secrets["supabase_key"]
-
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 SUPABASE_TABLE = "email_logs"  # あらかじめ作っておくテーブル名
+supabase: Client | None = None
+
+# secrets に URL / KEY が設定されている場合だけクライアントを作成する
+if "supabase_url" in st.secrets and "supabase_key" in st.secrets:
+    try:
+        SUPABASE_URL = st.secrets["supabase_url"]
+        SUPABASE_KEY = st.secrets["supabase_key"]
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    except Exception as e:
+        # クライアント初期化に失敗した場合も、「Supabase無しモード」で動かす
+        supabase = None
+        st.write("⚠ Supabase クライアント初期化に失敗しました:", e)
+else:
+    # secrets が無い環境では Supabase を使わずに動かす
+    supabase = None
+
 
 # ============================================
 # 時候の挨拶（ヘルパー）
@@ -1098,4 +1110,5 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
