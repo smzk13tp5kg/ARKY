@@ -1,6 +1,5 @@
 import streamlit as st
 from datetime import datetime
-import random
 import html
 import textwrap
 import json
@@ -9,7 +8,6 @@ import json
 # 時候の挨拶（ヘルパー）
 # ============================================
 def get_seasonal_greeting() -> str:
-    """現在の月に応じた時候の挨拶を返す"""
     month = datetime.now().month
     greetings = {
         1: "新春の候",
@@ -25,7 +23,6 @@ def get_seasonal_greeting() -> str:
         11: "晩秋の候",
         12: "師走の候",
     }
-
     return greetings.get(month, "")
 
 # ============================================
@@ -95,13 +92,11 @@ def generate_email(template, tone, recipient, message, variation=0, seasonal_tex
     greeting_list = greetings_variations.get(recipient, ["お世話になっております。"])
     base_greeting = greeting_list[variation % len(greeting_list)]
 
-    # ★ 時候の挨拶を greeting にだけ付与する
     if seasonal_text:
         greeting = f"{seasonal_text}、{base_greeting}"
     else:
         greeting = base_greeting
 
-    # ★ body_variations から seasonal_block を削除
     body_variations = [
         f"""{greeting}
 
@@ -179,7 +174,7 @@ def generate_email(template, tone, recipient, message, variation=0, seasonal_tex
         "advice": advice,
         "variation": variation,
     }
-    
+
 # ============================================
 # ページ設定
 # ============================================
@@ -190,14 +185,12 @@ st.set_page_config(
 )
 
 # ============================================
-# カスタムCSS（統合版）
+# カスタムCSS
 # ============================================
 st.markdown(
     """
 <style>
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 /* 全体背景：濃い紺色 + ARKY背景画像 */
 .stApp {
@@ -228,9 +221,7 @@ st.markdown(
     background-color: rgba(5, 11, 35, 0.95);
     backdrop-filter: blur(10px);
 }
-body {
-    background-color: #050b23;
-}
+body { background-color: #050b23; }
 
 /* メインエリア調整 */
 main.block-container {
@@ -240,13 +231,7 @@ main.block-container {
     max-width: 100% !important;
 }
 
-/* メインブロックの上下余白 */
-.stMainBlockContainer {
-    padding-top: 0 !important;
-    padding-bottom: 10px !important;
-}
-
-/* カラム、ブロックの幅調整 */
+/* カラムレイアウト */
 [data-testid="column"] {
     padding: 0 !important;
     width: 100% !important;
@@ -284,8 +269,6 @@ button[title="Close sidebar"] svg {
 /* -------------------------------------------
    サイドバー限定：3D フリップボタン
 ------------------------------------------- */
-
-/* 3D を効かせるのはサイドバー内のボタンだけ */
 [data-testid="stSidebar"] .stButton,
 [data-testid="stSidebar"] .stFormSubmitButton {
   perspective: 1000px;
@@ -353,7 +336,7 @@ button[title="Close sidebar"] svg {
   transform: translateZ(-25px) rotateX(-90deg);
 }
 
-/* ボタン内部のdivは表示するが、透明度を下げる */
+/* ボタン内部のdiv */
 [data-testid="stSidebar"] .stButton > button > div,
 [data-testid="stSidebar"] .stFormSubmitButton > button > div {
   position: relative;
@@ -363,24 +346,19 @@ button[title="Close sidebar"] svg {
   text-transform: uppercase;
 }
 
-/* 新規作成ボタン用のラッパ（緑系の3Dフリップ） */
+/* 新規作成ボタンだけ緑系 */
 [data-testid="stSidebar"] .create-button-container .stButton > button::before {
   background-color: #10b981;
   border-color: #10b981;
-  color: #ffffff;
 }
-
 [data-testid="stSidebar"] .create-button-container .stButton > button::after {
   background-color: #059669;
   border-color: #059669;
-  color: #ffffff;
 }
 
 /* -------------------------------------------
-   メインエリア
+   メインエリア：ヘッダー・見出し
 ------------------------------------------- */
-
-/* トップバー */
 .top-bar {
     background: #050b23;
     padding: 16px 8px 8px 8px;
@@ -392,8 +370,6 @@ button[title="Close sidebar"] svg {
     font-weight: 700;
     color: #ffffff !important;
 }
-
-/* セクション見出し */
 .section-header {
     font-size: 16px;
     font-weight: 700;
@@ -401,7 +377,7 @@ button[title="Close sidebar"] svg {
     margin: 8px 0;
 }
 
-/* タイトル直下のメッセージエリア（アイコン＋AIバブル） */
+/* タイトル直下のメッセージエリア */
 .intro-wrapper {
     display: flex;
     align-items: flex-start;
@@ -419,7 +395,7 @@ button[title="Close sidebar"] svg {
     object-fit: contain;
 }
 
-/* ★ グラデ枠＋グラデ文字の AI バブル ★ */
+/* グラデ枠＋グラデ文字の AI バブル */
 .intro-bubble {
     position: relative;
     padding: 0;
@@ -514,17 +490,13 @@ button[title="Close sidebar"] svg {
     font-size: 12px !important;
     width: 100% !important;
 }
-
-/* コピー案内テキスト（白文字） */
 .copy-info {
     color: #ffffff;
     font-size: 13px;
     margin-bottom: 4px;
 }
 
-/* ============================================
-   チャットメッセージ（自前バブル表示）
-============================================ */
+/* チャットバブル */
 .chat-log {
     display: flex;
     flex-direction: column;
@@ -543,156 +515,83 @@ button[title="Close sidebar"] svg {
     box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 .chat-bubble.user {
-    position: relative;             /* ← しっぽの基準にする */
+    position: relative;
     background: #ffffff;
     color: #111827;
-    margin-left: auto;              /* 右寄せしたい場合。左寄せなら消してOK */
-    max-width: 80%;                 /* 余白を少し残すために調整（お好み） */
+    margin-left: auto;
+    max-width: 80%;
 }
-
-/* ユーザー吹き出しの“しっぽ”（右側） */
 .chat-bubble.user::after {
     content: "";
     position: absolute;
-    right: -8px;                    /* バブルの右外側に飛び出させる */
-    top: 14px;                      /* 縦位置。お好みで調整 */
+    right: -8px;
+    top: 14px;
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 8px 0 8px 8px;    /* 三角形のサイズ */
-    border-color: transparent transparent transparent #ffffff;  /* ← バブルと同じ色 */
-
-    /* 影をちょっと付けたい場合 */
+    border-width: 8px 0 8px 8px;
+    border-color: transparent transparent transparent #ffffff;
     filter: drop-shadow(-1px 1px 2px rgba(0,0,0,0.15));
 }
-
-/* ★ AIチャットバブルを intro-bubble と同じスタイルに変更 ★ */
 .chat-bubble.assistant {
     position: relative;
-    padding: 0;                     /* 内側の padding はテキスト側で制御 */
+    padding: 0;
     border-radius: 16px;
     background: transparent;
     overflow: visible;
-    margin-right: auto;             /* 左寄せ（必要に応じて調整） */
-    max-width: 85%;                 /* お好みで可変 */
+    margin-right: auto;
+    max-width: 85%;
 }
-
-/* 外側の光るグラデーション枠（assistant用） */
 .chat-bubble.assistant::before {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: 16px;
-    padding: 4px; /* 枠の太さ */
-
+    padding: 4px;
     background: linear-gradient(120deg, #6559ae, #ff7159, #6559ae);
     background-size: 400% 400%;
     animation: intro-gradient 3s ease-in-out infinite;
-
     -webkit-mask:
       linear-gradient(#000 0 0) content-box,
       linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
             mask-composite: exclude;
 }
-
-/* 内側テキストのグラデーション（assistant用） */
 .chat-bubble.assistant > span {
     position: relative;
     display: block;
     padding: 10px 18px;
     border-radius: 12px;
-
-    background: rgba(5, 11, 35, 0.85);      /* 半透明背景 */
+    background: rgba(5, 11, 35, 0.85);
     background-image: linear-gradient(120deg, #fdfbff, #ffd7b2, #ffe6ff);
     background-size: 400% 400%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-
     font-size: 14px;
     font-weight: 600;
     line-height: 1.6;
-
     animation: intro-gradient 3s ease-in-out infinite;
 }
 
-/* Streamlit の要素コンテナ余白を削る */
-.stElementContainer {
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-/* 一部アイコンの色を白に */
-.st-emotion-cache-pd6qx2 {
-    color: #ffffff !important;
-    fill: #ffffff !important;
-}
-
-/* サイドバー上部ヘッダー（黄色で囲った余白）の高さを詰める */
+/* サイドバー上部ヘッダー縮小 */
 [data-testid="stSidebarHeader"] {
     min-height: 0 !important;
     height: 0 !important;
     padding-top: 0 !important;
     padding-bottom: 0 !important;
 }
-
-/* サイドバーコンテンツの上パディングも少しだけにする */
 [data-testid="stSidebarContent"] {
-    padding-top: 7px !important;   /* 0でもいいけど、開閉アイコンが見えなくなるからこれくらいが自然かも */
-}
-
-/* ============================================
-   プレビューエリア：金色グラデボタン（コピー／再生成）
-   ※ ナビゲーションの3Dボタンとは切り分ける
-============================================ */
-
-/* ボタン本体 */
-.preview-actions .stButton > button {
-    position: relative;
-    width: 100%;
-    padding: 10px 20px;
-    border-radius: 999px;
-    border: none;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-
-    /* 金色グラデーション */
-    background: linear-gradient(90deg, #ffd666 0%, #f4a021 100%);
-    color: #ffffff !important;
-
-    /* ARKYらしい強めの影 */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
-
-    /* 3Dフリップ用 transform を無効化 */
-    transform: none !important;
-    transform-style: flat !important;
-    transition: all 0.2s ease-out;
-}
-
-/* ホバー時：白背景＋金枠＋黒文字 */
-.preview-actions .stButton > button:hover {
-    background: #ffffff;
-    color: #111827 !important;
-    border: 2px solid #f4a021;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-    transform: translateY(-1px);
-}
-
-/* 3D用の ::before / ::after を無効化しておく */
-.preview-actions .stButton > button::before,
-.preview-actions .stButton > button::after {
-    content: none !important;
+    padding-top: 7px !important;
 }
 
 /* ============================================
    メインエリア：金色グラデボタン（送信／コピー／再生成）
 ============================================ */
 
-/* 左カラム（col1）の送信ボタン */
-[data-testid="column"]:nth-of-type(1) .stFormSubmitButton > button,
-/* 右カラム（col2）のコピー・再生成ボタン */
-[data-testid="column"]:nth-of-type(2) .stButton > button {
+/* 左カラムの送信ボタン（message-form-marker 直後） */
+.message-form-marker + div .stFormSubmitButton > button,
+/* 右カラムのコピー／再生成ボタン（preview-actions-marker 直後の columns 内） */
+.preview-actions-marker + div [data-testid="column"] .stButton > button {
     position: relative;
     width: 100%;
     padding: 10px 20px;
@@ -701,22 +600,17 @@ button[title="Close sidebar"] svg {
     font-size: 14px;
     font-weight: 700;
     letter-spacing: 0.05em;
-
-    /* 金色グラデーション */
     background: linear-gradient(90deg, #ffd666 0%, #f4a021 100%);
     color: #ffffff !important;
-
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
-
-    /* 3D用 transform を完全に無効化 */
     transform: none !important;
     transform-style: flat !important;
     transition: all 0.2s ease-out;
 }
 
 /* ホバー時：白背景＋金枠＋黒文字 */
-[data-testid="column"]:nth-of-type(1) .stFormSubmitButton > button:hover,
-[data-testid="column"]:nth-of-type(2) .stButton > button:hover {
+.message-form-marker + div .stFormSubmitButton > button:hover,
+.preview-actions-marker + div [data-testid="column"] .stButton > button:hover {
     background: #ffffff;
     color: #111827 !important;
     border: 2px solid #f4a021;
@@ -724,28 +618,27 @@ button[title="Close sidebar"] svg {
     transform: translateY(-1px) !important;
 }
 
-/* 念のため：3D用の ::before / ::after を完全に消す */
-[data-testid="column"]:nth-of-type(1) .stFormSubmitButton > button::before,
-[data-testid="column"]:nth-of-type(1) .stFormSubmitButton > button::after,
-[data-testid="column"]:nth-of-type(2) .stButton > button::before,
-[data-testid="column"]:nth-of-type(2) .stButton > button::after {
+/* 念のため：対象ボタンから3D疑似要素を完全に消す */
+.message-form-marker + div .stFormSubmitButton > button::before,
+.message-form-marker + div .stFormSubmitButton > button::after,
+.preview-actions-marker + div [data-testid="column"] .stButton > button::before,
+.preview-actions-marker + div [data-testid="column"] .stButton > button::after {
     content: none !important;
 }
-
 </style>
 """,
     unsafe_allow_html=True,
 )
 
 # ============================================
-# JavaScriptでボタンテキストを動的に設定
+# JavaScriptでボタンテキストを3D用に設定（サイドバー用）
 # ============================================
 st.components.v1.html(
     """
     <script>
     (function() {
       function updateButtonText() {
-        const buttons = parent.document.querySelectorAll('.stButton > button, .stFormSubmitButton > button');
+        const buttons = parent.document.querySelectorAll('[data-testid="stSidebar"] .stButton > button, [data-testid="stSidebar"] .stFormSubmitButton > button');
         buttons.forEach(btn => {
           const textDiv = btn.querySelector('div');
           if (textDiv && textDiv.textContent) {
@@ -753,19 +646,9 @@ st.components.v1.html(
           }
         });
       }
-      
-      // 初回実行
       setTimeout(updateButtonText, 500);
-      
-      // MutationObserverで動的に追加されるボタンも監視
       const observer = new MutationObserver(updateButtonText);
-      observer.observe(parent.document.body, {
-        childList: true,
-        subtree: true
-      });
-      
-      // 定期的にも実行
-      setInterval(updateButtonText, 1000);
+      observer.observe(parent.document.body, { childList: true, subtree: true });
     })();
     </script>
     """,
@@ -786,7 +669,7 @@ if "variation_count" not in st.session_state:
 # トップバー
 # ============================================
 st.markdown(
-    "<div class='top-bar'><h1 class='app-title'>✉️ BUSINESS WRITING AI - AI PARTNERS -</h1></div>",
+    "<div class='top-bar'><h1 class='app-title'>✉️ ビジネスメール作成アシスタント</h1></div>",
     unsafe_allow_html=True,
 )
 
@@ -795,7 +678,7 @@ st.markdown(
 # ============================================
 with st.sidebar:
     st.markdown(
-        "<div class='sidebar-app-title'>■ ビジネスメール作成アシスタント</div>",
+        "<div class='sidebar-app-title'>■ メール生成AI</div>",
         unsafe_allow_html=True,
     )
 
@@ -938,7 +821,6 @@ with col1:
     st.markdown("<div class='section-header'>💬 メッセージ</div>", unsafe_allow_html=True)
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-    # タイトル直下のメッセージエリア（アイコン＋AIグラデバブル）
     st.markdown(
         """
         <div class="intro-wrapper">
@@ -959,7 +841,8 @@ with col1:
 
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-    # フォーム（intro-bubble の直下）
+    # 送信ボタン用マーカー
+    st.markdown("<div class='message-form-marker'></div>", unsafe_allow_html=True)
     with st.form("message_form", clear_on_submit=True):
         user_message = st.text_area(
             "メッセージを入力",
@@ -991,23 +874,15 @@ with col1:
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-    # 送信済みメッセージ一覧（ユーザー＆アシスタント）
-    chat_html_parts = []
-    chat_html_parts.append("<div class='chat-log'>")
-
+    # チャットログ
+    chat_html_parts = ["<div class='chat-log'>"]
     for msg in st.session_state.messages:
         role = msg["role"]
         text = html.escape(msg["content"]).replace("\n", "<br>")
         if role == "user":
-            chat_html_parts.append(
-                f"<div class='chat-bubble user'>{text}</div>"
-            )
+            chat_html_parts.append(f"<div class='chat-bubble user'>{text}</div>")
         else:
-            # ★ span で包むのがポイント
-            chat_html_parts.append(
-                f"<div class='chat-bubble assistant'><span>{text}</span></div>"
-            )
-
+            chat_html_parts.append(f"<div class='chat-bubble assistant'><span>{text}</span></div>")
     chat_html_parts.append("</div>")
     st.markdown("\n".join(chat_html_parts), unsafe_allow_html=True)
 
@@ -1027,10 +902,8 @@ with col2:
             """
         )
         st.markdown(placeholder_html, unsafe_allow_html=True)
-
     else:
         email = st.session_state.generated_email
-
         body_html = html.escape(email["body"]).replace("\n", "<br>")
         subject_html = html.escape(email["subject"])
 
@@ -1061,37 +934,29 @@ with col2:
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-        st.markdown("<div class='preview-actions'>", unsafe_allow_html=True)
+        # コピー／再生成用マーカー → この直後の columns 内ボタンに金グラデ適用
+        st.markdown("<div class='preview-actions-marker'></div>", unsafe_allow_html=True)
         btn_col1, btn_col2 = st.columns(2)
 
-        # ---------- コピー ボタン ----------
+        # ---------- コピー ----------
         with btn_col1:
-            # コピー用テキスト
             full_text = f"件名: {email['subject']}\n\n{email['body']}"
-            escaped_text = json.dumps(full_text)  # JSに安全に渡す
+            escaped_text = json.dumps(full_text)
 
-            # Streamlit標準ボタン（3DフリップCSSが適用される）
             if st.button("📋 コピー", use_container_width=True):
-                # JSを実行するHTMLを埋め込む（ボタン押下時にのみ発火）
                 st.components.v1.html(
                     f"""
                     <script>
                     (function() {{
                         const text = {escaped_text};
-
-                        // 1. まず navigator.clipboard（新しめのAPI）を試す
                         if (navigator.clipboard && navigator.clipboard.writeText) {{
-                            navigator.clipboard.writeText(text).then(function() {{
-                                console.log("Copied with navigator.clipboard");
-                            }}).catch(function(err) {{
+                            navigator.clipboard.writeText(text).catch(function(err) {{
                                 console.warn("navigator.clipboard failed:", err);
                                 fallbackCopy(text);
                             }});
                         }} else {{
-                            // 2. 非対応ブラウザや iframe 制限時はこちら
                             fallbackCopy(text);
                         }}
-
                         function fallbackCopy(text) {{
                             try {{
                                 const textarea = document.createElement('textarea');
@@ -1101,9 +966,8 @@ with col2:
                                 document.body.appendChild(textarea);
                                 textarea.focus();
                                 textarea.select();
-                                const ok = document.execCommand('copy');
+                                document.execCommand('copy');
                                 document.body.removeChild(textarea);
-                                console.log("Copied with execCommand, result:", ok);
                             }} catch (e) {{
                                 console.error("Fallback copy failed:", e);
                             }}
@@ -1113,14 +977,9 @@ with col2:
                     """,
                     height=0,
                 )
+                st.markdown("<div class='copy-info'>✔ コピーしました</div>", unsafe_allow_html=True)
 
-                # 視覚フィードバック
-                st.markdown(
-                    "<div class='copy-info'>✔ コピーしました</div>",
-                    unsafe_allow_html=True,
-                )
-
-        # ---------- 再生成 ボタン ----------
+        # ---------- 再生成 ----------
         with btn_col2:
             if st.button("🔄 再生成", use_container_width=True):
                 st.session_state.messages.append(
@@ -1152,14 +1011,4 @@ with col2:
                             ),
                         }
                     )
-
                 st.rerun()
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
-
-
-
-
-
-
