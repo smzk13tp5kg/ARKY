@@ -11,19 +11,20 @@ def get_seasonal_greeting() -> str:
     """現在の月に応じた時候の挨拶を返す"""
     month = datetime.now().month
     greetings = {
-        1: "新春の候、ますますご清栄のこととお慶び申し上げます。",
-        2: "余寒の候、皆さまにおかれましてはお変わりなくお過ごしのことと存じます。",
-        3: "早春の候、貴社ますますご発展のこととお喜び申し上げます。",
-        4: "春暖の候、皆さまにおかれましては一層ご健勝のことと存じます。",
-        5: "新緑の候、貴社ますますご繁栄のこととお慶び申し上げます。",
-        6: "初夏の候、皆さまにおかれましてはお元気でお過ごしのことと存じます。",
-        7: "盛夏の候、皆さまにおかれましてはご健勝のこととお喜び申し上げます。",
-        8: "晩夏の候、ますますご清栄のこととお慶び申し上げます。",
-        9: "初秋の候、貴社ますますご発展のこととお喜び申し上げます。",
-        10: "秋涼の候、皆さまにおかれましてはご健勝のことと存じます。",
-        11: "晩秋の候、貴社ますますご発展のこととお慶び申し上げます。",
-        12: "師走の候、皆さまにおかれましてはますますご清栄のことと存じます。",
+        1: "新春の候",
+        2: "余寒の候",
+        3: "早春の候",
+        4: "春暖の候",
+        5: "新緑の候",
+        6: "初夏の候",
+        7: "盛夏の候",
+        8: "晩夏の候",
+        9: "初秋の候",
+        10: "秋涼の候",
+        11: "晩秋の候",
+        12: "師走の候",
     }
+
     return greetings.get(month, "")
 
 # ============================================
@@ -91,7 +92,14 @@ def generate_email(template, tone, recipient, message, variation=0, seasonal_tex
         ],
     }
     greeting_list = greetings_variations.get(recipient, ["お世話になっております。"])
-    greeting = greeting_list[variation % len(greeting_list)]
+    base_greeting = greeting_list[variation % len(greeting_list)]
+
+    # 時候の挨拶がある場合は結合
+    if seasonal_text:
+        greeting = f"{seasonal_text}、{base_greeting}"
+    else:
+        greeting = base_greeting
+
 
     # 時候の挨拶ブロック
     seasonal_block = ""
@@ -956,5 +964,6 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
