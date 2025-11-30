@@ -910,8 +910,9 @@ with col1:
                 f"<div class='chat-bubble user'>{text}</div>"
             )
         else:
+            # ★ span で包むのがポイント
             chat_html_parts.append(
-                f"<div class='chat-bubble assistant'>{text}</div>"
+                f"<div class='chat-bubble assistant'><span>{text}</span></div>"
             )
 
     chat_html_parts.append("</div>")
@@ -1023,5 +1024,6 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
