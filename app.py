@@ -576,7 +576,7 @@ with st.sidebar:
                 st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
-    st.caption("© 2024 メール生成AI")
+    st.caption("© 2024 ARKY")
 
 # ============================================
 # メイン 2 カラム
@@ -720,3 +720,4 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
