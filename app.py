@@ -658,6 +658,47 @@ button[title="Close sidebar"] svg {
     padding-top: 7px !important;
 }
 
+/* ============================
+   プレビュー下の「コピー」「再生成」だけ 3D を無効化する
+   （.preview-actions 内の stButton にだけ適用）
+============================ */
+.preview-actions .stButton > button {
+    all: unset;  /* まず既存の 3D スタイルを全部リセット */
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: #f3f4f6;
+    color: #111827;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* ホバー時の軽い反応 */
+.preview-actions .stButton > button:hover {
+    background: #e5e7eb;
+}
+
+/* フォーカス時（キーボード操作の見え方） */
+.preview-actions .stButton > button:focus {
+    outline: 2px solid #fbbf24;
+    outline-offset: 2px;
+}
+
+/* 3D用の ::before / ::after を無効化しておく */
+.preview-actions .stButton > button::before,
+.preview-actions .stButton > button::after {
+    content: none !important;
+}
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -1057,3 +1098,4 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
