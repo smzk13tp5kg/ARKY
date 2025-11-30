@@ -456,6 +456,15 @@ div[data-testid="stHorizontalBlock"] {
     background-color: transparent !important; /* 必要なら白背景に変更可能 */
 }
 
+/* メインコンテンツ領域の上下パディングを調整 */
+.stMainBlockContainer,
+.block-container,
+.st-emotion-cache-zy6yx3,
+.e4man114 {
+    padding-top: 0 !important;
+    padding-bottom: 10px !important;
+}
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -824,6 +833,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
