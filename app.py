@@ -469,14 +469,42 @@ button[title="Close sidebar"] svg {
     background: #ffffff;
     color: #111827;
 }
+
+/* AIアシスタントバブル：グラデーションボーダーアニメーション */
 .chat-bubble.assistant {
-    background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%);
+    position: relative;
+    background: #050b23;
     color: #ffffff;
+    padding: 12px 16px;
+    border: 4px solid transparent;
+    background-clip: padding-box;
 }
-</style>
-""",
-    unsafe_allow_html=True,
-)
+
+.chat-bubble.assistant::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    background: linear-gradient(120deg, #6559ae, #ff7159, #6559ae);
+    background-size: 400% 400%;
+    border-radius: 12px;
+    z-index: -1;
+    animation: gradient-border 3s ease-in-out infinite;
+}
+
+@keyframes gradient-border {
+    0% {
+        background-position: 14% 0%;
+    }
+    50% {
+        background-position: 87% 100%;
+    }
+    100% {
+        background-position: 14% 0%;
+    }
+}
 
 # ============================================
 # JavaScriptでボタンテキストを動的に設定
@@ -831,6 +859,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
