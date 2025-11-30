@@ -220,27 +220,91 @@ div[data-testid="stHorizontalBlock"] {
     margin-bottom: 8px;
 }
 
-/* ★ ナビゲーションエリアのボタン（新規作成／送信）共通スタイル ★ */
-/* 通常：Goldグラデーション＋白文字（disabled含む） */
+/* 3D ボタン用ベーススタイル（サイドバー内のボタンすべて） */
 [data-testid="stSidebar"] button,
-[data-testid="stSidebar"] button:disabled {
-    background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%) !important;
-    color: #ffffff !important;
-    border-radius: 999px !important;
-    border: none !important;
-    font-weight: 700 !important;
-    font-size: 14px !important;
-    padding: 8px 16px !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.25) !important;
+[data-testid="stSidebar"] input[type="submit"] {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.5;
+  position: relative;
+  display: inline-block;
+  width: 200px;
+  margin: 4px 0;
+  padding: 0;                 /* 中身は擬似要素で描画 */
+  cursor: pointer;
+  text-align: center;
+  letter-spacing: 0.1em;
+  border-radius: 0.5rem;
+  border: none;
+  background: transparent;
+  color: #fff;                /* 文字：白 */
+  perspective: 600px;         /* 3D 表現のため */
+  overflow: visible;
 }
 
-/* ホバー時：白背景＋黒文字（有効なボタンのみ） */
-[data-testid="stSidebar"] button:hover:enabled {
-    background: #ffffff !important;
-    color: #111827 !important;
-    border: 1px solid #ffd666 !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
+/* ボタン内のテキストを前面に */
+[data-testid="stSidebar"] button > div,
+[data-testid="stSidebar"] input[type="submit"] {
+  position: relative;
+  z-index: 2;
 }
+
+/* ---- front 面（通常時に見える Gold グラデ） ---- */
+[data-testid="stSidebar"] button::before,
+[data-testid="stSidebar"] input[type="submit"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0.5rem;
+
+  background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%);
+  transform-origin: 50% 0%;
+  transform: translateY(0) rotateX(0deg);
+  transition: all 0.4s ease;
+  backface-visibility: hidden;
+  z-index: 1;
+}
+
+/* ---- back 面（フリップ後に見える白＋Gold枠） ---- */
+[data-testid="stSidebar"] button::after,
+[data-testid="stSidebar"] input[type="submit"]::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0.5rem;
+
+  background: #ffffff;
+  border: 1px solid #ffd666;
+  transform-origin: 50% 0%;
+  transform: translateY(-1px) rotateX(-90deg);
+  transition: all 0.4s ease;
+  backface-visibility: hidden;
+  z-index: 1;
+}
+
+/* ---- hover 時：front → 奥へ、back → 手前へ（3D フリップ） ---- */
+[data-testid="stSidebar"] button:hover::before,
+[data-testid="stSidebar"] input[type="submit"]:hover::before {
+  transform: translateY(-50%) rotateX(90deg);
+}
+
+[data-testid="stSidebar"] button:hover::after,
+[data-testid="stSidebar"] input[type="submit"]:hover::after {
+  transform: translateY(-50%) rotateX(0deg);
+}
+
+/* hover 中の文字色（白→黒） */
+[data-testid="stSidebar"] button:hover,
+[data-testid="stSidebar"] input[type="submit"]:hover {
+  color: #111827 !important;
+}
+
 
 /* サイドバー：選択中の項目 */
 .nav-section div[role="radiogroup"] input:checked ~ div {
@@ -673,3 +737,4 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
