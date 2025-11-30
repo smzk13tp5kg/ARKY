@@ -627,39 +627,6 @@ with st.sidebar:
         custom_recipient = st.text_input("カスタム相手", placeholder="例: 顧客")
         recipient = custom_recipient if custom_recipient else "その他"
 
-    # ナビゲーションエリア最下部：入力フォーム
-    st.markdown("<hr>", unsafe_allow_html=True)
-    st.markdown("<div class='card input-card'>", unsafe_allow_html=True)
-    with st.form("message_form", clear_on_submit=True):
-        user_message = st.text_area(
-            "メッセージを入力",
-            placeholder="例：取引先に感謝を伝えるメールを作成したい",
-            height=120,
-            label_visibility="collapsed",
-        )
-        submitted = st.form_submit_button("✓ 送信")
-
-        if submitted and user_message:
-            if template == "その他" and not custom_template:
-                st.error("⚠️ カスタムテンプレートを入力してください")
-            elif recipient == "その他" and not custom_recipient:
-                st.error("⚠️ カスタム相手を入力してください")
-            else:
-                st.session_state.messages.append({"role": "user", "content": user_message})
-
-                response = (
-                    f"{template}メールを「{tone}」なトーンで、"
-                    f"{recipient}宛に作成しました！右側のプレビューをご覧ください。"
-                )
-                st.session_state.messages.append({"role": "assistant", "content": response})
-
-                st.session_state.variation_count = 0
-                st.session_state.generated_email = generate_email(
-                    template, tone, recipient, user_message, variation=0
-                )
-                st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
-
     st.caption("© 2025 ARKY")
 
 # ============================================
@@ -676,23 +643,69 @@ with col2:
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
 # ============================================
-# 左：メッセージエリア（自前チャット表示）
+# 左：メッセージエリア（案内メッセージ＋送信エリア＋メッセージ一覧）
 # ============================================
 with col1:
-    chat_html_parts = []
-    chat_html_parts.append("<div class='chat-log'>")
-
-    # ★ あいさつメッセージは常に一番上に表示
+    # ① 一番上：固定の案内メッセージ（オレンジの吹き出し）
     initial_msg = (
         "こんにちは！ビジネスメールの作成をお手伝いします。<br><br>"
         "左側のナビゲーションエリアでテンプレートやトーン、相手を選び、"
         "下部の入力欄からメッセージ内容を入力してください。"
     )
-    chat_html_parts.append(
+    st.markdown(
+        "<div class='chat-log'>"
         f"<div class='chat-bubble assistant'>{initial_msg}</div>"
+        "</div>",
+        unsafe_allow_html=True,
     )
 
-    # ★ その下に、これまでのユーザー／AIメッセージを順番に表示
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+
+    # ② 真ん中：送信エリア（フォーム）
+    st.markdown("<div class='card input-card'>", unsafe_allow_html=True)
+    with st.form("message_form_main", clear_on_submit=True):
+        user_message = st.text_area(
+            "メッセージを入力",
+            placeholder="例：取引先に感謝を伝えるメールを作成したい",
+            height=120,
+            label_visibility="collapsed",
+        )
+        submitted = st.form_submit_button("✓ 送信")
+
+        if submitted and user_message:
+            if template == "その他" and not custom_template:
+                st.error("⚠️ カスタムテンプレートを入力してください")
+            elif recipient == "その他" and not custom_recipient:
+                st.error("⚠️ カスタム相手を入力してください")
+            else:
+                # ユーザーメッセージを履歴に追加
+                st.session_state.messages.append(
+                    {"role": "user", "content": user_message}
+                )
+
+                # アシスタントの「生成しました」メッセージを履歴に追加
+                response = (
+                    f"{template}メールを「{tone}」なトーンで、"
+                    f"{recipient}宛に作成しました！右側のプレビューをご覧ください。"
+                )
+                st.session_state.messages.append(
+                    {"role": "assistant", "content": response}
+                )
+
+                # メール本体を生成して保存
+                st.session_state.variation_count = 0
+                st.session_state.generated_email = generate_email(
+                    template, tone, recipient, user_message, variation=0
+                )
+                st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+
+    # ③ 一番下：送信済みメッセージ一覧（ユーザー＆アシスタント）
+    chat_html_parts = []
+    chat_html_parts.append("<div class='chat-log'>")
+
     for msg in st.session_state.messages:
         role = msg["role"]
         text = html.escape(msg["content"]).replace("\n", "<br>")
@@ -707,6 +720,7 @@ with col1:
 
     chat_html_parts.append("</div>")
     st.markdown("\n".join(chat_html_parts), unsafe_allow_html=True)
+
 
 # ============================================
 # 右：プレビューエリア
@@ -805,6 +819,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
