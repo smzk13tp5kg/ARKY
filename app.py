@@ -267,7 +267,7 @@ button[title="Close sidebar"] svg {
 }
 
 /* -------------------------------------------
-   サイドバー限定：3D フリップボタン
+   サイドバー限定：3D フリップボタン（新規作成など）
 ------------------------------------------- */
 [data-testid="stSidebar"] .stButton,
 [data-testid="stSidebar"] .stFormSubmitButton {
@@ -310,7 +310,7 @@ button[title="Close sidebar"] svg {
   top: 0;
 }
 
-/* 前面（オレンジ背景×白文字） */
+/* サイドバー前面（オレンジ背景×白文字） */
 [data-testid="stSidebar"] .stButton > button::before,
 [data-testid="stSidebar"] .stFormSubmitButton > button::before {
   content: attr(data-text);
@@ -320,7 +320,7 @@ button[title="Close sidebar"] svg {
   transform: rotateY(0deg) translateZ(25px);
 }
 
-/* 背面（黄色背景×白文字） */
+/* サイドバー背面（黄色背景×白文字） */
 [data-testid="stSidebar"] .stButton > button::after,
 [data-testid="stSidebar"] .stFormSubmitButton > button::after {
   content: attr(data-text);
@@ -330,13 +330,13 @@ button[title="Close sidebar"] svg {
   transform: rotateX(90deg) translateZ(25px);
 }
 
-/* ホバー時：X軸90度回転でフリップ */
+/* サイドバー：ホバー時3D回転 */
 [data-testid="stSidebar"] .stButton > button:hover,
 [data-testid="stSidebar"] .stFormSubmitButton > button:hover {
   transform: translateZ(-25px) rotateX(-90deg);
 }
 
-/* ボタン内部のdiv */
+/* サイドバー：ボタン内部のdiv */
 [data-testid="stSidebar"] .stButton > button > div,
 [data-testid="stSidebar"] .stFormSubmitButton > button > div {
   position: relative;
@@ -350,10 +350,12 @@ button[title="Close sidebar"] svg {
 [data-testid="stSidebar"] .create-button-container .stButton > button::before {
   background-color: #10b981;
   border-color: #10b981;
+  color: #ffffff;
 }
 [data-testid="stSidebar"] .create-button-container .stButton > button::after {
   background-color: #059669;
   border-color: #059669;
+  color: #ffffff;
 }
 
 /* -------------------------------------------
@@ -361,7 +363,7 @@ button[title="Close sidebar"] svg {
 ------------------------------------------- */
 .top-bar {
     background: #050b23;
-    padding: 16px 8px 8px 8px;
+    padding: 0px 8px 8px 8px;   /* ← 上パディング 0 */
     border-bottom: 1px solid #cfae63;
     margin-bottom: 20px;
 }
@@ -586,12 +588,10 @@ button[title="Close sidebar"] svg {
 
 /* ============================================
    メインエリア：金色グラデボタン（送信／コピー／再生成）
+   → stAppViewContainer 内のすべての button / submit を上書き
 ============================================ */
-
-/* 左カラムの送信ボタン（message-form-marker 直後） */
-.message-form-marker + div .stFormSubmitButton > button,
-/* 右カラムのコピー／再生成ボタン（preview-actions-marker 直後の columns 内） */
-.preview-actions-marker + div [data-testid="column"] .stButton > button {
+[data-testid="stAppViewContainer"] .stButton > button,
+[data-testid="stAppViewContainer"] .stFormSubmitButton > button {
     position: relative;
     width: 100%;
     padding: 10px 20px;
@@ -608,9 +608,9 @@ button[title="Close sidebar"] svg {
     transition: all 0.2s ease-out;
 }
 
-/* ホバー時：白背景＋金枠＋黒文字 */
-.message-form-marker + div .stFormSubmitButton > button:hover,
-.preview-actions-marker + div [data-testid="column"] .stButton > button:hover {
+/* hover：白背景＋金枠＋黒文字 */
+[data-testid="stAppViewContainer"] .stButton > button:hover,
+[data-testid="stAppViewContainer"] .stFormSubmitButton > button:hover {
     background: #ffffff;
     color: #111827 !important;
     border: 2px solid #f4a021;
@@ -618,11 +618,11 @@ button[title="Close sidebar"] svg {
     transform: translateY(-1px) !important;
 }
 
-/* 念のため：対象ボタンから3D疑似要素を完全に消す */
-.message-form-marker + div .stFormSubmitButton > button::before,
-.message-form-marker + div .stFormSubmitButton > button::after,
-.preview-actions-marker + div [data-testid="column"] .stButton > button::before,
-.preview-actions-marker + div [data-testid="column"] .stButton > button::after {
+/* 念のため、メインエリアの ::before/::after は消しておく */
+[data-testid="stAppViewContainer"] .stButton > button::before,
+[data-testid="stAppViewContainer"] .stButton > button::after,
+[data-testid="stAppViewContainer"] .stFormSubmitButton > button::before,
+[data-testid="stAppViewContainer"] .stFormSubmitButton > button::after {
     content: none !important;
 }
 </style>
@@ -631,14 +631,17 @@ button[title="Close sidebar"] svg {
 )
 
 # ============================================
-# JavaScriptでボタンテキストを3D用に設定（サイドバー用）
+# JavaScript（3D用 data-text の付与：サイドバーのみ）
 # ============================================
 st.components.v1.html(
     """
     <script>
     (function() {
       function updateButtonText() {
-        const buttons = parent.document.querySelectorAll('[data-testid="stSidebar"] .stButton > button, [data-testid="stSidebar"] .stFormSubmitButton > button');
+        const buttons = parent.document.querySelectorAll(
+          '[data-testid="stSidebar"] .stButton > button, ' +
+          '[data-testid="stSidebar"] .stFormSubmitButton > button'
+        );
         buttons.forEach(btn => {
           const textDiv = btn.querySelector('div');
           if (textDiv && textDiv.textContent) {
@@ -692,24 +695,23 @@ with st.sidebar:
     st.markdown("</div>", unsafe_allow_html=True)
 
     # テンプレート
-    with st.container():
-        st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
-        st.markdown("<div class='nav-label'>テンプレート</div>", unsafe_allow_html=True)
-        template_display = st.radio(
-            "テンプレート",
-            [
-                "📧 依頼メール",
-                "✉️ 交渉メール",
-                "🙏 お礼メール",
-                "💼 謝罪メール",
-                "📩 挨拶メール",
-                "➕ その他",
-            ],
-            index=0,
-            label_visibility="collapsed",
-            key="template_radio",
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-label'>テンプレート</div>", unsafe_allow_html=True)
+    template_display = st.radio(
+        "テンプレート",
+        [
+            "📧 依頼メール",
+            "✉️ 交渉メール",
+            "🙏 お礼メール",
+            "💼 謝罪メール",
+            "📩 挨拶メール",
+            "➕ その他",
+        ],
+        index=0,
+        label_visibility="collapsed",
+        key="template_radio",
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
 
     display_to_template = {
         "📧 依頼メール": "依頼",
@@ -727,24 +729,23 @@ with st.sidebar:
         template = custom_template if custom_template else "その他"
 
     # トーン
-    with st.container():
-        st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
-        st.markdown("<div class='nav-label'>トーン</div>", unsafe_allow_html=True)
-        tone_display = st.radio(
-            "トーン",
-            [
-                "😊 カジュアル／フレンドリー（同僚向け）",
-                "📄 標準ビジネス（最も一般的）",
-                "📘 フォーマル（社外顧客／上位者／依頼交渉）",
-                "🙏 厳粛・儀礼的（謝罪・クレーム対応）",
-                "⏱️ 緊急・簡潔（即時対応が必要な通知）",
-                "🌿 柔らかめ（関係維持・お礼・広報向け）",
-            ],
-            index=1,
-            label_visibility="collapsed",
-            key="tone_radio",
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-label'>トーン</div>", unsafe_allow_html=True)
+    tone_display = st.radio(
+        "トーン",
+        [
+            "😊 カジュアル／フレンドリー（同僚向け）",
+            "📄 標準ビジネス（最も一般的）",
+            "📘 フォーマル（社外顧客／上位者／依頼交渉）",
+            "🙏 厳粛・儀礼的（謝罪・クレーム対応）",
+            "⏱️ 緊急・簡潔（即時対応が必要な通知）",
+            "🌿 柔らめ（関係維持・お礼・広報向け）",
+        ],
+        index=1,
+        label_visibility="collapsed",
+        key="tone_radio",
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
 
     display_to_tone = {
         "😊 カジュアル／フレンドリー（同僚向け）": "カジュアル／フレンドリー",
@@ -752,29 +753,28 @@ with st.sidebar:
         "📘 フォーマル（社外顧客／上位者／依頼交渉）": "フォーマル",
         "🙏 厳粛・儀礼的（謝罪・クレーム対応）": "厳粛・儀礼的",
         "⏱️ 緊急・簡潔（即時対応が必要な通知）": "緊急・簡潔",
-        "🌿 柔らかめ（関係維持・お礼・広報向け）": "柔らかめ",
+        "🌿 柔らめ（関係維持・お礼・広報向け）": "柔らめ",
     }
     tone = display_to_tone[tone_display]
 
     # 相手
-    with st.container():
-        st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
-        st.markdown("<div class='nav-label'>相手</div>", unsafe_allow_html=True)
-        recipient_display = st.radio(
-            "相手",
-            [
-                "👤 上司",
-                "😊 同僚",
-                "👔 部下",
-                "🏢 社外企業社員",
-                "🏪 取引先",
-                "➕ その他",
-            ],
-            index=0,
-            label_visibility="collapsed",
-            key="recipient_radio",
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-label'>相手</div>", unsafe_allow_html=True)
+    recipient_display = st.radio(
+        "相手",
+        [
+            "👤 上司",
+            "😊 同僚",
+            "👔 部下",
+            "🏢 社外企業社員",
+            "🏪 取引先",
+            "➕ その他",
+        ],
+        index=0,
+        label_visibility="collapsed",
+        key="recipient_radio",
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
 
     display_to_recipient = {
         "👤 上司": "上司",
@@ -792,17 +792,16 @@ with st.sidebar:
         recipient = custom_recipient if custom_recipient else "その他"
 
     # 時候の挨拶
-    with st.container():
-        st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
-        st.markdown("<div class='nav-label'>時候の挨拶</div>", unsafe_allow_html=True)
-        seasonal_option = st.radio(
-            "時候の挨拶",
-            ["不要", "追加する"],
-            index=0,
-            label_visibility="collapsed",
-            key="seasonal_radio",
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-label'>時候の挨拶</div>", unsafe_allow_html=True)
+    seasonal_option = st.radio(
+        "時候の挨拶",
+        ["不要", "追加する"],
+        index=0,
+        label_visibility="collapsed",
+        key="seasonal_radio",
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
 
     add_seasonal = seasonal_option == "追加する"
     seasonal_text = get_seasonal_greeting() if add_seasonal else ""
@@ -841,8 +840,7 @@ with col1:
 
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-    # 送信ボタン用マーカー
-    st.markdown("<div class='message-form-marker'></div>", unsafe_allow_html=True)
+    # フォーム
     with st.form("message_form", clear_on_submit=True):
         user_message = st.text_area(
             "メッセージを入力",
@@ -934,8 +932,6 @@ with col2:
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-        # コピー／再生成用マーカー → この直後の columns 内ボタンに金グラデ適用
-        st.markdown("<div class='preview-actions-marker'></div>", unsafe_allow_html=True)
         btn_col1, btn_col2 = st.columns(2)
 
         # ---------- コピー ----------
