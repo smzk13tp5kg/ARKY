@@ -165,15 +165,31 @@ st.markdown(
     box-sizing: border-box;
 }
 
-/* 全体背景：濃い紺色 */
+/* 全体背景：濃い紺色 + ARKY背景画像 */
 .stApp {
     background-color: #050b23;
+    background-image: url('https://raw.githubusercontent.com/あなたのユーザー名/リポジトリ名/main/assets/arky_logo.png');
+    background-size: contain;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+}
+.stApp::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(5, 11, 35, 0.85);
+    z-index: -1;
 }
 [data-testid="stAppViewContainer"] {
-    background-color: #050b23;
+    background-color: transparent;
 }
 [data-testid="stHeader"] {
-    background-color: #050b23;
+    background-color: rgba(5, 11, 35, 0.95);
+    backdrop-filter: blur(10px);
 }
 body {
     background-color: #050b23;
