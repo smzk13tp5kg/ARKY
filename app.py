@@ -369,7 +369,7 @@ button[title="Close sidebar"] svg {
     margin: 8px 0;
 }
 
-/* タイトル直下のメッセージエリア（アイコン＋吹き出し） */
+/* タイトル直下のメッセージエリア（アイコン＋AIバブル） */
 .intro-wrapper {
     display: flex;
     align-items: flex-start;
@@ -386,14 +386,65 @@ button[title="Close sidebar"] svg {
     height: 100%;
     object-fit: contain;
 }
+
+/* ★ グラデ枠＋グラデ文字の AI バブル ★ */
 .intro-bubble {
-    background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%);
-    color: #ffffff;
-    padding: 10px 16px;
-    border-radius: 14px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    position: relative;
+    padding: 0;                     /* 中身のpaddingは内側spanで管理 */
+    border-radius: 16px;
+    background: transparent;        /* 背景は透明に */
+    overflow: visible;
+}
+
+/* 外側のグラデーション枠（border） */
+.intro-bubble::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 4px; /* 枠の太さ */
+
+    /* グラデーション背景 */
+    background: linear-gradient(120deg, #6559ae, #ff7159, #6559ae);
+    background-size: 400% 400%;
+    animation: intro-gradient 3s ease-in-out infinite;
+
+    /* 中身をくり抜いて枠だけにする */
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+}
+
+/* 内側のテキストエリア（背景＋文字グラデ） */
+.intro-bubble-text {
+    position: relative;
+    display: block;
+    padding: 10px 18px;
+    border-radius: 12px;
+
+    /* 背景の薄いダークレイヤー */
+    background: rgba(5, 11, 35, 0.85);
+
+    /* 文字自体にグラデーション */
+    background-image: linear-gradient(120deg, #fdfbff, #ffd7b2, #ffe6ff);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
     font-size: 14px;
+    font-weight: 600;
     line-height: 1.6;
+
+    animation: intro-gradient 3s ease-in-out infinite;
+}
+
+/* グラデーションの動き */
+@keyframes intro-gradient {
+    0%   { background-position: 14% 0%; }
+    50%  { background-position: 87% 100%; }
+    100% { background-position: 14% 0%; }
 }
 
 /* 右：プレビューカード */
@@ -490,15 +541,10 @@ button[title="Close sidebar"] svg {
     padding: 0 !important;
 }
 
+/* 一部アイコンの色を白に */
 .st-emotion-cache-pd6qx2 {
-    color: #ffffff !important;  /* テキスト色を白に */
-    fill: #ffffff !important;   /* SVGアイコン用の色を白に */
-}
-
-button[title="Open sidebar"] svg,
-button[title="Close sidebar"] svg {
-    fill: #ffffff !important;
     color: #ffffff !important;
+    fill: #ffffff !important;
 }
 
 </style>
@@ -691,7 +737,7 @@ with col1:
     st.markdown("<div class='section-header'>💬 メッセージ</div>", unsafe_allow_html=True)
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-    # タイトル直下のメッセージエリア（アイコン＋オレンジ吹き出し）
+    # タイトル直下のメッセージエリア（アイコン＋AIグラデバブル）
     st.markdown(
         """
         <div class="intro-wrapper">
@@ -699,9 +745,11 @@ with col1:
             <img src="https://raw.githubusercontent.com/smzk13tp5kg/ARKY/main/AIhontai.png">
           </div>
           <div class="intro-bubble">
-            ようこそ！<br>ビジネスメールの作成をお手伝いします。<br>
-            左側のナビゲーションエリアでテンプレートやトーン、相手を選び、
-            下部の入力欄からメッセージ内容を入力してください。
+            <span class="intro-bubble-text">
+              ようこそ！<br>ビジネスメールの作成をお手伝いします。<br>
+              左側のナビゲーションエリアでテンプレートやトーン、相手を選び、
+              下部の入力欄からメッセージ内容を入力してください。
+            </span>
           </div>
         </div>
         """,
@@ -867,5 +915,3 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
-
-
