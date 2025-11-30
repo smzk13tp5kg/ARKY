@@ -206,7 +206,7 @@ st.markdown(
     content: '';
     position: fixed;
     top: 0;
-    left: 350px;
+    left: 450px;
     right: 0;
     height: 100%;
     background-image: url('https://raw.githubusercontent.com/smzk13tp5kg/ARKY/main/ARKY%20background%20image.png');
@@ -262,9 +262,9 @@ div[data-testid="stHorizontalBlock"] {
    サイドバー
 ------------------------------------------- */
 [data-testid="stSidebar"] {
-    width: 350px !important;
-    min-width: 350px !important;
-    max-width: 350px !important;
+    width: 450px !important;
+    min-width: 450px !important;
+    max-width: 450px !important;
     background: #050b23;
     border-right: 1px solid #cfae63;
 }
@@ -290,6 +290,33 @@ button[title="Close sidebar"] svg {
 /* サイドバーコンテンツの上パディング */
 [data-testid="stSidebarContent"] {
     padding-top: 20px !important;
+}
+
+/* サイドバー内のメッセージ入力エリア */
+.sidebar-input-section {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #cfae63;
+}
+
+.sidebar-input-label {
+    color: #ffd666 !important;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+/* サイドバー内のテキストエリア */
+[data-testid="stSidebar"] textarea {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid #cfae63 !important;
+    border-radius: 8px !important;
+    color: #ffffff !important;
+    font-size: 14px !important;
+}
+
+[data-testid="stSidebar"] textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
 }
 
 /* -------------------------------------------
