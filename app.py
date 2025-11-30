@@ -374,8 +374,8 @@ button[title="Close sidebar"] svg {
     margin-bottom: 12px;
 }
 .intro-icon {
-    width: 100px;
-    height: 100px;
+    width: 110px;
+    height: 110px;
     flex-shrink: 0;
 }
 .intro-icon img {
@@ -701,7 +701,7 @@ with col1:
             <img src="https://raw.githubusercontent.com/smzk13tp5kg/ARKY/main/AIhontai.png">
           </div>
           <div class="intro-bubble">
-            こんにちは！ビジネスメールの作成をお手伝いします。<br><br>
+            ようこそ！ビジネスメールの作成をお手伝いします。<br>
             左側のナビゲーションエリアでテンプレートやトーン、相手を選び、
             下部の入力欄からメッセージ内容を入力してください。
           </div>
@@ -831,5 +831,6 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
