@@ -3,6 +3,7 @@ from datetime import datetime
 import random
 import html
 import textwrap
+import json
 
 # ============================================
 # 時候の挨拶（ヘルパー）
@@ -972,22 +973,30 @@ with col2:
         btn_col1, btn_col2 = st.columns(2)
 
         with btn_col1:
-            if st.button("📋 コピー", use_container_width=True):
-                full_text = f"件名: {email['subject']}\n\n{email['body']}"
+            # コピー用テキスト
+            full_text = f"件名: {email['subject']}\n\n{email['body']}"
+            escaped_text = json.dumps(full_text)  # JSに安全に渡す
 
+            # Streamlit標準ボタン（3DフリップCSSが適用される）
+            if st.button("📋 コピー", use_container_width=True):
+                # JSを実行するHTMLを埋め込む（ボタン押下時にのみ発火）
+                st.components.v1.html(
+                    f"""
+                    <script>
+                    navigator.clipboard.writeText({escaped_text}).then(() => {{
+                        console.log("Copied!");
+                    }});
+                    </script>
+                    """,
+                    height=0,
+                )
+
+                # 視覚フィードバック
                 st.markdown(
-                    "<div class='copy-info'>以下のテキストをコピーしてご利用ください。</div>",
+                    "<div class='copy-info'>✔ コピーしました</div>",
                     unsafe_allow_html=True,
                 )
 
-                st.markdown("<div class='copy-area'>", unsafe_allow_html=True)
-                st.text_area(
-                    "コピー用テキスト",
-                    full_text,
-                    height=120,
-                    label_visibility="collapsed",
-                )
-                st.markdown("</div>", unsafe_allow_html=True)
 
         with btn_col2:
             if st.button("🔄 再生成", use_container_width=True):
@@ -1024,6 +1033,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
