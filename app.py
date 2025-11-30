@@ -435,8 +435,8 @@ div[data-testid="stHorizontalBlock"] {
     color: #ffffff;
 }
 
-/* サイドナビゲーションの送信用テキストエリア */
-[data-testid="stSidebar"] .input-card textarea {
+/* サイドナビゲーションの送信用テキストエリア（サイドバー内の textarea 全部） */
+[data-testid="stSidebar"] textarea {
     background-color: #000000 !important;      /* 背景：黒 */
     border: 5px solid #ff8c00 !important;      /* 枠：オレンジ 太さ5 */
     color: #f9fafb !important;                 /* 文字色：薄い白 */
@@ -444,9 +444,10 @@ div[data-testid="stHorizontalBlock"] {
 }
 
 /* プレースホルダーの色も少し明るめに */
-[data-testid="stSidebar"] .input-card textarea::placeholder {
+[data-testid="stSidebar"] textarea::placeholder {
     color: #d1d5db !important;
 }
+
 
 
 </style>
@@ -802,4 +803,5 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
