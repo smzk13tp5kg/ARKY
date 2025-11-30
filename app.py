@@ -685,6 +685,52 @@ button[title="Close sidebar"] svg {
     content: none !important;
 }
 
+/* ============================================
+   メインエリア：金色グラデボタン（送信／コピー／再生成）
+============================================ */
+
+/* 左カラム（col1）の送信ボタン */
+[data-testid="column"]:nth-of-type(1) .stFormSubmitButton > button,
+/* 右カラム（col2）のコピー・再生成ボタン */
+[data-testid="column"]:nth-of-type(2) .stButton > button {
+    position: relative;
+    width: 100%;
+    padding: 10px 20px;
+    border-radius: 999px;
+    border: none;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+
+    /* 金色グラデーション */
+    background: linear-gradient(90deg, #ffd666 0%, #f4a021 100%);
+    color: #ffffff !important;
+
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+
+    /* 3D用 transform を完全に無効化 */
+    transform: none !important;
+    transform-style: flat !important;
+    transition: all 0.2s ease-out;
+}
+
+/* ホバー時：白背景＋金枠＋黒文字 */
+[data-testid="column"]:nth-of-type(1) .stFormSubmitButton > button:hover,
+[data-testid="column"]:nth-of-type(2) .stButton > button:hover {
+    background: #ffffff;
+    color: #111827 !important;
+    border: 2px solid #f4a021;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    transform: translateY(-1px) !important;
+}
+
+/* 念のため：3D用の ::before / ::after を完全に消す */
+[data-testid="column"]:nth-of-type(1) .stFormSubmitButton > button::before,
+[data-testid="column"]:nth-of-type(1) .stFormSubmitButton > button::after,
+[data-testid="column"]:nth-of-type(2) .stButton > button::before,
+[data-testid="column"]:nth-of-type(2) .stButton > button::after {
+    content: none !important;
+}
 
 </style>
 """,
@@ -1110,6 +1156,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
