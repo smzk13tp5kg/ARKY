@@ -169,7 +169,7 @@ st.markdown(
 .stApp {
     background-color: #050b23;
     background-image: url('https://raw.githubusercontent.com/あなたのユーザー名/リポジトリ名/main/assets/arky_logo.png');
-    background-size: contain;
+    background-size: cover;
     background-position: center;
     background-attachment: fixed;
     background-repeat: no-repeat;
@@ -785,3 +785,4 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
