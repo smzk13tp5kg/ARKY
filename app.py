@@ -216,93 +216,97 @@ div[data-testid="stHorizontalBlock"] {
 }
 
 /* -------------------------------------------
-   ボタンスタイル（3D効果付き）
+   3D フリップボタン（Pure CSS）
 ------------------------------------------- */
 
-/* デフォルト：全ての st.button / st.form_submit_button をオレンジ＋白に */
+/* デフォルト：全ての st.button / st.form_submit_button に3Dフリップ効果 */
+.stButton,
+.stFormSubmitButton {
+  perspective: 1000px;
+  display: inline-block;
+  width: 100%;
+}
+
 .stButton > button,
 .stFormSubmitButton > button {
+  position: relative;
+  width: 100%;
+  height: 50px;
   font-size: 1.0rem;
   font-weight: 700;
-  line-height: 1.5;
-  position: relative;
-  display: inline-block;
-  padding: 0.7rem 1.8rem;
+  text-transform: uppercase;
   cursor: pointer;
-  user-select: none;
-  transition: all 0.3s ease;
-  text-align: center;
-  vertical-align: middle;
-  text-decoration: none;
-  letter-spacing: 0.05em;
-  color: #ffffff !important;
-  border-radius: 0.5rem;
-  background: #ff8c00;  /* オレンジ */
   border: none;
-  overflow: visible;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: transparent;
+  transform-style: preserve-3d;
+  transform: translateZ(-25px);
+  transition: transform 0.25s;
+  color: transparent !important;
 }
 
-/* テキストを前面に出す */
-.stButton > button > div,
-.stFormSubmitButton > button > div {
-  position: relative;
-  z-index: 1;
-  color: #ffffff !important;
+.stButton > button::before,
+.stButton > button::after,
+.stFormSubmitButton > button::before,
+.stFormSubmitButton > button::after {
+  position: absolute;
+  width: 100%;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 5px solid #000;
+  box-sizing: border-box;
+  border-radius: 8px;
+  left: 0;
+  top: 0;
 }
 
-/* ホバー時：黄色に変更＋押し込み効果 */
+/* 前面（オレンジ背景×白文字） */
+.stButton > button::before,
+.stFormSubmitButton > button::before {
+  content: attr(data-text);
+  background-color: #ff8c00;
+  color: #ffffff;
+  border-color: #ff8c00;
+  transform: rotateY(0deg) translateZ(25px);
+}
+
+/* 背面（黄色背景×白文字） */
+.stButton > button::after,
+.stFormSubmitButton > button::after {
+  content: attr(data-text);
+  background-color: #ffd700;
+  color: #ffffff;
+  border-color: #ffd700;
+  transform: rotateX(90deg) translateZ(25px);
+}
+
+/* ホバー時：X軸90度回転でフリップ */
 .stButton > button:hover,
 .stFormSubmitButton > button:hover {
-  background: #ffd700 !important;  /* 黄色 */
-  color: #ffffff !important;
-  transform: translateY(2px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1);
+  transform: translateZ(-25px) rotateX(-90deg);
 }
 
-.stButton > button:hover > div,
-.stFormSubmitButton > button:hover > div {
-  color: #ffffff !important;
+/* ボタン内部のdivを非表示 */
+.stButton > button > div,
+.stFormSubmitButton > button > div {
+  opacity: 0;
+  pointer-events: none;
 }
 
-/* アクティブ時：さらに押し込む */
-.stButton > button:active,
-.stFormSubmitButton > button:active {
-  transform: translateY(4px);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+/* 新規作成ボタン用のラッパ（緑系の3Dフリップ） */
+.create-button-container .stButton > button::before {
+  content: "新規作成";
+  background-color: #10b981;
+  border-color: #10b981;
+  color: #ffffff;
 }
 
-/* 新規作成ボタン用のラッパ（緑系の3Dボタン） */
-.create-button-container .stButton > button {
-    position: relative;
-    width: 100%;
-    padding: 0.9rem 1.5rem;
-    border-radius: 12px;
-    background: #10b981;  /* 緑 */
-    color: #ffffff !important;
-    text-align: center;
-    font-size: 1.0rem;
-    font-weight: 700;
-    overflow: visible;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    border: none;
-}
-
-.create-button-container .stButton > button > div {
-    color: #ffffff !important;
-    z-index: 1;
-}
-
-.create-button-container .stButton > button:hover {
-    background: #059669 !important;  /* 濃い緑 */
-    color: #ffffff !important;
-    transform: translateY(2px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.create-button-container .stButton > button:hover > div {
-    color: #ffffff !important;
+.create-button-container .stButton > button::after {
+  content: "新規作成";
+  background-color: #059669;
+  border-color: #059669;
+  color: #ffffff;
 }
 
 /* -------------------------------------------
