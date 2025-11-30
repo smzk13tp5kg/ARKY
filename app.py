@@ -220,9 +220,10 @@ div[data-testid="stHorizontalBlock"] {
     margin-bottom: 8px;
 }
 
-/* ★ サイドバー内のボタン共通スタイル ★ */
+/* ★ ナビゲーションエリアのボタン（新規作成／送信）共通スタイル ★ */
 /* 通常時：Gold 背景＋白文字 */
-[data-testid="stSidebar"] .stButton > button {
+.sidebar-new-btn .stButton > button,
+.input-card button {
     background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%) !important;
     color: #ffffff !important;
     border-radius: 999px !important;
@@ -234,7 +235,8 @@ div[data-testid="stHorizontalBlock"] {
 }
 
 /* ホバー時：白背景＋黒文字＋Gold枠 */
-[data-testid="stSidebar"] .stButton > button:hover {
+.sidebar-new-btn .stButton > button:hover,
+.input-card button:hover {
     background: #ffffff !important;
     color: #111827 !important;
     border: 1px solid #ffd666 !important;
@@ -273,7 +275,7 @@ div[data-testid="stHorizontalBlock"] {
     margin: 8px 0;
 }
 
-/* （メッセージラッパ関連のCSSは省略せず維持） */
+/* （メッセージラッパ関連のCSSはそのまま） */
 .message-wrapper {
     background: #ffffff;
     border-radius: 12px;
@@ -574,7 +576,7 @@ with st.sidebar:
                 st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
-    st.caption("© 2025 ARKY")
+    st.caption("© 2024 メール生成AI")
 
 # ============================================
 # メイン 2 カラム
