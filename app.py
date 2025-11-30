@@ -178,7 +178,7 @@ st.markdown(
     width: 100%;
     height: 100%;
     background-image: url('https://raw.githubusercontent.com/smzk13tp5kg/ARKY/main/ARKY%20background%20image.png');
-    background-size: 600px 600px;
+    background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
     opacity: 0.4;
