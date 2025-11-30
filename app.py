@@ -633,6 +633,11 @@ button[title="Close sidebar"] svg {
     content: none !important;
 }
 
+/* メインブロック（stMainBlockContainer）の上パディング調整 */
+[data-testid="stAppViewContainer"] .main .block-container {
+    padding-top: 10px !important;
+}
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -1016,4 +1021,5 @@ with col2:
                         }
                     )
                 st.rerun()
+
 
