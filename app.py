@@ -5,7 +5,7 @@ import html
 import textwrap
 
 # ============================================
-# メール生成関数 (変更なし)
+# メール生成関数
 # ============================================
 def generate_email(template, tone, recipient, message, variation=0):
     subject_variations = {
@@ -221,9 +221,9 @@ div[data-testid="stHorizontalBlock"] {
 }
 
 /* ★ ナビゲーションエリアのボタン（新規作成／送信）共通スタイル ★ */
-/* 通常時：Gold 背景＋白文字 */
-.sidebar-new-btn .stButton > button,
-.input-card button {
+/* 通常：Goldグラデーション＋白文字（disabled含む） */
+[data-testid="stSidebar"] button,
+[data-testid="stSidebar"] button:disabled {
     background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%) !important;
     color: #ffffff !important;
     border-radius: 999px !important;
@@ -234,9 +234,8 @@ div[data-testid="stHorizontalBlock"] {
     box-shadow: 0 2px 4px rgba(0,0,0,0.25) !important;
 }
 
-/* ホバー時：白背景＋黒文字＋Gold枠 */
-.sidebar-new-btn .stButton > button:hover,
-.input-card button:hover {
+/* ホバー時：白背景＋黒文字（有効なボタンのみ） */
+[data-testid="stSidebar"] button:hover:enabled {
     background: #ffffff !important;
     color: #111827 !important;
     border: 1px solid #ffd666 !important;
@@ -264,7 +263,7 @@ div[data-testid="stHorizontalBlock"] {
 .app-title {
     font-size: 24px;
     font-weight: 700;
-    color: #ffffff !important;
+    color: #ffffff !重要;
 }
 
 /* セクション見出し */
@@ -273,52 +272,6 @@ div[data-testid="stHorizontalBlock"] {
     font-weight: 700;
     color: #ffd666;
     margin: 8px 0;
-}
-
-/* （メッセージラッパ関連のCSSはそのまま） */
-.message-wrapper {
-    background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #ffd666;
-    padding: 10px 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    height: 180px;
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    color: #111827;
-    display: flex;
-    flex-direction: column; 
-    overflow: hidden;
-}
-.message-wrapper + div {
-    height: 100%; 
-    min-height: 0;
-    flex: 1; 
-    display: flex;
-    flex-direction: column;
-}
-.message-wrapper + div > div[data-testid="stVerticalBlock"] {
-    flex: 1;
-    overflow-y: auto;
-    padding-right: 8px;
-    min-height: 0; 
-}
-div[data-testid="stChatMessage"] {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 4px 0 !important;
-    padding: 4px 0 !important;
-    flex-shrink: 0; 
-}
-.message-wrapper p,
-.message-wrapper span,
-.message-wrapper div {
-    color: #111827 !important;
-    word-break: break-word !important; 
-    word-wrap: break-word !important; 
-    white-space: pre-wrap !important; 
-    max-width: 100% !important;
 }
 
 /* 右：プレビューカード */
@@ -720,5 +673,3 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
-
-
