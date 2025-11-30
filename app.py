@@ -972,62 +972,78 @@ with col2:
         st.markdown("<div class='preview-actions'>", unsafe_allow_html=True)
         btn_col1, btn_col2 = st.columns(2)
 
-        # ---------- コピー ボタン ----------
+# ---------- コピー ボタン ----------
         with btn_col1:
             # コピー用テキスト
             full_text = f"件名: {email['subject']}\n\n{email['body']}"
-            escaped_text = json.dumps(full_text)  # JSに安全に渡す
-
+            
             # Streamlit標準ボタン（3DフリップCSSが適用される）
-            if st.button("📋 コピー", use_container_width=True):
-                # JSを実行するHTMLを埋め込む（ボタン押下時にのみ発火）
-                st.components.v1.html(
-                    f"""
-                    <script>
-                    (function() {{
-                        const text = {escaped_text};
-
-                        // 1. まず navigator.clipboard（新しめのAPI）を試す
-                        if (navigator.clipboard && navigator.clipboard.writeText) {{
-                            navigator.clipboard.writeText(text).then(function() {{
-                                console.log("Copied with navigator.clipboard");
-                            }}).catch(function(err) {{
-                                console.warn("navigator.clipboard failed:", err);
-                                fallbackCopy(text);
-                            }});
-                        }} else {{
-                            // 2. 非対応ブラウザや iframe 制限時はこちら
-                            fallbackCopy(text);
-                        }}
-
-                        function fallbackCopy(text) {{
-                            try {{
-                                const textarea = document.createElement('textarea');
-                                textarea.value = text;
-                                textarea.style.position = 'fixed';
-                                textarea.style.left = '-9999px';
-                                document.body.appendChild(textarea);
-                                textarea.focus();
-                                textarea.select();
-                                const ok = document.execCommand('copy');
-                                document.body.removeChild(textarea);
-                                console.log("Copied with execCommand, result:", ok);
-                            }} catch (e) {{
-                                console.error("Fallback copy failed:", e);
+            copy_button_id = f"copy_btn_{random.randint(1000, 9999)}"
+            
+            st.markdown(
+                f"""
+                <button id="{copy_button_id}" 
+                        style="width: 100%; height: 50px; font-size: 1.0rem; 
+                               font-weight: 700; text-transform: uppercase; 
+                               cursor: pointer; border: none; 
+                               background: transparent; position: relative;
+                               transform-style: preserve-3d; 
+                               transform: translateZ(-25px);
+                               transition: transform 0.25s;"
+                        data-text="📋 コピー"
+                        onmouseover="this.style.transform='translateZ(-25px) rotateX(-90deg)'"
+                        onmouseout="this.style.transform='translateZ(-25px)'">
+                    <div style="position: absolute; width: 100%; height: 50px; 
+                                display: flex; align-items: center; justify-content: center;
+                                border: 5px solid #ff8c00; box-sizing: border-box; 
+                                border-radius: 8px; left: 0; top: 0;
+                                background-color: #ff8c00; color: #ffffff;
+                                transform: rotateY(0deg) translateZ(25px);">
+                        📋 コピー
+                    </div>
+                    <div style="position: absolute; width: 100%; height: 50px; 
+                                display: flex; align-items: center; justify-content: center;
+                                border: 5px solid #ffd700; box-sizing: border-box; 
+                                border-radius: 8px; left: 0; top: 0;
+                                background-color: #ffd700; color: #ffffff;
+                                transform: rotateX(90deg) translateZ(25px);">
+                        📋 コピー
+                    </div>
+                </button>
+                <div id="copy_status_{copy_button_id}" style="color: #ffffff; font-size: 13px; margin-top: 8px; min-height: 20px;"></div>
+                <textarea id="copy_text_{copy_button_id}" style="position: absolute; left: -9999px;">{html.escape(full_text)}</textarea>
+                <script>
+                (function() {{
+                    const btn = document.getElementById('{copy_button_id}');
+                    const statusDiv = document.getElementById('copy_status_{copy_button_id}');
+                    const textarea = document.getElementById('copy_text_{copy_button_id}');
+                    
+                    btn.addEventListener('click', function() {{
+                        try {{
+                            textarea.style.position = 'fixed';
+                            textarea.style.left = '0';
+                            textarea.focus();
+                            textarea.select();
+                            const success = document.execCommand('copy');
+                            textarea.style.position = 'absolute';
+                            textarea.style.left = '-9999px';
+                            
+                            if (success) {{
+                                statusDiv.textContent = '✔ コピーしました';
+                                setTimeout(() => {{ statusDiv.textContent = ''; }}, 3000);
+                            }} else {{
+                                statusDiv.textContent = '⚠ コピーに失敗しました';
                             }}
+                        }} catch (e) {{
+                            statusDiv.textContent = '⚠ コピーに失敗しました';
+                            console.error('Copy failed:', e);
                         }}
-                    }})();
-                    </script>
-                    """,
-                    height=0,
-                )
-
-                # 視覚フィードバック
-                st.markdown(
-                    "<div class='copy-info'>✔ コピーしました</div>",
-                    unsafe_allow_html=True,
-                )
-
+                    }});
+                }})();
+                </script>
+                """,
+                unsafe_allow_html=True,
+            )
         # ---------- 再生成 ボタン ----------
         with btn_col2:
             if st.button("🔄 再生成", use_container_width=True):
@@ -1064,3 +1080,4 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
