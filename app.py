@@ -287,27 +287,56 @@ div[data-testid="stHorizontalBlock"] {
   transform: translateZ(-25px) rotateX(-90deg);
 }
 
-/* ボタン内部のdivを非表示 */
+/* ボタン内部のdivは表示するが、透明度を下げる */
 .stButton > button > div,
 .stFormSubmitButton > button > div {
-  opacity: 0;
-  pointer-events: none;
+  position: relative;
+  z-index: 10;
+  color: #ffffff !important;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
 /* 新規作成ボタン用のラッパ（緑系の3Dフリップ） */
 .create-button-container .stButton > button::before {
-  content: "新規作成";
   background-color: #10b981;
   border-color: #10b981;
   color: #ffffff;
 }
 
 .create-button-container .stButton > button::after {
-  content: "新規作成";
   background-color: #059669;
   border-color: #059669;
   color: #ffffff;
 }
+
+/* JavaScriptでボタンテキストをdata-text属性にコピー */
+<script>
+(function() {
+  function updateButtonText() {
+    const buttons = document.querySelectorAll('.stButton > button, .stFormSubmitButton > button');
+    buttons.forEach(btn => {
+      const textDiv = btn.querySelector('div');
+      if (textDiv && textDiv.textContent) {
+        btn.setAttribute('data-text', textDiv.textContent.trim());
+      }
+    });
+  }
+  
+  // 初回実行
+  updateButtonText();
+  
+  // MutationObserverで動的に追加されるボタンも監視
+  const observer = new MutationObserver(updateButtonText);
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+  
+  // 定期的にも実行（保険）
+  setInterval(updateButtonText, 1000);
+})();
+</script>
 
 /* -------------------------------------------
    メインエリア
