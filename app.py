@@ -495,6 +495,12 @@ button[title="Close sidebar"] svg {
     fill: #ffffff !important;   /* SVGアイコン用の色を白に */
 }
 
+button[title="Open sidebar"] svg,
+button[title="Close sidebar"] svg {
+    fill: #ffffff !important;
+    color: #ffffff !important;
+}
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -861,4 +867,5 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
