@@ -4,34 +4,12 @@ import random
 import html
 import textwrap
 import json
-from supabase import create_client, Client  # requirements.txt に supabase を追加しておく
-
-# ============================================
-# Supabase クライアント設定（無ければオフ）
-# ============================================
-SUPABASE_TABLE = "email_logs"  # あらかじめ作っておくテーブル名
-supabase: Client | None = None
-
-# secrets に URL / KEY が設定されている場合だけクライアントを作成する
-if "supabase_url" in st.secrets and "supabase_key" in st.secrets:
-    try:
-        SUPABASE_URL = st.secrets["supabase_url"]
-        SUPABASE_KEY = st.secrets["supabase_key"]
-        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-    except Exception as e:
-        # クライアント初期化に失敗した場合も、「Supabase無しモード」で動かす
-        supabase = None
-        st.write("⚠ Supabase クライアント初期化に失敗しました:", e)
-else:
-    # secrets が無い環境では Supabase を使わずに動かす
-    supabase = None
-
 
 # ============================================
 # 時候の挨拶（ヘルパー）
 # ============================================
 def get_seasonal_greeting() -> str:
-    """現在の月に応じた時候の挨拶を返す（冒頭語のみ）"""
+    """現在の月に応じた時候の挨拶を返す"""
     month = datetime.now().month
     greetings = {
         1: "新春の候",
@@ -47,6 +25,7 @@ def get_seasonal_greeting() -> str:
         11: "晩秋の候",
         12: "師走の候",
     }
+
     return greetings.get(month, "")
 
 # ============================================
@@ -122,6 +101,7 @@ def generate_email(template, tone, recipient, message, variation=0, seasonal_tex
     else:
         greeting = base_greeting
 
+    # ★ body_variations から seasonal_block を削除
     body_variations = [
         f"""{greeting}
 
@@ -199,33 +179,7 @@ def generate_email(template, tone, recipient, message, variation=0, seasonal_tex
         "advice": advice,
         "variation": variation,
     }
-
-# ============================================
-# Supabase への保存ヘルパー
-# ============================================
-def save_email_to_supabase(email_dict: dict,
-                           template: str,
-                           tone: str,
-                           recipient: str,
-                           seasonal_text: str,
-                           raw_message: str):
-    """生成したメール内容とメタ情報を Supabase に保存する"""
-    try:
-        data = {
-            "template": template,
-            "tone": tone,
-            "recipient": recipient,
-            "seasonal_text": seasonal_text or "",
-            "subject": email_dict.get("subject", ""),
-            "body": email_dict.get("body", ""),
-            "advice": email_dict.get("advice", ""),
-            "raw_message": raw_message,
-            "variation": email_dict.get("variation", 0),
-        }
-        supabase.table(SUPABASE_TABLE).insert(data).execute()
-    except Exception as e:
-        st.write("⚠ Supabase への保存に失敗しました:", e)
-
+    
 # ============================================
 # ページ設定
 # ============================================
@@ -312,7 +266,7 @@ div[data-testid="stHorizontalBlock"] {
 [data-testid="stSidebar"] {
     width: 450px !important;
     min-width: 450px !important;
-    max_width: 450px !important;
+    max-width: 450px !important;
     background: #050b23;
     border-right: 1px solid #cfae63;
 }
@@ -499,7 +453,7 @@ button[title="Close sidebar"] svg {
     font-size: 14px;
     font-weight: 600;
     line-height: 1.6;
-    animation: intro-gradient 3s ease_in-out infinite;
+    animation: intro-gradient 3s ease-in-out infinite;
 }
 @keyframes intro-gradient {
     0%   { background-position: 14% 0%; }
@@ -560,7 +514,7 @@ button[title="Close sidebar"] svg {
 }
 
 /* コピー案内テキスト（白文字） */
-.copy_info {
+.copy-info {
     color: #ffffff;
     font-size: 13px;
     margin-bottom: 4px;
@@ -587,63 +541,76 @@ button[title="Close sidebar"] svg {
     box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 .chat-bubble.user {
-    position: relative;
+    position: relative;             /* ← しっぽの基準にする */
     background: #ffffff;
     color: #111827;
-    margin-left: auto;
-    max-width: 80%;
+    margin-left: auto;              /* 右寄せしたい場合。左寄せなら消してOK */
+    max-width: 80%;                 /* 余白を少し残すために調整（お好み） */
 }
+
+/* ユーザー吹き出しの“しっぽ”（右側） */
 .chat-bubble.user::after {
     content: "";
     position: absolute;
-    right: -8px;
-    top: 14px;
+    right: -8px;                    /* バブルの右外側に飛び出させる */
+    top: 14px;                      /* 縦位置。お好みで調整 */
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 8px 0 8px 8px;
-    border-color: transparent transparent transparent #ffffff;
+    border-width: 8px 0 8px 8px;    /* 三角形のサイズ */
+    border-color: transparent transparent transparent #ffffff;  /* ← バブルと同じ色 */
+
+    /* 影をちょっと付けたい場合 */
     filter: drop-shadow(-1px 1px 2px rgba(0,0,0,0.15));
 }
 
-/* AIチャットバブル：グラデ枠＋文字 */
+/* ★ AIチャットバブルを intro-bubble と同じスタイルに変更 ★ */
 .chat-bubble.assistant {
     position: relative;
-    padding: 0;
+    padding: 0;                     /* 内側の padding はテキスト側で制御 */
     border-radius: 16px;
     background: transparent;
     overflow: visible;
-    margin-right: auto;
-    max-width: 85%;
+    margin-right: auto;             /* 左寄せ（必要に応じて調整） */
+    max-width: 85%;                 /* お好みで可変 */
 }
+
+/* 外側の光るグラデーション枠（assistant用） */
 .chat-bubble.assistant::before {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: 16px;
-    padding: 4px;
+    padding: 4px; /* 枠の太さ */
+
     background: linear-gradient(120deg, #6559ae, #ff7159, #6559ae);
     background-size: 400% 400%;
     animation: intro-gradient 3s ease-in-out infinite;
+
     -webkit-mask:
       linear-gradient(#000 0 0) content-box,
       linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
             mask-composite: exclude;
 }
+
+/* 内側テキストのグラデーション（assistant用） */
 .chat-bubble.assistant > span {
     position: relative;
     display: block;
     padding: 10px 18px;
     border-radius: 12px;
-    background: rgba(5, 11, 35, 0.85);
+
+    background: rgba(5, 11, 35, 0.85);      /* 半透明背景 */
     background-image: linear-gradient(120deg, #fdfbff, #ffd7b2, #ffe6ff);
     background-size: 400% 400%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+
     font-size: 14px;
     font-weight: 600;
     line-height: 1.6;
+
     animation: intro-gradient 3s ease-in-out infinite;
 }
 
@@ -659,57 +626,19 @@ button[title="Close sidebar"] svg {
     fill: #ffffff !important;
 }
 
-/* サイドバー上部ヘッダー（余白調整） */
+/* サイドバー上部ヘッダー（黄色で囲った余白）の高さを詰める */
 [data-testid="stSidebarHeader"] {
     min-height: 0 !important;
     height: 0 !important;
     padding-top: 0 !important;
     padding-bottom: 0 !important;
 }
+
+/* サイドバーコンテンツの上パディングも少しだけにする */
 [data-testid="stSidebarContent"] {
-    padding-top: 7px !important;
+    padding-top: 7px !important;   /* 0でもいいけど、開閉アイコンが見えなくなるからこれくらいが自然かも */
 }
 
-/* ============================
-   プレビュー下の「コピー」「再生成」だけ 3D を無効化する
-   （.preview-actions 内の stButton にだけ適用）
-============================ */
-.preview-actions .stButton > button {
-    all: unset;  /* まず既存の 3D スタイルを全部リセット */
-    box-sizing: border-box;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 100%;
-    height: 40px;
-    padding: 0 12px;
-
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    background: #f3f4f6;
-    color: #111827;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-}
-
-/* ホバー時の軽い反応 */
-.preview-actions .stButton > button:hover {
-    background: #e5e7eb;
-}
-
-/* フォーカス時（キーボード操作の見え方） */
-.preview-actions .stButton > button:focus {
-    outline: 2px solid #fbbf24;
-    outline-offset: 2px;
-}
-
-/* 3D用の ::before / ::after を無効化しておく */
-.preview-actions .stButton > button::before,
-.preview-actions .stButton > button::after {
-    content: none !important;
-}
 
 </style>
 """,
@@ -717,7 +646,7 @@ button[title="Close sidebar"] svg {
 )
 
 # ============================================
-# ボタンのテキストを data-text に反映
+# JavaScriptでボタンテキストを動的に設定
 # ============================================
 st.components.v1.html(
     """
@@ -732,9 +661,18 @@ st.components.v1.html(
           }
         });
       }
+      
+      // 初回実行
       setTimeout(updateButtonText, 500);
+      
+      // MutationObserverで動的に追加されるボタンも監視
       const observer = new MutationObserver(updateButtonText);
-      observer.observe(parent.document.body, { childList: true, subtree: true });
+      observer.observe(parent.document.body, {
+        childList: true,
+        subtree: true
+      });
+      
+      // 定期的にも実行
       setInterval(updateButtonText, 1000);
     })();
     </script>
@@ -954,22 +892,9 @@ with col1:
                 st.session_state.messages.append({"role": "assistant", "content": response})
 
                 st.session_state.variation_count = 0
-                new_email = generate_email(
-                    template, tone, recipient, user_message,
-                    variation=0, seasonal_text=seasonal_text
+                st.session_state.generated_email = generate_email(
+                    template, tone, recipient, user_message, variation=0, seasonal_text=seasonal_text
                 )
-                st.session_state.generated_email = new_email
-
-                # Supabase に保存
-                save_email_to_supabase(
-                    email_dict=new_email,
-                    template=template,
-                    tone=tone,
-                    recipient=recipient,
-                    seasonal_text=seasonal_text,
-                    raw_message=user_message,
-                )
-
                 st.rerun()
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
@@ -986,6 +911,7 @@ with col1:
                 f"<div class='chat-bubble user'>{text}</div>"
             )
         else:
+            # ★ span で包むのがポイント
             chat_html_parts.append(
                 f"<div class='chat-bubble assistant'><span>{text}</span></div>"
             )
@@ -1046,23 +972,63 @@ with col2:
         st.markdown("<div class='preview-actions'>", unsafe_allow_html=True)
         btn_col1, btn_col2 = st.columns(2)
 
-        # ---------- コピー（テキストエリア方式） ----------
+        # ---------- コピー ボタン ----------
         with btn_col1:
+            # コピー用テキスト
             full_text = f"件名: {email['subject']}\n\n{email['body']}"
-            st.markdown(
-                "<div class='copy-info'>以下のテキストをコピーしてご利用ください。</div>",
-                unsafe_allow_html=True,
-            )
-            st.markdown("<div class='copy-area'>", unsafe_allow_html=True)
-            st.text_area(
-                "コピー用テキスト",
-                full_text,
-                height=120,
-                label_visibility="collapsed",
-            )
-            st.markdown("</div>", unsafe_allow_html=True)
+            escaped_text = json.dumps(full_text)  # JSに安全に渡す
 
-        # ---------- 再生成 ボタン（Supabase保存付き） ----------
+            # Streamlit標準ボタン（3DフリップCSSが適用される）
+            if st.button("📋 コピー", use_container_width=True):
+                # JSを実行するHTMLを埋め込む（ボタン押下時にのみ発火）
+                st.components.v1.html(
+                    f"""
+                    <script>
+                    (function() {{
+                        const text = {escaped_text};
+
+                        // 1. まず navigator.clipboard（新しめのAPI）を試す
+                        if (navigator.clipboard && navigator.clipboard.writeText) {{
+                            navigator.clipboard.writeText(text).then(function() {{
+                                console.log("Copied with navigator.clipboard");
+                            }}).catch(function(err) {{
+                                console.warn("navigator.clipboard failed:", err);
+                                fallbackCopy(text);
+                            }});
+                        }} else {{
+                            // 2. 非対応ブラウザや iframe 制限時はこちら
+                            fallbackCopy(text);
+                        }}
+
+                        function fallbackCopy(text) {{
+                            try {{
+                                const textarea = document.createElement('textarea');
+                                textarea.value = text;
+                                textarea.style.position = 'fixed';
+                                textarea.style.left = '-9999px';
+                                document.body.appendChild(textarea);
+                                textarea.focus();
+                                textarea.select();
+                                const ok = document.execCommand('copy');
+                                document.body.removeChild(textarea);
+                                console.log("Copied with execCommand, result:", ok);
+                            }} catch (e) {{
+                                console.error("Fallback copy failed:", e);
+                            }}
+                        }}
+                    }})();
+                    </script>
+                    """,
+                    height=0,
+                )
+
+                # 視覚フィードバック
+                st.markdown(
+                    "<div class='copy-info'>✔ コピーしました</div>",
+                    unsafe_allow_html=True,
+                )
+
+        # ---------- 再生成 ボタン ----------
         with btn_col2:
             if st.button("🔄 再生成", use_container_width=True):
                 st.session_state.messages.append(
@@ -1077,7 +1043,7 @@ with col2:
 
                 if last_user_message:
                     st.session_state.variation_count += 1
-                    new_email = generate_email(
+                    st.session_state.generated_email = generate_email(
                         template,
                         tone,
                         recipient,
@@ -1085,8 +1051,6 @@ with col2:
                         variation=st.session_state.variation_count,
                         seasonal_text=seasonal_text,
                     )
-                    st.session_state.generated_email = new_email
-
                     st.session_state.messages.append(
                         {
                             "role": "assistant",
@@ -1097,18 +1061,7 @@ with col2:
                         }
                     )
 
-                    # Supabase に保存
-                    save_email_to_supabase(
-                        email_dict=new_email,
-                        template=template,
-                        tone=tone,
-                        recipient=recipient,
-                        seasonal_text=seasonal_text,
-                        raw_message=last_user_message,
-                    )
-
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
-
 
