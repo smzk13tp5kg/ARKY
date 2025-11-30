@@ -563,9 +563,54 @@ button[title="Close sidebar"] svg {
     filter: drop-shadow(-1px 1px 2px rgba(0,0,0,0.15));
 }
 
+/* ★ AIチャットバブルを intro-bubble と同じスタイルに変更 ★ */
 .chat-bubble.assistant {
-    background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%);
-    color: #ffffff;
+    position: relative;
+    padding: 0;                     /* 内側の padding はテキスト側で制御 */
+    border-radius: 16px;
+    background: transparent;
+    overflow: visible;
+    margin-right: auto;             /* 左寄せ（必要に応じて調整） */
+    max-width: 85%;                 /* お好みで可変 */
+}
+
+/* 外側の光るグラデーション枠（assistant用） */
+.chat-bubble.assistant::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 4px; /* 枠の太さ */
+
+    background: linear-gradient(120deg, #6559ae, #ff7159, #6559ae);
+    background-size: 400% 400%;
+    animation: intro-gradient 3s ease-in-out infinite;
+
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+}
+
+/* 内側テキストのグラデーション（assistant用） */
+.chat-bubble.assistant > span {
+    position: relative;
+    display: block;
+    padding: 10px 18px;
+    border-radius: 12px;
+
+    background: rgba(5, 11, 35, 0.85);      /* 半透明背景 */
+    background-image: linear-gradient(120deg, #fdfbff, #ffd7b2, #ffe6ff);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.6;
+
+    animation: intro-gradient 3s ease-in-out infinite;
 }
 
 /* Streamlit の要素コンテナ余白を削る */
@@ -978,4 +1023,5 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
