@@ -1,7 +1,3 @@
-コード全体を書き直しました。
-「💬 メッセージ」見出しの直下に、**左にアイコン画像＋右にオレンジの吹き出し**を固定表示し、その下にチャット履歴が並ぶ構成になっています。
-
-```python
 import streamlit as st
 from datetime import datetime
 import random
@@ -835,3 +831,4 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
