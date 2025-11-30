@@ -588,10 +588,12 @@ button[title="Close sidebar"] svg {
 
 /* ============================================
    メインエリア：金色グラデボタン（送信／コピー／再生成）
-   → stAppViewContainer 内のすべての button / submit を上書き
+   ※ サイドバー（[data-testid="stSidebar"]）は除外する
 ============================================ */
-[data-testid="stAppViewContainer"] .stButton > button,
-[data-testid="stAppViewContainer"] .stFormSubmitButton > button {
+
+/* メインエリア側の st.button / st.form_submit_button 全部 */
+[data-testid="stAppViewContainer"] > div:not([data-testid="stSidebar"]) .stButton > button,
+[data-testid="stAppViewContainer"] > div:not([data-testid="stSidebar"]) .stFormSubmitButton > button {
     position: relative;
     width: 100%;
     padding: 10px 20px;
@@ -600,17 +602,22 @@ button[title="Close sidebar"] svg {
     font-size: 14px;
     font-weight: 700;
     letter-spacing: 0.05em;
+
+    /* 金色グラデーション */
     background: linear-gradient(90deg, #ffd666 0%, #f4a021 100%);
     color: #ffffff !important;
+
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+
+    /* 3D用 transform を完全に無効化 */
     transform: none !important;
     transform-style: flat !important;
     transition: all 0.2s ease-out;
 }
 
 /* hover：白背景＋金枠＋黒文字 */
-[data-testid="stAppViewContainer"] .stButton > button:hover,
-[data-testid="stAppViewContainer"] .stFormSubmitButton > button:hover {
+[data-testid="stAppViewContainer"] > div:not([data-testid="stSidebar"]) .stButton > button:hover,
+[data-testid="stAppViewContainer"] > div:not([data-testid="stSidebar"]) .stFormSubmitButton > button:hover {
     background: #ffffff;
     color: #111827 !important;
     border: 2px solid #f4a021;
@@ -618,13 +625,14 @@ button[title="Close sidebar"] svg {
     transform: translateY(-1px) !important;
 }
 
-/* 念のため、メインエリアの ::before/::after は消しておく */
-[data-testid="stAppViewContainer"] .stButton > button::before,
-[data-testid="stAppViewContainer"] .stButton > button::after,
-[data-testid="stAppViewContainer"] .stFormSubmitButton > button::before,
-[data-testid="stAppViewContainer"] .stFormSubmitButton > button::after {
+/* メインエリア側の 3D用 ::before / ::after を消す */
+[data-testid="stAppViewContainer"] > div:not([data-testid="stSidebar"]) .stButton > button::before,
+[data-testid="stAppViewContainer"] > div:not([data-testid="stSidebar"]) .stButton > button::after,
+[data-testid="stAppViewContainer"] > div:not([data-testid="stSidebar"]) .stFormSubmitButton > button::before,
+[data-testid="stAppViewContainer"] > div:not([data-testid="stSidebar"]) .stFormSubmitButton > button::after {
     content: none !important;
 }
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -1008,3 +1016,4 @@ with col2:
                         }
                     )
                 st.rerun()
+
