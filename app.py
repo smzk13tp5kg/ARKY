@@ -639,6 +639,50 @@ button[title="Close sidebar"] svg {
     padding-top: 7px !important;   /* 0でもいいけど、開閉アイコンが見えなくなるからこれくらいが自然かも */
 }
 
+/* ============================================
+   プレビューエリア：金色グラデボタン（コピー／再生成）
+   ※ ナビゲーションの3Dボタンとは切り分ける
+============================================ */
+
+/* ボタン本体 */
+.preview-actions .stButton > button {
+    position: relative;
+    width: 100%;
+    padding: 10px 20px;
+    border-radius: 999px;
+    border: none;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+
+    /* 金色グラデーション */
+    background: linear-gradient(90deg, #ffd666 0%, #f4a021 100%);
+    color: #ffffff !important;
+
+    /* ARKYらしい強めの影 */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+
+    /* 3Dフリップ用 transform を無効化 */
+    transform: none !important;
+    transform-style: flat !important;
+    transition: all 0.2s ease-out;
+}
+
+/* ホバー時：白背景＋金枠＋黒文字 */
+.preview-actions .stButton > button:hover {
+    background: #ffffff;
+    color: #111827 !important;
+    border: 2px solid #f4a021;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    transform: translateY(-1px);
+}
+
+/* 3D用の ::before / ::after を無効化しておく */
+.preview-actions .stButton > button::before,
+.preview-actions .stButton > button::after {
+    content: none !important;
+}
+
 
 </style>
 """,
@@ -1064,4 +1108,5 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
