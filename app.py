@@ -94,22 +94,17 @@ def generate_email(template, tone, recipient, message, variation=0, seasonal_tex
     greeting_list = greetings_variations.get(recipient, ["お世話になっております。"])
     base_greeting = greeting_list[variation % len(greeting_list)]
 
-    # 時候の挨拶がある場合は結合
+    # ★ 時候の挨拶を greeting にだけ付与する
     if seasonal_text:
         greeting = f"{seasonal_text}、{base_greeting}"
     else:
         greeting = base_greeting
 
-
-    # 時候の挨拶ブロック
-    seasonal_block = ""
-    if seasonal_text:
-        seasonal_block = seasonal_text.strip() + "\n\n"
-
+    # ★ body_variations から seasonal_block を削除
     body_variations = [
         f"""{greeting}
 
-{seasonal_block}{message}に関しまして、ご連絡させていただきます。
+{message}に関しまして、ご連絡させていただきます。
 
 詳細につきましては、下記のとおりとなります。
 ご確認いただけますと幸いです。
@@ -118,7 +113,7 @@ def generate_email(template, tone, recipient, message, variation=0, seasonal_tex
 """,
         f"""{greeting}
 
-{seasonal_block}{message}の件につきまして、ご連絡申し上げます。
+{message}の件につきまして、ご連絡申し上げます。
 
 詳細は以下のとおりでございます。
 ご確認のほど、何卒よろしくお願い申し上げます。
@@ -127,7 +122,7 @@ def generate_email(template, tone, recipient, message, variation=0, seasonal_tex
 """,
         f"""{greeting}
 
-{seasonal_block}{message}についてご連絡いたします。
+{message}についてご連絡いたします。
 
 下記の内容をご確認ください。
 
@@ -183,8 +178,7 @@ def generate_email(template, tone, recipient, message, variation=0, seasonal_tex
         "advice": advice,
         "variation": variation,
     }
-
-
+    
 # ============================================
 # ページ設定
 # ============================================
@@ -964,6 +958,3 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
-
-
-
