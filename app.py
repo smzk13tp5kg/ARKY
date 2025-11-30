@@ -786,7 +786,7 @@ if "variation_count" not in st.session_state:
 # トップバー
 # ============================================
 st.markdown(
-    "<div class='top-bar'><h1 class='app-title'>✉️ ビジネスメール作成アシスタント</h1></div>",
+    "<div class='top-bar'><h1 class='app-title'>✉️ Business Writing AI</h1></div>",
     unsafe_allow_html=True,
 )
 
@@ -795,7 +795,7 @@ st.markdown(
 # ============================================
 with st.sidebar:
     st.markdown(
-        "<div class='sidebar-app-title'>■ メール生成AI</div>",
+        "<div class='sidebar-app-title'>■ ビジネスメール作成アシスタント</div>",
         unsafe_allow_html=True,
     )
 
@@ -1156,6 +1156,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
