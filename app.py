@@ -177,7 +177,7 @@ st.markdown(
     width: 100%;
     height: 100%;
     background-color: #050b23;
-    background-image: url('https://raw.githubusercontent.com/smzk13tp5kg/ARKY/main/ARKY%20background%20image.png');
+    background-image: url('https://github.com/smzk13tp5kg/ARKY/blob/af841c7b31f3d9389fcdae05217ec935a09f9c99/ARKY%20background%20image.png');
     background-size: 500px 500px;
     background-position: center center;
     background-repeat: no-repeat;
@@ -786,3 +786,4 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
