@@ -168,11 +168,6 @@ st.markdown(
 /* 全体背景：濃い紺色 + ARKY背景画像 */
 .stApp {
     background-color: #050b23;
-    background-image: url('https://raw.githubusercontent.com/あなたのユーザー名/リポジトリ名/main/assets/arky_logo.png');
-    background-size: contain;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
 }
 .stApp::before {
     content: '';
@@ -181,8 +176,14 @@ st.markdown(
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(5, 11, 35, 0.3);
+    background-color: #050b23;
+    background-image: url('https://raw.githubusercontent.com/smzk13tp5kg/ARKY/main/ARKY%20background%20image.png');
+    background-size: 500px 500px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    opacity: 0.3;
     z-index: -1;
+    pointer-events: none;
 }
 [data-testid="stAppViewContainer"] {
     background-color: transparent;
