@@ -794,16 +794,23 @@ with col2:
 
         with btn_col1:
             if st.button("📋 コピー", use_container_width=True):
-                full_text = f"件名: {email['subject']}\n\n{email['body']}"
-                st.info("以下のテキストをコピーしてご利用ください。")
-                st.markdown("<div class='copy-area'>", unsafe_allow_html=True)
-                st.text_area(
-                    "コピー用テキスト",
-                    full_text,
-                    height=120,
-                    label_visibility="collapsed",
-                )
-                st.markdown("</div>", unsafe_allow_html=True)
+        full_text = f"件名: {email['subject']}\n\n{email['body']}"
+
+        # ▼ st.info の代わりに自前の白文字メッセージ
+        st.markdown(
+            "<div class='copy-info'>以下のテキストをコピーしてご利用ください。</div>",
+            unsafe_allow_html=True,
+        )
+
+        st.markdown("<div class='copy-area'>", unsafe_allow_html=True)
+        st.text_area(
+            "コピー用テキスト",
+            full_text,
+            height=120,
+            label_visibility="collapsed",
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+
 
         with btn_col2:
             if st.button("🔄 再生成", use_container_width=True):
@@ -839,6 +846,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
