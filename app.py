@@ -167,7 +167,8 @@ st.markdown(
 
 /* 全体背景：濃い紺色 + ARKY背景画像 */
 .stApp {
-    background-color: red;
+    background-color: #050b23;
+    position: relative;
 }
 .stApp::before {
     content: '';
@@ -176,17 +177,18 @@ st.markdown(
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: #050b23;
     background-image: url('https://raw.githubusercontent.com/smzk13tp5kg/ARKY/main/ARKY%20background%20image.png');
-    background-size: 500px 500px;
+    background-size: 600px 600px;
     background-position: center center;
     background-repeat: no-repeat;
-    opacity: 0.3;
-    z-index: -1;
+    opacity: 0.4;
+    z-index: 0;
     pointer-events: none;
 }
 [data-testid="stAppViewContainer"] {
     background-color: transparent;
+    position: relative;
+    z-index: 1;
 }
 [data-testid="stHeader"] {
     background-color: rgba(5, 11, 35, 0.95);
@@ -786,5 +788,3 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
-
-
