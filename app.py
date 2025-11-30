@@ -126,7 +126,8 @@ def generate_email(template, tone, recipient, message, variation=0):
         ],
     }
     closing_list = closings_variations.get(recipient, ["よろしくお願いいたします。"])
-    closing = closing_list[variation % len(closings_variations)]
+    closing = closing_list[variation % len(closing_list)]
+
 
     body = body_start + closing
 
@@ -803,5 +804,6 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
