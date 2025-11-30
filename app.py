@@ -558,6 +558,20 @@ button[title="Close sidebar"] svg {
     fill: #ffffff !important;
 }
 
+/* サイドバー上部ヘッダー（黄色で囲った余白）の高さを詰める */
+[data-testid="stSidebarHeader"] {
+    min-height: 0 !important;
+    height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* サイドバーコンテンツの上パディングも少しだけにする */
+[data-testid="stSidebarContent"] {
+    padding-top: 4px !important;   /* 0でもいいけど、4pxくらいが自然 */
+}
+
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -942,3 +956,4 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
