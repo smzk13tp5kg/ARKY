@@ -156,7 +156,7 @@ st.set_page_config(
 )
 
 # ============================================
-# カスタムCSS
+# カスタムCSS（統合版）
 # ============================================
 st.markdown(
     """
@@ -215,13 +215,11 @@ div[data-testid="stHorizontalBlock"] {
     color: #ffffff !important;
 }
 
-# ==============================
-# ボタン用カスタムCSS（デフォルト＝オレンジ×白、辞書ボタンだけ青系）
-# ==============================
-st.markdown(
-    """
-<style>
-/* ▼▼ デフォルト：全ての st.button / st.form_submit_button をオレンジ＋白に（3D効果付き） ▼▼ */
+/* -------------------------------------------
+   ボタンスタイル（3D効果付き）
+------------------------------------------- */
+
+/* デフォルト：全ての st.button / st.form_submit_button をオレンジ＋白に */
 .stButton > button,
 .stFormSubmitButton > button {
   font-size: 1.0rem;
@@ -274,7 +272,7 @@ st.markdown(
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-/* ▼▼ 新規作成ボタン用のラッパ（緑系の3Dボタン） ▼▼ */
+/* 新規作成ボタン用のラッパ（緑系の3Dボタン） */
 .create-button-container .stButton > button {
     position: relative;
     width: 100%;
@@ -307,64 +305,6 @@ st.markdown(
     color: #ffffff !important;
 }
 
-/* ▼▼ 辞書ビュー用：用語一覧ボタン（AliceBlue / Azure）に上書き ▼▼ */
-.term-button-container .stButton > button {
-    position: relative;
-    width: 100%;
-    padding: 0.9rem 1.1rem;
-    border-radius: 12px;
-    border: 1px solid #F0FFFF;       /* Azure */
-    background-color: #F0F8FF;       /* AliceBlue */
-    color: #111827 !important;
-    text-align: left;
-    font-size: 0.90rem;
-    font-weight: 500;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-}
-
-/* 用語ボタン内テキストを前面に */
-.term-button-container .stButton > button > div {
-    position: relative;
-    z-index: 2;
-    color: #111827 !important;
-}
-
-/* 用語ボタンのスライドアニメ：Azure */
-.term-button-container .stButton > button::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #F0FFFF;             /* Azure */
-    transform: translateX(-96%);
-    transition: transform .5s ease-in-out;
-    z-index: 1;
-}
-
-/* Hover時：スライドイン（用語ボタン） */
-.term-button-container .stButton > button:hover::before {
-    transform: translateX(0%);
-}
-
-/* Hover時テキスト色（用語ボタン） */
-.term-button-container .stButton > button:hover {
-    color: #111827 !important;
-    transform: translateY(2px);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-}
-
-.term-button-container .stButton > button:hover > div {
-    color: #111827 !important;
-}
-</style>
-""",
-    unsafe_allow_html=True,
-)
-
 /* -------------------------------------------
    メインエリア
 ------------------------------------------- */
@@ -379,7 +319,7 @@ st.markdown(
 .app-title {
     font-size: 24px;
     font-weight: 700;
-    color: #ffffff !重要;
+    color: #ffffff !important;
 }
 
 /* セクション見出し */
@@ -503,8 +443,8 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    # 新規作成
-    st.markdown("<div class='sidebar-new-btn'>", unsafe_allow_html=True)
+    # 新規作成ボタン（緑系3D）
+    st.markdown("<div class='create-button-container'>", unsafe_allow_html=True)
     if st.button("新規作成", use_container_width=True):
         st.session_state.messages = []
         st.session_state.generated_email = None
@@ -568,7 +508,7 @@ with st.sidebar:
         st.markdown("</div>", unsafe_allow_html=True)
 
     display_to_tone = {
-        "😊 カジュアル／フレンドリー（同僚・社内フラット向け）": "カジュアル／フレンドリー",
+        "😊 カジュアル／フレンドリー（同僚向け）": "カジュアル／フレンドリー",
         "📄 標準ビジネス（最も一般的）": "標準ビジネス",
         "📘 フォーマル（社外顧客／上位者／依頼交渉）": "フォーマル",
         "🙏 厳粛・儀礼的（謝罪・不祥事・クレーム対応）": "厳粛・儀礼的",
@@ -789,5 +729,3 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
-
-
