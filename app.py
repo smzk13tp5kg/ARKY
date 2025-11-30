@@ -974,14 +974,15 @@ with col2:
 
 # ---------- コピー ボタン ----------
         with btn_col1:
-            if st.button("📋 コピー", key="copy_email", use_container_width=True):
-                # JavaScriptを使ってコピー
-                full_text = f"件名: {email['subject']}\n\n{email['body']}"
-                escaped_text = json.dumps(full_text)
-                
-                copy_js = f"""
+            # コピー用のテキストとJavaScriptを事前に埋め込む
+            full_text = f"件名: {email['subject']}\n\n{email['body']}"
+            escaped_text = json.dumps(full_text)
+            copy_button_id = f"copy_btn_{random.randint(1000, 9999)}"
+            
+            # JavaScriptを先に埋め込む
+            st.components.v1.html(f"""
                 <script>
-                (function() {{
+                window.copyEmailText_{copy_button_id} = function() {{
                     const textToCopy = {escaped_text};
                     const textarea = document.createElement('textarea');
                     textarea.value = textToCopy;
@@ -989,12 +990,30 @@ with col2:
                     textarea.style.left = '-9999px';
                     document.body.appendChild(textarea);
                     textarea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textarea);
-                }})();
+                    try {{
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        return true;
+                    }} catch (e) {{
+                        if (textarea.parentNode) {{
+                            document.body.removeChild(textarea);
+                        }}
+                        return false;
+                    }}
+                }};
                 </script>
-                """
-                st.components.v1.html(copy_js, height=0)
+            """, height=0)
+            
+            # Streamlitボタン
+            if st.button("📋 コピー", key=f"copy_email_{copy_button_id}", use_container_width=True):
+                # ボタンがクリックされたらJavaScript関数を実行
+                st.components.v1.html(f"""
+                    <script>
+                    if (window.copyEmailText_{copy_button_id}) {{
+                        window.copyEmailText_{copy_button_id}();
+                    }}
+                    </script>
+                """, height=0)
                 st.success("✔ コピーしました", icon="✅")
             
         # ---------- 再生成 ボタン ----------
@@ -1033,6 +1052,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
