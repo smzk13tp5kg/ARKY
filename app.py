@@ -649,39 +649,6 @@ with st.sidebar:
         custom_recipient = st.text_input("カスタム相手", placeholder="例: 顧客")
         recipient = custom_recipient if custom_recipient else "その他"
 
-    # ナビゲーションエリア最下部：入力フォーム（従来どおりサイドバー下部）
-    st.markdown("<hr>", unsafe_allow_html=True)
-    st.markdown("<div class='card input-card'>", unsafe_allow_html=True)
-    with st.form("message_form", clear_on_submit=True):
-        user_message = st.text_area(
-            "メッセージを入力",
-            placeholder="例：取引先に感謝を伝えるメールを作成したい",
-            height=120,
-            label_visibility="collapsed",
-        )
-        submitted = st.form_submit_button("✓ 送信")
-
-        if submitted and user_message:
-            if template == "その他" and not custom_template:
-                st.error("⚠️ カスタムテンプレートを入力してください")
-            elif recipient == "その他" and not custom_recipient:
-                st.error("⚠️ カスタム相手を入力してください")
-            else:
-                st.session_state.messages.append({"role": "user", "content": user_message})
-
-                response = (
-                    f"{template}メールを「{tone}」なトーンで、"
-                    f"{recipient}宛に作成しました！右側のプレビューをご覧ください。"
-                )
-                st.session_state.messages.append({"role": "assistant", "content": response})
-
-                st.session_state.variation_count = 0
-                st.session_state.generated_email = generate_email(
-                    template, tone, recipient, user_message, variation=0
-                )
-                st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
-
     st.caption("© 2025 ARKY")
 
 # ============================================
@@ -689,6 +656,9 @@ with st.sidebar:
 # ============================================
 col1, col2 = st.columns([3, 2], gap="medium")
 
+# --------------------------------------------
+# 左：メッセージ＋送信エリア
+# --------------------------------------------
 with col1:
     st.markdown("<div class='section-header'>💬 メッセージ</div>", unsafe_allow_html=True)
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
@@ -731,13 +701,47 @@ with col1:
     chat_html_parts.append("</div>")
     st.markdown("\n".join(chat_html_parts), unsafe_allow_html=True)
 
+    # ==== ここに送信フォームを移動 ====
+    st.markdown("<hr>", unsafe_allow_html=True)
+    st.markdown("<div class='card input-card'>", unsafe_allow_html=True)
+    with st.form("message_form", clear_on_submit=True):
+        user_message = st.text_area(
+            "メッセージを入力",
+            placeholder="例：取引先に感謝を伝えるメールを作成したい",
+            height=120,
+            label_visibility="collapsed",
+        )
+        submitted = st.form_submit_button("✓ 送信")
+
+        if submitted and user_message:
+            if template == "その他" and not custom_template:
+                st.error("⚠️ カスタムテンプレートを入力してください")
+            elif recipient == "その他" and not custom_recipient:
+                st.error("⚠️ カスタム相手を入力してください")
+            else:
+                st.session_state.messages.append({"role": "user", "content": user_message})
+
+                response = (
+                    f"{template}メールを「{tone}」なトーンで、"
+                    f"{recipient}宛に作成しました！右側のプレビューをご覧ください。"
+                )
+                st.session_state.messages.append({"role": "assistant", "content": response})
+
+                st.session_state.variation_count = 0
+                st.session_state.generated_email = generate_email(
+                    template, tone, recipient, user_message, variation=0
+                )
+                st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# --------------------------------------------
+# 右：プレビュー
+# --------------------------------------------
 with col2:
     st.markdown("<div class='section-header'>📄 プレビュー</div>", unsafe_allow_html=True)
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-    # ============================================
     # 右：プレビューエリア
-    # ============================================
     if st.session_state.generated_email is None:
         placeholder_html = textwrap.dedent(
             """
@@ -831,5 +835,3 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
-
-
