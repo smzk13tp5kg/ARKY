@@ -974,92 +974,92 @@ with col2:
 
 # ---------- コピー ボタン ----------
         with btn_col1:
-            # コピー用テキスト
             full_text = f"件名: {email['subject']}\n\n{email['body']}"
             copy_button_id = f"copy_btn_{random.randint(1000, 9999)}"
+            escaped_text = json.dumps(full_text)
             
-            st.markdown(
-                f"""
-                <div style="perspective: 1000px; width: 100%;">
-                    <button id="{copy_button_id}" 
-                            style="position: relative; width: 100%; height: 50px; 
-                                   font-size: 1.0rem; font-weight: 700; 
-                                   text-transform: uppercase; cursor: pointer; 
-                                   border: none; background: transparent;
-                                   transform-style: preserve-3d; 
-                                   transform: translateZ(-25px);
-                                   transition: transform 0.25s;">
-                        <div style="position: absolute; width: 100%; height: 50px; 
-                                    display: flex; align-items: center; justify-content: center;
-                                    border: 5px solid #ff8c00; box-sizing: border-box; 
-                                    border-radius: 8px; left: 0; top: 0;
-                                    background-color: #ff8c00; color: #ffffff;
-                                    transform: rotateY(0deg) translateZ(25px);">
-                            📋 コピー
-                        </div>
-                        <div style="position: absolute; width: 100%; height: 50px; 
-                                    display: flex; align-items: center; justify-content: center;
-                                    border: 5px solid #ffd700; box-sizing: border-box; 
-                                    border-radius: 8px; left: 0; top: 0;
-                                    background-color: #ffd700; color: #ffffff;
-                                    transform: rotateX(90deg) translateZ(25px);">
-                            📋 コピー
-                        </div>
-                    </button>
-                    <div id="copy_status_{copy_button_id}" 
-                         style="color: #ffffff; font-size: 13px; margin-top: 8px; 
-                                min-height: 20px; text-align: center;"></div>
-                </div>
-                <textarea id="copy_text_{copy_button_id}" 
-                          style="position: absolute; left: -9999px;">{html.escape(full_text)}</textarea>
-                <script>
-                (function() {{
-                    const btn = document.getElementById('{copy_button_id}');
-                    const statusDiv = document.getElementById('copy_status_{copy_button_id}');
-                    const textarea = document.getElementById('copy_text_{copy_button_id}');
-                    
-                    // 3Dフリップエフェクト
-                    btn.addEventListener('mouseenter', function() {{
-                        this.style.transform = 'translateZ(-25px) rotateX(-90deg)';
-                    }});
-                    btn.addEventListener('mouseleave', function() {{
-                        this.style.transform = 'translateZ(-25px)';
-                    }});
-                    
-                    // コピー機能
-                    btn.addEventListener('click', function() {{
-                        try {{
-                            textarea.style.position = 'fixed';
-                            textarea.style.left = '0';
-                            textarea.style.opacity = '0';
-                            textarea.focus();
-                            textarea.select();
-                            const success = document.execCommand('copy');
-                            textarea.style.position = 'absolute';
-                            textarea.style.left = '-9999px';
-                            
-                            if (success) {{
-                                statusDiv.textContent = '✔ コピーしました';
-                                statusDiv.style.color = '#10b981';
-                                setTimeout(() => {{ 
-                                    statusDiv.textContent = ''; 
-                                    statusDiv.style.color = '#ffffff';
-                                }}, 3000);
-                            }} else {{
-                                statusDiv.textContent = '⚠ コピーに失敗しました';
-                                statusDiv.style.color = '#ef4444';
-                            }}
-                        }} catch (e) {{
-                            statusDiv.textContent = '⚠ コピーに失敗しました';
-                            statusDiv.style.color = '#ef4444';
-                            console.error('Copy failed:', e);
-                        }}
-                    }});
-                }})();
-                </script>
-                """,
-                unsafe_allow_html=True,
-            )
+            html_code = f"""
+<div style="perspective: 1000px; width: 100%;">
+    <button id="{copy_button_id}" 
+            style="position: relative; width: 100%; height: 50px; 
+                   font-size: 1.0rem; font-weight: 700; 
+                   text-transform: uppercase; cursor: pointer; 
+                   border: none; background: transparent;
+                   transform-style: preserve-3d; 
+                   transform: translateZ(-25px);
+                   transition: transform 0.25s;">
+        <div style="position: absolute; width: 100%; height: 50px; 
+                    display: flex; align-items: center; justify-content: center;
+                    border: 5px solid #ff8c00; box-sizing: border-box; 
+                    border-radius: 8px; left: 0; top: 0;
+                    background-color: #ff8c00; color: #ffffff;
+                    transform: rotateY(0deg) translateZ(25px);">
+            📋 コピー
+        </div>
+        <div style="position: absolute; width: 100%; height: 50px; 
+                    display: flex; align-items: center; justify-content: center;
+                    border: 5px solid #ffd700; box-sizing: border-box; 
+                    border-radius: 8px; left: 0; top: 0;
+                    background-color: #ffd700; color: #ffffff;
+                    transform: rotateX(90deg) translateZ(25px);">
+            📋 コピー
+        </div>
+    </button>
+    <div id="copy_status_{copy_button_id}" 
+         style="color: #ffffff; font-size: 13px; margin-top: 8px; 
+                min-height: 20px; text-align: center;"></div>
+</div>
+<script>
+(function() {{
+    const btn = document.getElementById('{copy_button_id}');
+    const statusDiv = document.getElementById('copy_status_{copy_button_id}');
+    const textToCopy = {escaped_text};
+    
+    btn.addEventListener('mouseenter', function() {{
+        this.style.transform = 'translateZ(-25px) rotateX(-90deg)';
+    }});
+    
+    btn.addEventListener('mouseleave', function() {{
+        this.style.transform = 'translateZ(-25px)';
+    }});
+    
+    btn.addEventListener('click', function() {{
+        const textarea = document.createElement('textarea');
+        textarea.value = textToCopy;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        
+        try {{
+            const success = document.execCommand('copy');
+            document.body.removeChild(textarea);
+            
+            if (success) {{
+                statusDiv.textContent = '✔ コピーしました';
+                statusDiv.style.color = '#10b981';
+                setTimeout(function() {{
+                    statusDiv.textContent = '';
+                    statusDiv.style.color = '#ffffff';
+                }}, 3000);
+            }} else {{
+                statusDiv.textContent = '⚠ コピーに失敗しました';
+                statusDiv.style.color = '#ef4444';
+            }}
+        }} catch (e) {{
+            if (textarea.parentNode) {{
+                document.body.removeChild(textarea);
+            }}
+            statusDiv.textContent = '⚠ コピーに失敗しました';
+            statusDiv.style.color = '#ef4444';
+        }}
+    }});
+}})();
+</script>
+"""
+            st.markdown(html_code, unsafe_allow_html=True)
             
         # ---------- 再生成 ボタン ----------
         with btn_col2:
@@ -1097,6 +1097,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
