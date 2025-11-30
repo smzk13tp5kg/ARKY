@@ -682,27 +682,28 @@ with col1:
     chat_html_parts = []
     chat_html_parts.append("<div class='chat-log'>")
 
-    if not st.session_state.messages:
-        initial_msg = (
-            "こんにちは！ビジネスメールの作成をお手伝いします。<br><br>"
-            "左側のナビゲーションエリアでテンプレートやトーン、相手を選び、"
-            "下部の入力欄からメッセージ内容を入力してください。"
-        )
-        chat_html_parts.append(
-            f"<div class='chat-bubble assistant'>{initial_msg}</div>"
-        )
-    else:
-        for msg in st.session_state.messages:
-            role = msg["role"]
-            text = html.escape(msg["content"]).replace("\n", "<br>")
-            if role == "user":
-                chat_html_parts.append(
-                    f"<div class='chat-bubble user'>{text}</div>"
-                )
-            else:
-                chat_html_parts.append(
-                    f"<div class='chat-bubble assistant'>{text}</div>"
-                )
+    # ★ あいさつメッセージは常に一番上に表示
+    initial_msg = (
+        "こんにちは！ビジネスメールの作成をお手伝いします。<br><br>"
+        "左側のナビゲーションエリアでテンプレートやトーン、相手を選び、"
+        "下部の入力欄からメッセージ内容を入力してください。"
+    )
+    chat_html_parts.append(
+        f"<div class='chat-bubble assistant'>{initial_msg}</div>"
+    )
+
+    # ★ その下に、これまでのユーザー／AIメッセージを順番に表示
+    for msg in st.session_state.messages:
+        role = msg["role"]
+        text = html.escape(msg["content"]).replace("\n", "<br>")
+        if role == "user":
+            chat_html_parts.append(
+                f"<div class='chat-bubble user'>{text}</div>"
+            )
+        else:
+            chat_html_parts.append(
+                f"<div class='chat-bubble assistant'>{text}</div>"
+            )
 
     chat_html_parts.append("</div>")
     st.markdown("\n".join(chat_html_parts), unsafe_allow_html=True)
@@ -804,6 +805,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
