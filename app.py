@@ -8,6 +8,16 @@ from supabase import create_client, Client  # requirements.txt に supabase-py �
 import os
 
 # ============================================
+# Supabase クライアント設定
+# ============================================
+SUPABASE_URL = st.secrets["supabase_url"]      # Streamlit Cloud の secrets に設定しておく
+SUPABASE_KEY = st.secrets["supabase_key"]
+
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+SUPABASE_TABLE = "email_logs"  # あらかじめ作っておくテーブル名
+
+# ============================================
 # 時候の挨拶（ヘルパー）
 # ============================================
 def get_seasonal_greeting() -> str:
@@ -1066,5 +1076,6 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
