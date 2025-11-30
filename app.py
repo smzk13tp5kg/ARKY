@@ -489,6 +489,12 @@ button[title="Close sidebar"] svg {
     margin: 0 !important;
     padding: 0 !important;
 }
+
+.st-emotion-cache-pd6qx2 {
+    color: #ffffff !important;  /* テキスト色を白に */
+    fill: #ffffff !important;   /* SVGアイコン用の色を白に */
+}
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -855,3 +861,4 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
