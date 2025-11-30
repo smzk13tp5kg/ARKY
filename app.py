@@ -181,7 +181,7 @@ st.markdown(
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(5, 11, 35, 0.85);
+    background: rgba(5, 11, 35, 0.3);
     z-index: -1;
 }
 [data-testid="stAppViewContainer"] {
