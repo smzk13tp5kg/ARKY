@@ -126,8 +126,7 @@ def generate_email(template, tone, recipient, message, variation=0):
         ],
     }
     closing_list = closings_variations.get(recipient, ["よろしくお願いいたします。"])
-    # variation に応じて正しくインデックスするため len(closing_list) を使用
-    closing = closing_list[variation % len(closing_list)]
+    closing = closing_list[variation % len(closings_variations)]
 
     body = body_start + closing
 
@@ -207,12 +206,6 @@ main.block-container {
     max-width: 100% !important;
 }
 
-/* メインブロックの上下余白 */
-.stMainBlockContainer {
-    padding-top: 0 !important;
-    padding-bottom: 10px !important;
-}
-
 /* カラム、ブロックの幅調整 */
 [data-testid="column"] {
     padding: 0 !important;
@@ -241,16 +234,11 @@ div[data-testid="stHorizontalBlock"] {
     color: #ffffff !important;
 }
 
-/* サイドバー開閉ボタンのアイコン色 */
-button[title="Open sidebar"] svg,
-button[title="Close sidebar"] svg {
-    fill: #ffffff !important;
-    color: #ffffff !important;
-}
-
 /* -------------------------------------------
    3D フリップボタン（Pure CSS）
 ------------------------------------------- */
+
+/* デフォルト：全ての st.button / st.form_submit_button に3Dフリップ効果 */
 .stButton,
 .stFormSubmitButton {
   perspective: 1000px;
@@ -366,33 +354,6 @@ button[title="Close sidebar"] svg {
     margin: 8px 0;
 }
 
-/* タイトル直下のメッセージエリア（アイコン＋吹き出し） */
-.intro-wrapper {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 12px;
-}
-.intro-icon {
-    width: 110px;
-    height: 110px;
-    flex-shrink: 0;
-}
-.intro-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-.intro-bubble {
-    background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%);
-    color: #ffffff;
-    padding: 10px 16px;
-    border-radius: 14px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    font-size: 14px;
-    line-height: 1.6;
-}
-
 /* 右：プレビューカード */
 .preview-main-wrapper {
     background: #ffffff;
@@ -469,42 +430,46 @@ button[title="Close sidebar"] svg {
     background: #ffffff;
     color: #111827;
 }
-
-/* AIアシスタントバブル：グラデーションボーダーアニメーション */
 .chat-bubble.assistant {
-    position: relative;
-    background: #050b23;
+    background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%);
     color: #ffffff;
-    padding: 12px 16px;
-    border: 4px solid transparent;
-    background-clip: padding-box;
 }
 
-.chat-bubble.assistant::before {
-    content: '';
-    position: absolute;
-    top: -4px;
-    left: -4px;
-    right: -4px;
-    bottom: -4px;
-    background: linear-gradient(120deg, #6559ae, #ff7159, #6559ae);
-    background-size: 400% 400%;
+/* 初回案内メッセージ用（AIアイコン付き） */
+.welcome-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.welcome-message-icon {
+    width: 80px;
+    height: 80px;
     border-radius: 12px;
-    z-index: -1;
-    animation: gradient-border 3s ease-in-out infinite;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.welcome-message-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.welcome-message-content {
+    flex: 1;
+    background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%);
+    color: #ffffff;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    font-size: 14px;
+    line-height: 1.6;
 }
 
-@keyframes gradient-border {
-    0% {
-        background-position: 14% 0%;
-    }
-    50% {
-        background-position: 87% 100%;
-    }
-    100% {
-        background-position: 14% 0%;
-    }
-}
+</style>
+""",
+    unsafe_allow_html=True,
+)
 
 # ============================================
 # JavaScriptでボタンテキストを動的に設定
@@ -677,7 +642,7 @@ with st.sidebar:
         custom_recipient = st.text_input("カスタム相手", placeholder="例: 顧客")
         recipient = custom_recipient if custom_recipient else "その他"
 
-    # ナビゲーションエリア最下部：入力フォーム（従来どおりサイドバー下部）
+    # ナビゲーションエリア最下部：入力フォーム
     st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown("<div class='card input-card'>", unsafe_allow_html=True)
     with st.form("message_form", clear_on_submit=True):
@@ -721,51 +686,46 @@ with col1:
     st.markdown("<div class='section-header'>💬 メッセージ</div>", unsafe_allow_html=True)
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-    # タイトル直下のメッセージエリア（アイコン＋オレンジ吹き出し）
-    st.markdown(
-        """
-        <div class="intro-wrapper">
-          <div class="intro-icon">
-            <img src="https://raw.githubusercontent.com/smzk13tp5kg/ARKY/main/AIhontai.png">
-          </div>
-          <div class="intro-bubble">
-            ようこそ！ビジネスメールの作成をお手伝いします。<br>
-            左側のナビゲーションエリアでテンプレートやトーン、相手を選び、
-            下部の入力欄からメッセージ内容を入力してください。
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
-
-    # 送信済みメッセージ一覧（ユーザー＆アシスタント）
-    chat_html_parts = []
-    chat_html_parts.append("<div class='chat-log'>")
-
-    for msg in st.session_state.messages:
-        role = msg["role"]
-        text = html.escape(msg["content"]).replace("\n", "<br>")
-        if role == "user":
-            chat_html_parts.append(
-                f"<div class='chat-bubble user'>{text}</div>"
-            )
-        else:
-            chat_html_parts.append(
-                f"<div class='chat-bubble assistant'>{text}</div>"
-            )
-
-    chat_html_parts.append("</div>")
-    st.markdown("\n".join(chat_html_parts), unsafe_allow_html=True)
-
 with col2:
     st.markdown("<div class='section-header'>📄 プレビュー</div>", unsafe_allow_html=True)
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-    # ============================================
-    # 右：プレビューエリア
-    # ============================================
+# ============================================
+# 左：メッセージエリア（自前チャット表示）
+# ============================================
+with col1:
+    chat_html_parts = []
+    chat_html_parts.append("<div class='chat-log'>")
+
+    if not st.session_state.messages:
+        initial_msg = (
+            "こんにちは！ビジネスメールの作成をお手伝いします。<br><br>"
+            "左側のナビゲーションエリアでテンプレートやトーン、相手を選び、"
+            "下部の入力欄からメッセージ内容を入力してください。"
+        )
+        chat_html_parts.append(
+            f"<div class='chat-bubble assistant'>{initial_msg}</div>"
+        )
+    else:
+        for msg in st.session_state.messages:
+            role = msg["role"]
+            text = html.escape(msg["content"]).replace("\n", "<br>")
+            if role == "user":
+                chat_html_parts.append(
+                    f"<div class='chat-bubble user'>{text}</div>"
+                )
+            else:
+                chat_html_parts.append(
+                    f"<div class='chat-bubble assistant'>{text}</div>"
+                )
+
+    chat_html_parts.append("</div>")
+    st.markdown("\n".join(chat_html_parts), unsafe_allow_html=True)
+
+# ============================================
+# 右：プレビューエリア
+# ============================================
+with col2:
     if st.session_state.generated_email is None:
         placeholder_html = textwrap.dedent(
             """
@@ -859,7 +819,3 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
-
-
-
-
