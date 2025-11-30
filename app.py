@@ -370,7 +370,7 @@ button[title="Close sidebar"] svg {
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 0px;
 }
 .intro-icon {
     width: 72px;
@@ -835,3 +835,4 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
