@@ -167,7 +167,7 @@ st.markdown(
 
 /* 全体背景：濃い紺色 + ARKY背景画像 */
 .stApp {
-    background-color: #050b23;
+    background-color: red;
 }
 .stApp::before {
     content: '';
@@ -176,7 +176,7 @@ st.markdown(
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: #050b23;
+    background-color: red;
     background-image: url('https://raw.githubusercontent.com/smzk13tp5kg/ARKY/main/ARKY%20background%20image.png');
     background-size: 500px 500px;
     background-position: center center;
@@ -786,3 +786,4 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
