@@ -5,9 +5,31 @@ import html
 import textwrap
 
 # ============================================
+# 時候の挨拶（ヘルパー）
+# ============================================
+def get_seasonal_greeting() -> str:
+    """現在の月に応じた時候の挨拶を返す"""
+    month = datetime.now().month
+    greetings = {
+        1: "新春の候、ますますご清栄のこととお慶び申し上げます。",
+        2: "余寒の候、皆さまにおかれましてはお変わりなくお過ごしのことと存じます。",
+        3: "早春の候、貴社ますますご発展のこととお喜び申し上げます。",
+        4: "春暖の候、皆さまにおかれましては一層ご健勝のことと存じます。",
+        5: "新緑の候、貴社ますますご繁栄のこととお慶び申し上げます。",
+        6: "初夏の候、皆さまにおかれましてはお元気でお過ごしのことと存じます。",
+        7: "盛夏の候、皆さまにおかれましてはご健勝のこととお喜び申し上げます。",
+        8: "晩夏の候、ますますご清栄のこととお慶び申し上げます。",
+        9: "初秋の候、貴社ますますご発展のこととお喜び申し上げます。",
+        10: "秋涼の候、皆さまにおかれましてはご健勝のことと存じます。",
+        11: "晩秋の候、貴社ますますご発展のこととお慶び申し上げます。",
+        12: "師走の候、皆さまにおかれましてはますますご清栄のことと存じます。",
+    }
+    return greetings.get(month, "")
+
+# ============================================
 # メール生成関数
 # ============================================
-def generate_email(template, tone, recipient, message, variation=0):
+def generate_email(template, tone, recipient, message, variation=0, seasonal_text: str | None = None):
     subject_variations = {
         "依頼": [
             f"【ご依頼】{message[:20]}",
@@ -71,10 +93,15 @@ def generate_email(template, tone, recipient, message, variation=0):
     greeting_list = greetings_variations.get(recipient, ["お世話になっております。"])
     greeting = greeting_list[variation % len(greeting_list)]
 
+    # 時候の挨拶ブロック
+    seasonal_block = ""
+    if seasonal_text:
+        seasonal_block = seasonal_text.strip() + "\n\n"
+
     body_variations = [
         f"""{greeting}
 
-{message}に関しまして、ご連絡させていただきます。
+{seasonal_block}{message}に関しまして、ご連絡させていただきます。
 
 詳細につきましては、下記のとおりとなります。
 ご確認いただけますと幸いです。
@@ -83,7 +110,7 @@ def generate_email(template, tone, recipient, message, variation=0):
 """,
         f"""{greeting}
 
-{message}の件につきまして、ご連絡申し上げます。
+{seasonal_block}{message}の件につきまして、ご連絡申し上げます。
 
 詳細は以下のとおりでございます。
 ご確認のほど、何卒よろしくお願い申し上げます。
@@ -92,7 +119,7 @@ def generate_email(template, tone, recipient, message, variation=0):
 """,
         f"""{greeting}
 
-{message}についてご連絡いたします。
+{seasonal_block}{message}についてご連絡いたします。
 
 下記の内容をご確認ください。
 
@@ -390,57 +417,41 @@ button[title="Close sidebar"] svg {
 /* ★ グラデ枠＋グラデ文字の AI バブル ★ */
 .intro-bubble {
     position: relative;
-    padding: 0;                     /* 中身のpaddingは内側spanで管理 */
+    padding: 0;
     border-radius: 16px;
-    background: transparent;        /* 背景は透明に */
+    background: transparent;
     overflow: visible;
 }
-
-/* 外側のグラデーション枠（border） */
 .intro-bubble::before {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: 16px;
-    padding: 4px; /* 枠の太さ */
-
-    /* グラデーション背景 */
+    padding: 4px;
     background: linear-gradient(120deg, #6559ae, #ff7159, #6559ae);
     background-size: 400% 400%;
     animation: intro-gradient 3s ease-in-out infinite;
-
-    /* 中身をくり抜いて枠だけにする */
     -webkit-mask:
       linear-gradient(#000 0 0) content-box,
       linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
             mask-composite: exclude;
 }
-
-/* 内側のテキストエリア（背景＋文字グラデ） */
 .intro-bubble-text {
     position: relative;
     display: block;
     padding: 10px 18px;
     border-radius: 12px;
-
-    /* 背景の薄いダークレイヤー */
     background: rgba(5, 11, 35, 0.85);
-
-    /* 文字自体にグラデーション */
     background-image: linear-gradient(120deg, #fdfbff, #ffd7b2, #ffe6ff);
     background-size: 400% 400%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-
     font-size: 14px;
     font-weight: 600;
     line-height: 1.6;
-
     animation: intro-gradient 3s ease-in-out infinite;
 }
-
-/* グラデーションの動き */
 @keyframes intro-gradient {
     0%   { background-position: 14% 0%; }
     50%  { background-position: 87% 100%; }
@@ -723,6 +734,22 @@ with st.sidebar:
         custom_recipient = st.text_input("カスタム相手", placeholder="例: 顧客")
         recipient = custom_recipient if custom_recipient else "その他"
 
+    # 時候の挨拶
+    with st.container():
+        st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
+        st.markdown("<div class='nav-label'>時候の挨拶</div>", unsafe_allow_html=True)
+        seasonal_option = st.radio(
+            "時候の挨拶",
+            ["不要", "追加する"],
+            index=0,
+            label_visibility="collapsed",
+            key="seasonal_radio",
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    add_seasonal = seasonal_option == "追加する"
+    seasonal_text = get_seasonal_greeting() if add_seasonal else ""
+
     st.caption("© 2025 ARKY")
 
 # ============================================
@@ -784,7 +811,7 @@ with col1:
 
                 st.session_state.variation_count = 0
                 st.session_state.generated_email = generate_email(
-                    template, tone, recipient, user_message, variation=0
+                    template, tone, recipient, user_message, variation=0, seasonal_text=seasonal_text
                 )
                 st.rerun()
 
@@ -866,7 +893,6 @@ with col2:
             if st.button("📋 コピー", use_container_width=True):
                 full_text = f"件名: {email['subject']}\n\n{email['body']}"
 
-                # 白文字のコピー案内
                 st.markdown(
                     "<div class='copy-info'>以下のテキストをコピーしてご利用ください。</div>",
                     unsafe_allow_html=True,
@@ -901,6 +927,7 @@ with col2:
                         recipient,
                         last_user_message,
                         variation=st.session_state.variation_count,
+                        seasonal_text=seasonal_text,
                     )
                     st.session_state.messages.append(
                         {
