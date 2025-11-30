@@ -215,103 +215,155 @@ div[data-testid="stHorizontalBlock"] {
     color: #ffffff !important;
 }
 
-/* 新規作成ボタン用のラッパ（レイアウトだけ） */
-.sidebar-new-btn {
-    margin-bottom: 8px;
-}
-
-/* 3D ボタン用ベーススタイル（サイドバー内のボタンすべて） */
-[data-testid="stSidebar"] button,
-[data-testid="stSidebar"] input[type="submit"] {
-  font-size: 1.4rem;
+# ==============================
+# ボタン用カスタムCSS（デフォルト＝オレンジ×白、辞書ボタンだけ青系）
+# ==============================
+st.markdown(
+    """
+<style>
+/* ▼▼ デフォルト：全ての st.button / st.form_submit_button をオレンジ＋白に（3D効果付き） ▼▼ */
+.stButton > button,
+.stFormSubmitButton > button {
+  font-size: 1.0rem;
   font-weight: 700;
   line-height: 1.5;
   position: relative;
   display: inline-block;
-  width: 200px;
-  margin: 4px 0;
-  padding: 0;                 /* 中身は擬似要素で描画 */
+  padding: 0.7rem 1.8rem;
   cursor: pointer;
+  user-select: none;
+  transition: all 0.3s ease;
   text-align: center;
-  letter-spacing: 0.1em;
+  vertical-align: middle;
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  color: #ffffff !important;
   border-radius: 0.5rem;
+  background: #ff8c00;  /* オレンジ */
   border: none;
-  background: transparent;
-  color: #fff;                /* 文字：白 */
-  perspective: 600px;         /* 3D 表現のため */
   overflow: visible;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* ボタン内のテキストを前面に */
-[data-testid="stSidebar"] button > div,
-[data-testid="stSidebar"] input[type="submit"] {
+/* テキストを前面に出す */
+.stButton > button > div,
+.stFormSubmitButton > button > div {
   position: relative;
-  z-index: 2;
-}
-
-/* ---- front 面（通常時に見える Gold グラデ） ---- */
-[data-testid="stSidebar"] button::before,
-[data-testid="stSidebar"] input[type="submit"]::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 0.5rem;
-
-  background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%);
-  transform-origin: 50% 0%;
-  transform: translateY(0) rotateX(0deg);
-  transition: all 0.4s ease;
-  backface-visibility: hidden;
   z-index: 1;
+  color: #ffffff !important;
 }
 
-/* ---- back 面（フリップ後に見える白＋Gold枠） ---- */
-[data-testid="stSidebar"] button::after,
-[data-testid="stSidebar"] input[type="submit"]::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 0.5rem;
-
-  background: #ffffff;
-  border: 1px solid #ffd666;
-  transform-origin: 50% 0%;
-  transform: translateY(-1px) rotateX(-90deg);
-  transition: all 0.4s ease;
-  backface-visibility: hidden;
-  z-index: 1;
+/* ホバー時：黄色に変更＋押し込み効果 */
+.stButton > button:hover,
+.stFormSubmitButton > button:hover {
+  background: #ffd700 !important;  /* 黄色 */
+  color: #ffffff !important;
+  transform: translateY(2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-/* ---- hover 時：front → 奥へ、back → 手前へ（3D フリップ） ---- */
-[data-testid="stSidebar"] button:hover::before,
-[data-testid="stSidebar"] input[type="submit"]:hover::before {
-  transform: translateY(-50%) rotateX(90deg);
+.stButton > button:hover > div,
+.stFormSubmitButton > button:hover > div {
+  color: #ffffff !important;
 }
 
-[data-testid="stSidebar"] button:hover::after,
-[data-testid="stSidebar"] input[type="submit"]:hover::after {
-  transform: translateY(-50%) rotateX(0deg);
+/* アクティブ時：さらに押し込む */
+.stButton > button:active,
+.stFormSubmitButton > button:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-/* hover 中の文字色（白→黒） */
-[data-testid="stSidebar"] button:hover,
-[data-testid="stSidebar"] input[type="submit"]:hover {
-  color: #111827 !important;
+/* ▼▼ 新規作成ボタン用のラッパ（緑系の3Dボタン） ▼▼ */
+.create-button-container .stButton > button {
+    position: relative;
+    width: 100%;
+    padding: 0.9rem 1.5rem;
+    border-radius: 12px;
+    background: #10b981;  /* 緑 */
+    color: #ffffff !important;
+    text-align: center;
+    font-size: 1.0rem;
+    font-weight: 700;
+    overflow: visible;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: none;
 }
 
-
-/* サイドバー：選択中の項目 */
-.nav-section div[role="radiogroup"] input:checked ~ div {
-    background: rgba(255,214,102,0.12);
-    border-color: #ffd666 !important;
-    color: #ffd666 !important;
+.create-button-container .stButton > button > div {
+    color: #ffffff !important;
+    z-index: 1;
 }
+
+.create-button-container .stButton > button:hover {
+    background: #059669 !important;  /* 濃い緑 */
+    color: #ffffff !important;
+    transform: translateY(2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.create-button-container .stButton > button:hover > div {
+    color: #ffffff !important;
+}
+
+/* ▼▼ 辞書ビュー用：用語一覧ボタン（AliceBlue / Azure）に上書き ▼▼ */
+.term-button-container .stButton > button {
+    position: relative;
+    width: 100%;
+    padding: 0.9rem 1.1rem;
+    border-radius: 12px;
+    border: 1px solid #F0FFFF;       /* Azure */
+    background-color: #F0F8FF;       /* AliceBlue */
+    color: #111827 !important;
+    text-align: left;
+    font-size: 0.90rem;
+    font-weight: 500;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+/* 用語ボタン内テキストを前面に */
+.term-button-container .stButton > button > div {
+    position: relative;
+    z-index: 2;
+    color: #111827 !important;
+}
+
+/* 用語ボタンのスライドアニメ：Azure */
+.term-button-container .stButton > button::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #F0FFFF;             /* Azure */
+    transform: translateX(-96%);
+    transition: transform .5s ease-in-out;
+    z-index: 1;
+}
+
+/* Hover時：スライドイン（用語ボタン） */
+.term-button-container .stButton > button:hover::before {
+    transform: translateX(0%);
+}
+
+/* Hover時テキスト色（用語ボタン） */
+.term-button-container .stButton > button:hover {
+    color: #111827 !important;
+    transform: translateY(2px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.term-button-container .stButton > button:hover > div {
+    color: #111827 !important;
+}
+</style>
+""",
+    unsafe_allow_html=True,
+)
 
 /* -------------------------------------------
    メインエリア
@@ -737,4 +789,5 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
