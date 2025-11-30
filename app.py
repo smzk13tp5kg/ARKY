@@ -4,6 +4,8 @@ import random
 import html
 import textwrap
 import json
+from supabase import create_client, Client  # requirements.txt に supabase-py を追加しておく
+import os
 
 # ============================================
 # 時候の挨拶（ヘルパー）
@@ -1064,4 +1066,5 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
