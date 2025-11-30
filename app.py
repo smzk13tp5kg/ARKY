@@ -200,7 +200,7 @@ body {
 
 /* メインエリア調整 */
 main.block-container {
-    padding-top: 0.5rem;
+    padding-top: 0rem;
     padding-left: 1rem !important;
     padding-right: 1rem !important;
     max-width: 100% !important;
@@ -835,4 +835,5 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
