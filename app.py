@@ -687,8 +687,7 @@ with col1:
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
     # ★ .intro-bubble の直下に送信フォームを配置 ★
-    st.markdown("<hr>", unsafe_allow_html=True)
-    st.markdown("<div class='card input-card'>", unsafe_allow_html=True)
+
     with st.form("message_form", clear_on_submit=True):
         user_message = st.text_area(
             "メッセージを入力",
@@ -840,6 +839,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
