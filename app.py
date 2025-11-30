@@ -449,14 +449,11 @@ div[data-testid="stHorizontalBlock"] {
     color: #d1d5db !important;
 }
 
-/* サイドバーを開くボタン（閉じているとき） */
-button[title="Open sidebar"] svg {
+/* Streamlit 自動生成クラス：サイドバー開閉アイコンのボタン背景/色補正 */
+.st-emotion-cache-pd6qx2 {
+    color: #ffffff !important;
     fill: #ffffff !important;
-}
-
-/* サイドバーを閉じるボタン（開いているとき） */
-button[title="Close sidebar"] svg {
-    fill: #ffffff !important;
+    background-color: transparent !important; /* 必要なら白背景に変更可能 */
 }
 
 </style>
@@ -827,6 +824,7 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
