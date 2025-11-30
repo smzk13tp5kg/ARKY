@@ -193,6 +193,34 @@ def generate_email(template, tone, recipient, message, variation=0, seasonal_tex
     }
     
 # ============================================
+# Supabase への保存ヘルパー
+# ============================================
+def save_email_to_supabase(email_dict: dict,
+                           template: str,
+                           tone: str,
+                           recipient: str,
+                           seasonal_text: str,
+                           raw_message: str):
+    """生成したメール内容とメタ情報を Supabase に保存する"""
+    try:
+        data = {
+            "template": template,
+            "tone": tone,
+            "recipient": recipient,
+            "seasonal_text": seasonal_text or "",
+            "subject": email_dict.get("subject", ""),
+            "body": email_dict.get("body", ""),
+            "advice": email_dict.get("advice", ""),
+            "raw_message": raw_message,
+            "variation": email_dict.get("variation", 0),
+        }
+        supabase.table(SUPABASE_TABLE).insert(data).execute()
+    except Exception as e:
+        # ログだけ出してアプリは落とさない
+        st.write("⚠ Supabase への保存に失敗しました:", e)
+
+
+# ============================================
 # ページ設定
 # ============================================
 st.set_page_config(
@@ -880,34 +908,47 @@ with col1:
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
     # フォーム（intro-bubble の直下）
-    with st.form("message_form", clear_on_submit=True):
-        user_message = st.text_area(
-            "メッセージを入力",
-            placeholder="例：取引先に感謝を伝えるメールを作成したい",
-            height=120,
-            label_visibility="collapsed",
-        )
-        submitted = st.form_submit_button("✓ 送信")
+with st.form("message_form", clear_on_submit=True):
+    user_message = st.text_area(
+        "メッセージを入力",
+        placeholder="例：取引先に感謝を伝えるメールを作成したい",
+        height=120,
+        label_visibility="collapsed",
+    )
+    submitted = st.form_submit_button("✓ 送信")
 
-        if submitted and user_message:
-            if template == "その他" and not custom_template:
-                st.error("⚠️ カスタムテンプレートを入力してください")
-            elif recipient == "その他" and not custom_recipient:
-                st.error("⚠️ カスタム相手を入力してください")
-            else:
-                st.session_state.messages.append({"role": "user", "content": user_message})
+    if submitted and user_message:
+        if template == "その他" and not custom_template:
+            st.error("⚠️ カスタムテンプレートを入力してください")
+        elif recipient == "その他" and not custom_recipient:
+            st.error("⚠️ カスタム相手を入力してください")
+        else:
+            st.session_state.messages.append({"role": "user", "content": user_message})
 
-                response = (
-                    f"{template}メールを「{tone}」なトーンで、"
-                    f"{recipient}宛に作成しました！右側のプレビューをご覧ください。"
-                )
-                st.session_state.messages.append({"role": "assistant", "content": response})
+            response = (
+                f"{template}メールを「{tone}」なトーンで、"
+                f"{recipient}宛に作成しました！右側のプレビューをご覧ください。"
+            )
+            st.session_state.messages.append({"role": "assistant", "content": response})
 
-                st.session_state.variation_count = 0
-                st.session_state.generated_email = generate_email(
-                    template, tone, recipient, user_message, variation=0, seasonal_text=seasonal_text
-                )
-                st.rerun()
+            st.session_state.variation_count = 0
+            new_email = generate_email(
+                template, tone, recipient, user_message,
+                variation=0, seasonal_text=seasonal_text
+            )
+            st.session_state.generated_email = new_email
+
+            # ★ ここで Supabase に保存 ★
+            save_email_to_supabase(
+                email_dict=new_email,
+                template=template,
+                tone=tone,
+                recipient=recipient,
+                seasonal_text=seasonal_text,
+                raw_message=user_message,
+            )
+
+            st.rerun()
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
@@ -1042,40 +1083,54 @@ with col2:
 
         # ---------- 再生成 ボタン ----------
         with btn_col2:
-            if st.button("🔄 再生成", use_container_width=True):
-                st.session_state.messages.append(
-                    {"role": "assistant", "content": "メールを再生成しています..."}
-                )
+    if st.button("🔄 再生成", use_container_width=True):
+        st.session_state.messages.append(
+            {"role": "assistant", "content": "メールを再生成しています..."}
+        )
 
-                last_user_message = None
-                for msg in reversed(st.session_state.messages):
-                    if msg["role"] == "user":
-                        last_user_message = msg["content"]
-                        break
+        last_user_message = None
+        for msg in reversed(st.session_state.messages):
+            if msg["role"] == "user":
+                last_user_message = msg["content"]
+                break
 
-                if last_user_message:
-                    st.session_state.variation_count += 1
-                    st.session_state.generated_email = generate_email(
-                        template,
-                        tone,
-                        recipient,
-                        last_user_message,
-                        variation=st.session_state.variation_count,
-                        seasonal_text=seasonal_text,
-                    )
-                    st.session_state.messages.append(
-                        {
-                            "role": "assistant",
-                            "content": (
-                                f"新しいバージョン（バリエーション "
-                                f"{st.session_state.variation_count + 1}）を生成しました！プレビューをご確認ください。"
-                            ),
-                        }
-                    )
+        if last_user_message:
+            st.session_state.variation_count += 1
+            new_email = generate_email(
+                template,
+                tone,
+                recipient,
+                last_user_message,
+                variation=st.session_state.variation_count,
+                seasonal_text=seasonal_text,
+            )
+            st.session_state.generated_email = new_email
 
-                st.rerun()
+            st.session_state.messages.append(
+                {
+                    "role": "assistant",
+                    "content": (
+                        f"新しいバージョン（バリエーション "
+                        f"{st.session_state.variation_count + 1}）を生成しました！プレビューをご確認ください。"
+                    ),
+                }
+            )
+
+            # ★ ここで Supabase に保存 ★
+            save_email_to_supabase(
+                email_dict=new_email,
+                template=template,
+                tone=tone,
+                recipient=recipient,
+                seasonal_text=seasonal_text,
+                raw_message=last_user_message,
+            )
+
+        st.rerun()
+
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
