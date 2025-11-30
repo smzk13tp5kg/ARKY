@@ -540,9 +540,29 @@ button[title="Close sidebar"] svg {
     box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 .chat-bubble.user {
+    position: relative;             /* ← しっぽの基準にする */
     background: #ffffff;
     color: #111827;
+    margin-left: auto;              /* 右寄せしたい場合。左寄せなら消してOK */
+    max-width: 80%;                 /* 余白を少し残すために調整（お好み） */
 }
+
+/* ユーザー吹き出しの“しっぽ”（右側） */
+.chat-bubble.user::after {
+    content: "";
+    position: absolute;
+    right: -8px;                    /* バブルの右外側に飛び出させる */
+    top: 14px;                      /* 縦位置。お好みで調整 */
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 8px 0 8px 8px;    /* 三角形のサイズ */
+    border-color: transparent transparent transparent #ffffff;  /* ← バブルと同じ色 */
+
+    /* 影をちょっと付けたい場合 */
+    filter: drop-shadow(-1px 1px 2px rgba(0,0,0,0.15));
+}
+
 .chat-bubble.assistant {
     background: linear-gradient(180deg, #ffd666 0%, #f4a021 100%);
     color: #ffffff;
@@ -958,3 +978,4 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
