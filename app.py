@@ -225,7 +225,7 @@ body { background-color: #050b23; }
 
 /* メインエリア調整 */
 main.block-container {
-    padding-top: 0rem;
+    padding-top: 0rem;  /* ← タイトル上のパディング 0 */
     padding-left: 1rem !important;
     padding-right: 1rem !important;
     max-width: 100% !important;
@@ -266,18 +266,29 @@ button[title="Close sidebar"] svg {
     color: #ffffff !important;
 }
 
+/* サイドバー上部ヘッダー縮小 */
+[data-testid="stSidebarHeader"] {
+    min-height: 0 !important;
+    height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+[data-testid="stSidebarContent"] {
+    padding-top: 7px !important;
+}
+
 /* -------------------------------------------
-   サイドバー限定：3D フリップボタン（新規作成など）
+   すべてのボタン：3D フリップスタイル
 ------------------------------------------- */
-[data-testid="stSidebar"] .stButton,
-[data-testid="stSidebar"] .stFormSubmitButton {
+.stButton,
+.stFormSubmitButton {
   perspective: 1000px;
   display: inline-block;
   width: 100%;
 }
 
-[data-testid="stSidebar"] .stButton > button,
-[data-testid="stSidebar"] .stFormSubmitButton > button {
+.stButton > button,
+.stFormSubmitButton > button {
   position: relative;
   width: 100%;
   height: 50px;
@@ -293,10 +304,10 @@ button[title="Close sidebar"] svg {
   color: transparent !important;
 }
 
-[data-testid="stSidebar"] .stButton > button::before,
-[data-testid="stSidebar"] .stButton > button::after,
-[data-testid="stSidebar"] .stFormSubmitButton > button::before,
-[data-testid="stSidebar"] .stFormSubmitButton > button::after {
+.stButton > button::before,
+.stButton > button::after,
+.stFormSubmitButton > button::before,
+.stFormSubmitButton > button::after {
   position: absolute;
   width: 100%;
   height: 50px;
@@ -310,9 +321,9 @@ button[title="Close sidebar"] svg {
   top: 0;
 }
 
-/* サイドバー前面（オレンジ背景×白文字） */
-[data-testid="stSidebar"] .stButton > button::before,
-[data-testid="stSidebar"] .stFormSubmitButton > button::before {
+/* 前面（オレンジ背景×白文字） */
+.stButton > button::before,
+.stFormSubmitButton > button::before {
   content: attr(data-text);
   background-color: #ff8c00;
   color: #ffffff;
@@ -320,9 +331,9 @@ button[title="Close sidebar"] svg {
   transform: rotateY(0deg) translateZ(25px);
 }
 
-/* サイドバー背面（黄色背景×白文字） */
-[data-testid="stSidebar"] .stButton > button::after,
-[data-testid="stSidebar"] .stFormSubmitButton > button::after {
+/* 背面（黄色背景×白文字） */
+.stButton > button::after,
+.stFormSubmitButton > button::after {
   content: attr(data-text);
   background-color: #ffd700;
   color: #ffffff;
@@ -330,15 +341,15 @@ button[title="Close sidebar"] svg {
   transform: rotateX(90deg) translateZ(25px);
 }
 
-/* サイドバー：ホバー時3D回転 */
-[data-testid="stSidebar"] .stButton > button:hover,
-[data-testid="stSidebar"] .stFormSubmitButton > button:hover {
+/* ホバー時：X軸90度回転でフリップ */
+.stButton > button:hover,
+.stFormSubmitButton > button:hover {
   transform: translateZ(-25px) rotateX(-90deg);
 }
 
-/* サイドバー：ボタン内部のdiv */
-[data-testid="stSidebar"] .stButton > button > div,
-[data-testid="stSidebar"] .stFormSubmitButton > button > div {
+/* ボタン内部のdiv（テキスト） */
+.stButton > button > div,
+.stFormSubmitButton > button > div {
   position: relative;
   z-index: 10;
   color: #ffffff !important;
@@ -346,24 +357,12 @@ button[title="Close sidebar"] svg {
   text-transform: uppercase;
 }
 
-/* 新規作成ボタンだけ緑系 */
-[data-testid="stSidebar"] .create-button-container .stButton > button::before {
-  background-color: #10b981;
-  border-color: #10b981;
-  color: #ffffff;
-}
-[data-testid="stSidebar"] .create-button-container .stButton > button::after {
-  background-color: #059669;
-  border-color: #059669;
-  color: #ffffff;
-}
-
 /* -------------------------------------------
    メインエリア：ヘッダー・見出し
 ------------------------------------------- */
 .top-bar {
     background: #050b23;
-    padding: 0px 8px 8px 8px;   /* ← 上パディング 0 */
+    padding: 0px 8px 8px 8px;  /* ← タイトル上 padding 0 */
     border-bottom: 1px solid #cfae63;
     margin-bottom: 20px;
 }
@@ -377,6 +376,18 @@ button[title="Close sidebar"] svg {
     font-weight: 700;
     color: #ffd666;
     margin: 8px 0;
+}
+
+/* プレビュー見出し＋コピーアイコン */
+.preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.preview-copy-icon {
+    cursor: pointer;
+    font-size: 18px;
+    margin-left: 8px;
 }
 
 /* タイトル直下のメッセージエリア */
@@ -484,14 +495,6 @@ button[title="Close sidebar"] svg {
     font-size: 13px;
     margin-top: 12px;
 }
-.copy-area textarea {
-    background: #f3f4f6 !important;
-    border-radius: 8px !important;
-    border: 1px solid #d1d5db !important;
-    color: #111827 !important;
-    font-size: 12px !important;
-    width: 100% !important;
-}
 .copy-info {
     color: #ffffff;
     font-size: 13px;
@@ -574,87 +577,20 @@ button[title="Close sidebar"] svg {
     line-height: 1.6;
     animation: intro-gradient 3s ease-in-out infinite;
 }
-
-/* サイドバー上部ヘッダー縮小 */
-[data-testid="stSidebarHeader"] {
-    min-height: 0 !important;
-    height: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-}
-[data-testid="stSidebarContent"] {
-    padding-top: 7px !important;
-}
-
-/* ============================================
-   メインエリア：金色グラデボタン（送信／コピー／再生成）
-   ※ サイドバー（[data-testid="stSidebar"]）は除外する
-============================================ */
-
-/* メインエリア側の st.button / st.form_submit_button 全部 */
-[data-testid="stAppViewContainer"] > div:not([data-testid="stSidebar"]) .stButton > button,
-[data-testid="stAppViewContainer"] > div:not([data-testid="stSidebar"]) .stFormSubmitButton > button {
-    position: relative;
-    width: 100%;
-    padding: 10px 20px;
-    border-radius: 999px;
-    border: none;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-
-    /* 金色グラデーション */
-    background: linear-gradient(90deg, #ffd666 0%, #f4a021 100%);
-    color: #ffffff !important;
-
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
-
-    /* 3D用 transform を完全に無効化 */
-    transform: none !important;
-    transform-style: flat !important;
-    transition: all 0.2s ease-out;
-}
-
-/* hover：白背景＋金枠＋黒文字 */
-[data-testid="stAppViewContainer"] > div:not([data-testid="stSidebar"]) .stButton > button:hover,
-[data-testid="stAppViewContainer"] > div:not([data-testid="stSidebar"]) .stFormSubmitButton > button:hover {
-    background: #ffffff;
-    color: #111827 !important;
-    border: 2px solid #f4a021;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-    transform: translateY(-1px) !important;
-}
-
-/* メインエリア側の 3D用 ::before / ::after を消す */
-[data-testid="stAppViewContainer"] > div:not([data-testid="stSidebar"]) .stButton > button::before,
-[data-testid="stAppViewContainer"] > div:not([data-testid="stSidebar"]) .stButton > button::after,
-[data-testid="stAppViewContainer"] > div:not([data-testid="stSidebar"]) .stFormSubmitButton > button::before,
-[data-testid="stAppViewContainer"] > div:not([data-testid="stSidebar"]) .stFormSubmitButton > button::after {
-    content: none !important;
-}
-
-/* メインブロック（stMainBlockContainer）の上パディング調整 */
-[data-testid="stAppViewContainer"] .main .block-container {
-    padding-top: 10px !important;
-}
-
 </style>
 """,
     unsafe_allow_html=True,
 )
 
 # ============================================
-# JavaScript（3D用 data-text の付与：サイドバーのみ）
+# JS：全ボタンに data-text を付与（3D用）
 # ============================================
 st.components.v1.html(
     """
     <script>
     (function() {
       function updateButtonText() {
-        const buttons = parent.document.querySelectorAll(
-          '[data-testid="stSidebar"] .stButton > button, ' +
-          '[data-testid="stSidebar"] .stFormSubmitButton > button'
-        );
+        const buttons = parent.document.querySelectorAll('.stButton > button, .stFormSubmitButton > button');
         buttons.forEach(btn => {
           const textDiv = btn.querySelector('div');
           if (textDiv && textDiv.textContent) {
@@ -690,22 +626,13 @@ st.markdown(
 )
 
 # ============================================
-# サイドバー
+# サイドバー（新規作成ボタンは削除）
 # ============================================
 with st.sidebar:
     st.markdown(
         "<div class='sidebar-app-title'>■ メール生成AI</div>",
         unsafe_allow_html=True,
     )
-
-    # 新規作成ボタン（緑系3D）
-    st.markdown("<div class='create-button-container'>", unsafe_allow_html=True)
-    if st.button("新規作成", use_container_width=True):
-        st.session_state.messages = []
-        st.session_state.generated_email = None
-        st.session_state.variation_count = 0
-        st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
 
     # テンプレート
     st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
@@ -901,7 +828,16 @@ with col1:
 # 右：プレビュー
 # --------------------------------------------
 with col2:
-    st.markdown("<div class='section-header'>📄 プレビュー</div>", unsafe_allow_html=True)
+    # 見出し＋コピーアイコン
+    st.markdown(
+        """
+        <div class="section-header preview-header">
+          <span>📄 プレビュー</span>
+          <span class="preview-copy-icon" title="プレビューをコピー">📋</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
     if st.session_state.generated_email is None:
@@ -921,15 +857,63 @@ with col2:
         preview_html = textwrap.dedent(
             f"""
             <div class="preview-main-wrapper">
-                <p><strong>件名</strong></p>
-                <p>{subject_html}</p>
+                <p class="preview-label"><strong>件名</strong></p>
+                <p class="preview-subject">{subject_html}</p>
                 <hr>
-                <p><strong>本文</strong></p>
-                <p>{body_html}</p>
+                <p class="preview-label"><strong>本文</strong></p>
+                <p class="preview-body">{body_html}</p>
             </div>
             """
         )
         st.markdown(preview_html, unsafe_allow_html=True)
+
+        # プレビュー全文をコピーするためのJS（アイコン用）
+        full_text = f"件名: {email['subject']}\n\n{email['body']}"
+        escaped_full_text = json.dumps(full_text)
+
+        st.components.v1.html(
+            f"""
+            <script>
+            (function() {{
+              function setupPreviewCopy() {{
+                const icon = parent.document.querySelector('.preview-copy-icon');
+                if (!icon) return;
+                icon.onclick = function() {{
+                  const text = {escaped_full_text};
+                  copyText(text);
+                }};
+              }}
+              function copyText(text) {{
+                if (navigator.clipboard && navigator.clipboard.writeText) {{
+                  navigator.clipboard.writeText(text).catch(function(err) {{
+                    console.warn("navigator.clipboard failed:", err);
+                    fallbackCopy(text);
+                  }});
+                }} else {{
+                  fallbackCopy(text);
+                }}
+              }}
+              function fallbackCopy(text) {{
+                try {{
+                  const textarea = document.createElement('textarea');
+                  textarea.value = text;
+                  textarea.style.position = 'fixed';
+                  textarea.style.left = '-9999px';
+                  document.body.appendChild(textarea);
+                  textarea.focus();
+                  textarea.select();
+                  document.execCommand('copy');
+                  document.body.removeChild(textarea);
+                }} catch (e) {{
+                  console.error("Fallback copy failed:", e);
+                }}
+              }}
+              setTimeout(setupPreviewCopy, 500);
+            }})();
+            </script>
+            """,
+            height=0,
+        )
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
@@ -947,48 +931,15 @@ with col2:
 
         btn_col1, btn_col2 = st.columns(2)
 
-        # ---------- コピー ----------
+        # ---------- リセット ボタン（元コピー） ----------
         with btn_col1:
-            full_text = f"件名: {email['subject']}\n\n{email['body']}"
-            escaped_text = json.dumps(full_text)
+            if st.button("リセット", use_container_width=True):
+                st.session_state.messages = []
+                st.session_state.generated_email = None
+                st.session_state.variation_count = 0
+                st.rerun()
 
-            if st.button("📋 コピー", use_container_width=True):
-                st.components.v1.html(
-                    f"""
-                    <script>
-                    (function() {{
-                        const text = {escaped_text};
-                        if (navigator.clipboard && navigator.clipboard.writeText) {{
-                            navigator.clipboard.writeText(text).catch(function(err) {{
-                                console.warn("navigator.clipboard failed:", err);
-                                fallbackCopy(text);
-                            }});
-                        }} else {{
-                            fallbackCopy(text);
-                        }}
-                        function fallbackCopy(text) {{
-                            try {{
-                                const textarea = document.createElement('textarea');
-                                textarea.value = text;
-                                textarea.style.position = 'fixed';
-                                textarea.style.left = '-9999px';
-                                document.body.appendChild(textarea);
-                                textarea.focus();
-                                textarea.select();
-                                document.execCommand('copy');
-                                document.body.removeChild(textarea);
-                            }} catch (e) {{
-                                console.error("Fallback copy failed:", e);
-                            }}
-                        }}
-                    }})();
-                    </script>
-                    """,
-                    height=0,
-                )
-                st.markdown("<div class='copy-info'>✔ コピーしました</div>", unsafe_allow_html=True)
-
-        # ---------- 再生成 ----------
+        # ---------- 再生成 ボタン ----------
         with btn_col2:
             if st.button("🔄 再生成", use_container_width=True):
                 st.session_state.messages.append(
@@ -1021,5 +972,3 @@ with col2:
                         }
                     )
                 st.rerun()
-
-
