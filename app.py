@@ -3,7 +3,6 @@ from datetime import datetime
 import html
 import textwrap
 import json
-from typing import Optional
 
 # ============================================
 # 時候の挨拶（ヘルパー）
@@ -29,7 +28,7 @@ def get_seasonal_greeting() -> str:
 # ============================================
 # メール生成関数
 # ============================================
-def generate_email(template, tone, recipient, message, variation=0, seasonal_text: Optional[str] = None):
+def generate_email(template, tone, recipient, message, variation=0, seasonal_text: str | None = None):
     subject_variations = {
         "依頼": [
             f"【ご依頼】{message[:20]}",
@@ -984,6 +983,5 @@ with col2:
                         }
                     )
                 st.rerun()
-
 
 
