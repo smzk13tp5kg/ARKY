@@ -584,6 +584,9 @@ button[title="Close sidebar"] svg {
     margin-bottom: 2px !important;
     padding: 0 !important;
 }
+[data-testid="stSidebar"] .nav-label {
+    margin-bottom: 4px !important;
+}
 
 </style>
 """,
@@ -980,5 +983,6 @@ with col2:
                         }
                     )
                 st.rerun()
+
 
 
