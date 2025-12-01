@@ -223,9 +223,9 @@ st.markdown(
 }
 body { background-color: #050b23; }
 
-/* メインエリア調整 */
+/* メインエリア調整（タイトル上padding 0） */
 main.block-container {
-    padding-top: 0rem;  /* タイトル上のパディング 0 */
+    padding-top: 0rem;
     padding-left: 1rem !important;
     padding-right: 1rem !important;
     max-width: 100% !important;
@@ -277,7 +277,7 @@ button[title="Close sidebar"] svg {
     padding-top: 7px !important;
 }
 
-/* ラジオ周りの余白を詰める */
+/* サイドバーのナビゲーション余白を詰める */
 [data-testid="stSidebar"] .nav-section {
     margin: 4px 0 !important;
     padding: 0 !important;
@@ -333,7 +333,7 @@ button[title="Close sidebar"] svg {
   width: 100%;
   height: 50px;
   display: flex;
-  alignments:center;
+  align-items: center;      /* ← alignments ではなく align-items */
   justify-content: center;
   border: 5px solid #000;
   box-sizing: border-box;
@@ -822,7 +822,7 @@ with col1:
             elif recipient == "その他" and not custom_recipient:
                 st.error("⚠️ カスタム相手を入力してください")
             else:
-                # ★ 選択内容付きでユーザーコメントを保存
+                # 選択内容付きでユーザーコメントを保存
                 user_display_text = (
                     f"{user_message}\n\n"
                     f"――――――――――\n"
