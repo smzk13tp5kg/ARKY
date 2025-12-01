@@ -277,7 +277,7 @@ button[title="Close sidebar"] svg {
     padding-top: 7px !important;
 }
 
-/* サイドバーのナビゲーション余白を詰める */
+/* サイドバー：ナビゲーション余白を詰める */
 [data-testid="stSidebar"] .nav-section {
     margin: 4px 0 !important;
     padding: 0 !important;
@@ -333,7 +333,7 @@ button[title="Close sidebar"] svg {
   width: 100%;
   height: 50px;
   display: flex;
-  align-items: center;      /* ← alignments ではなく align-items */
+  align-items: center;      /* ← align-items */
   justify-content: center;
   border: 5px solid #000;
   box-sizing: border-box;
@@ -383,7 +383,7 @@ button[title="Close sidebar"] svg {
 ------------------------------------------- */
 .top-bar {
     background: #050b23;
-    padding: 0px 8px 8px 8px;  /* タイトル上 padding 0 */
+    padding: 0px 8px 8px 8px;
     border-bottom: 1px solid #cfae63;
     margin-bottom: 20px;
 }
@@ -822,7 +822,7 @@ with col1:
             elif recipient == "その他" and not custom_recipient:
                 st.error("⚠️ カスタム相手を入力してください")
             else:
-                # 選択内容付きでユーザーコメントを保存
+                # ユーザーコメント（選択内容付き）
                 user_display_text = (
                     f"{user_message}\n\n"
                     f"――――――――――\n"
@@ -844,7 +844,7 @@ with col1:
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-    # チャットログ
+    # チャットログ（ユーザー左／AI右）
     chat_html_parts = ["<div class='chat-log'>"]
     for msg in st.session_state.messages:
         role = msg["role"]
