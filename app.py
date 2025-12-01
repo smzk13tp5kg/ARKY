@@ -941,9 +941,9 @@ with col2:
 
         # ---------- 再生成 ボタン ----------
         with btn_col2:
-            if st.button("🔄 再生成", use_container_width=True):
+            if st.button("🔄 表現を変える", use_container_width=True):
                 st.session_state.messages.append(
-                    {"role": "assistant", "content": "メールを再生成しています..."}
+                    {"role": "assistant", "content": "メール文面を再作成しています..."}
                 )
 
                 last_user_message = None
@@ -972,3 +972,4 @@ with col2:
                         }
                     )
                 st.rerun()
+
