@@ -813,20 +813,30 @@ with col1:
                 st.error("⚠️ カスタムテンプレートを入力してください")
             elif recipient == "その他" and not custom_recipient:
                 st.error("⚠️ カスタム相手を入力してください")
-            else:
-                st.session_state.messages.append({"role": "user", "content": user_message})
+        else:
+            # ★ 選択内容付きのユーザー表示テキストを組み立てる
+            user_display_text = (
+                f"{user_message}\n\n"
+                f"――――――――――\n"
+                f"テンプレート: {template} / トーン: {tone} / 相手: {recipient}"
+            )
 
-                response = (
-                    f"{template}メールを「{tone}」なトーンで、"
-                    f"{recipient}宛に作成しました！右側のプレビューをご覧ください。"
-                )
-                st.session_state.messages.append({"role": "assistant", "content": response})
+            st.session_state.messages.append(
+                {"role": "user", "content": user_display_text}
+            )
 
-                st.session_state.variation_count = 0
-                st.session_state.generated_email = generate_email(
-                    template, tone, recipient, user_message, variation=0, seasonal_text=seasonal_text
-                )
-                st.rerun()
+            response = (
+                f"{template}メールを「{tone}」なトーンで、"
+                f"{recipient}宛に作成しました！右側のプレビューをご覧ください。"
+            )
+            st.session_state.messages.append({"role": "assistant", "content": response})
+
+            st.session_state.variation_count = 0
+            st.session_state.generated_email = generate_email(
+                template, tone, recipient, user_message, variation=0, seasonal_text=seasonal_text
+            )
+            st.rerun()
+
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
@@ -990,6 +1000,7 @@ with col2:
                         }
                     )
                 st.rerun()
+
 
 
 
