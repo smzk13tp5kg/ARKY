@@ -519,34 +519,41 @@ button[title="Close sidebar"] svg {
     word-break: break-word;
     box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
+/* ユーザー：左寄せ＋左しっぽ */
 .chat-bubble.user {
     position: relative;
     background: #ffffff;
     color: #111827;
-    margin-left: auto;
+    margin-right: auto;   /* ← 左寄せ */
+    margin-left: 0;
     max-width: 80%;
 }
+
 .chat-bubble.user::after {
     content: "";
     position: absolute;
-    right: -8px;
+    left: -8px;           /* ← 左にしっぽ */
     top: 14px;
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 8px 0 8px 8px;
-    border-color: transparent transparent transparent #ffffff;
-    filter: drop-shadow(-1px 1px 2px rgba(0,0,0,0.15));
+    border-width: 8px 8px 8px 0;   /* ← 右向き三角から左向きへ */
+    border-color: transparent #ffffff transparent transparent;
+    filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.15));
 }
+
+/* AI：右寄せ（グラデ枠はそのまま） */
 .chat-bubble.assistant {
     position: relative;
     padding: 0;
     border-radius: 16px;
     background: transparent;
     overflow: visible;
-    margin-right: auto;
+    margin-left: auto;    /* ← 右寄せ */
+    margin-right: 0;
     max-width: 85%;
 }
+
 .chat-bubble.assistant::before {
     content: "";
     position: absolute;
@@ -983,6 +990,7 @@ with col2:
                         }
                     )
                 st.rerun()
+
 
 
 
