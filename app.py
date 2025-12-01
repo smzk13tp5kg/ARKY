@@ -225,7 +225,7 @@ body { background-color: #050b23; }
 
 /* メインエリア調整 */
 main.block-container {
-    padding-top: 0rem;  /* ← タイトル上のパディング 0 */
+    padding-top: 0rem;  /* タイトル上のパディング 0 */
     padding-left: 1rem !important;
     padding-right: 1rem !important;
     max-width: 100% !important;
@@ -277,6 +277,27 @@ button[title="Close sidebar"] svg {
     padding-top: 7px !important;
 }
 
+/* ラジオ周りの余白を詰める */
+[data-testid="stSidebar"] .nav-section {
+    margin: 4px 0 !important;
+    padding: 0 !important;
+}
+[data-testid="stSidebar"] [data-testid="stRadio"] {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+}
+[data-testid="stSidebar"] [data-testid="stRadio"] > label {
+    margin: 0 !important;
+    padding: 2px 0 !important;
+}
+[data-testid="stSidebar"] .stElementContainer {
+    margin-bottom: 4px !important;
+}
+[data-testid="stSidebar"] .nav-label {
+    margin-bottom: 4px !important;
+}
+
 /* -------------------------------------------
    すべてのボタン：3D フリップスタイル
 ------------------------------------------- */
@@ -312,7 +333,7 @@ button[title="Close sidebar"] svg {
   width: 100%;
   height: 50px;
   display: flex;
-  align-items: center;
+  alignments:center;
   justify-content: center;
   border: 5px solid #000;
   box-sizing: border-box;
@@ -362,7 +383,7 @@ button[title="Close sidebar"] svg {
 ------------------------------------------- */
 .top-bar {
     background: #050b23;
-    padding: 0px 8px 8px 8px;  /* ← タイトル上 padding 0 */
+    padding: 0px 8px 8px 8px;  /* タイトル上 padding 0 */
     border-bottom: 1px solid #cfae63;
     margin-bottom: 20px;
 }
@@ -524,20 +545,19 @@ button[title="Close sidebar"] svg {
     position: relative;
     background: #ffffff;
     color: #111827;
-    margin-right: auto;   /* ← 左寄せ */
+    margin-right: auto;
     margin-left: 0;
     max-width: 80%;
 }
-
 .chat-bubble.user::after {
     content: "";
     position: absolute;
-    left: -8px;           /* ← 左にしっぽ */
+    left: -8px;
     top: 14px;
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 8px 8px 8px 0;   /* ← 右向き三角から左向きへ */
+    border-width: 8px 8px 8px 0;
     border-color: transparent #ffffff transparent transparent;
     filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.15));
 }
@@ -549,11 +569,10 @@ button[title="Close sidebar"] svg {
     border-radius: 16px;
     background: transparent;
     overflow: visible;
-    margin-left: auto;    /* ← 右寄せ */
+    margin-left: auto;
     margin-right: 0;
     max-width: 85%;
 }
-
 .chat-bubble.assistant::before {
     content: "";
     position: absolute;
@@ -584,45 +603,6 @@ button[title="Close sidebar"] svg {
     line-height: 1.6;
     animation: intro-gradient 3s ease-in-out infinite;
 }
-
-/* サイドバーのラジオボタンの余白を詰める */
-[data-testid="stSidebar"] .stRadio > div {
-    margin-top: 2px !important;
-    margin-bottom: 2px !important;
-    padding: 0 !important;
-}
-[data-testid="stSidebar"] .nav-label {
-    margin-bottom: 4px !important;
-}
-
-/* -------------------------------------------
-   サイドバー：ナビゲーション余白を詰める
-------------------------------------------- */
-
-/* セクションラッパー自体の上下をギュッと */
-[data-testid="stSidebar"] .nav-section {
-    margin: 4px 0 !important;
-    padding: 0 !important;
-}
-
-/* ラジオ全体の上下余白を削る */
-[data-testid="stSidebar"] [data-testid="stRadio"] {
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    padding: 0 !important;
-}
-
-/* 各ラジオ行の上下パディングも詰める */
-[data-testid="stSidebar"] [data-testid="stRadio"] > label {
-    margin: 0 !important;
-    padding: 2px 0 !important;
-}
-
-/* サイドバー内の各要素コンテナの下マージンを小さく */
-[data-testid="stSidebar"] .stElementContainer {
-    margin-bottom: 4px !important;
-}
-
 </style>
 """,
     unsafe_allow_html=True,
@@ -672,7 +652,7 @@ st.markdown(
 )
 
 # ============================================
-# サイドバー（新規作成ボタンは削除）
+# サイドバー
 # ============================================
 with st.sidebar:
     st.markdown(
@@ -841,30 +821,26 @@ with col1:
                 st.error("⚠️ カスタムテンプレートを入力してください")
             elif recipient == "その他" and not custom_recipient:
                 st.error("⚠️ カスタム相手を入力してください")
-        else:
-            # ★ 選択内容付きのユーザー表示テキストを組み立てる
-            user_display_text = (
-                f"{user_message}\n\n"
-                f"――――――――――\n"
-                f"テンプレート: {template} / トーン: {tone} / 相手: {recipient}"
-            )
+            else:
+                # ★ 選択内容付きでユーザーコメントを保存
+                user_display_text = (
+                    f"{user_message}\n\n"
+                    f"――――――――――\n"
+                    f"テンプレート: {template} / トーン: {tone} / 相手: {recipient}"
+                )
+                st.session_state.messages.append({"role": "user", "content": user_display_text})
 
-            st.session_state.messages.append(
-                {"role": "user", "content": user_display_text}
-            )
+                response = (
+                    f"{template}メールを「{tone}」なトーンで、"
+                    f"{recipient}宛に作成しました！右側のプレビューをご覧ください。"
+                )
+                st.session_state.messages.append({"role": "assistant", "content": response})
 
-            response = (
-                f"{template}メールを「{tone}」なトーンで、"
-                f"{recipient}宛に作成しました！右側のプレビューをご覧ください。"
-            )
-            st.session_state.messages.append({"role": "assistant", "content": response})
-
-            st.session_state.variation_count = 0
-            st.session_state.generated_email = generate_email(
-                template, tone, recipient, user_message, variation=0, seasonal_text=seasonal_text
-            )
-            st.rerun()
-
+                st.session_state.variation_count = 0
+                st.session_state.generated_email = generate_email(
+                    template, tone, recipient, user_message, variation=0, seasonal_text=seasonal_text
+                )
+                st.rerun()
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
@@ -884,7 +860,6 @@ with col1:
 # 右：プレビュー
 # --------------------------------------------
 with col2:
-    # 見出し＋コピーアイコン
     st.markdown(
         """
         <div class="section-header preview-header">
@@ -987,7 +962,7 @@ with col2:
 
         btn_col1, btn_col2 = st.columns(2)
 
-        # ---------- リセット ボタン（元コピー） ----------
+        # ---------- リセット ----------
         with btn_col1:
             if st.button("リセット", use_container_width=True):
                 st.session_state.messages = []
@@ -995,7 +970,7 @@ with col2:
                 st.session_state.variation_count = 0
                 st.rerun()
 
-        # ---------- 再生成 ボタン ----------
+        # ---------- 再生成 ----------
         with btn_col2:
             if st.button("🔄 表現を変える", use_container_width=True):
                 st.session_state.messages.append(
@@ -1028,9 +1003,3 @@ with col2:
                         }
                     )
                 st.rerun()
-
-
-
-
-
-
