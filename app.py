@@ -595,6 +595,34 @@ button[title="Close sidebar"] svg {
     margin-bottom: 4px !important;
 }
 
+/* -------------------------------------------
+   サイドバー：ナビゲーション余白を詰める
+------------------------------------------- */
+
+/* セクションラッパー自体の上下をギュッと */
+[data-testid="stSidebar"] .nav-section {
+    margin: 4px 0 !important;
+    padding: 0 !important;
+}
+
+/* ラジオ全体の上下余白を削る */
+[data-testid="stSidebar"] [data-testid="stRadio"] {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+}
+
+/* 各ラジオ行の上下パディングも詰める */
+[data-testid="stSidebar"] [data-testid="stRadio"] > label {
+    margin: 0 !important;
+    padding: 2px 0 !important;
+}
+
+/* サイドバー内の各要素コンテナの下マージンを小さく */
+[data-testid="stSidebar"] .stElementContainer {
+    margin-bottom: 4px !important;
+}
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -1000,6 +1028,7 @@ with col2:
                         }
                     )
                 st.rerun()
+
 
 
 
