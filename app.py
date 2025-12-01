@@ -577,6 +577,14 @@ button[title="Close sidebar"] svg {
     line-height: 1.6;
     animation: intro-gradient 3s ease-in-out infinite;
 }
+
+/* サイドバーのラジオボタンの余白を詰める */
+[data-testid="stSidebar"] .stRadio > div {
+    margin-top: 2px !important;
+    margin-bottom: 2px !important;
+    padding: 0 !important;
+}
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -972,4 +980,5 @@ with col2:
                         }
                     )
                 st.rerun()
+
 
