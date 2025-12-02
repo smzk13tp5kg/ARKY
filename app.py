@@ -639,50 +639,6 @@ button[title="Close sidebar"] svg {
     padding-top: 7px !important;   /* 0でもいいけど、開閉アイコンが見えなくなるからこれくらいが自然かも */
 }
 
-/* ============================================
-   プレビューエリア：金色グラデボタン（コピー／再生成）
-   ※ ナビゲーションの3Dボタンとは切り分ける
-============================================ */
-
-/* ボタン本体 */
-.preview-actions .stButton > button {
-    position: relative;
-    width: 100%;
-    padding: 10px 20px;
-    border-radius: 999px;
-    border: none;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-
-    /* 金色グラデーション */
-    background: linear-gradient(90deg, #ffd666 0%, #f4a021 100%);
-    color: #ffffff !important;
-
-    /* ARKYらしい強めの影 */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
-
-    /* 3Dフリップ用 transform を無効化 */
-    transform: none !important;
-    transform-style: flat !important;
-    transition: all 0.2s ease-out;
-}
-
-/* ホバー時：白背景＋金枠＋黒文字 */
-.preview-actions .stButton > button:hover {
-    background: #ffffff;
-    color: #111827 !important;
-    border: 2px solid #f4a021;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-    transform: translateY(-1px);
-}
-
-/* 3D用の ::before / ::after を無効化しておく */
-.preview-actions .stButton > button::before,
-.preview-actions .stButton > button::after {
-    content: none !important;
-}
-
 
 </style>
 """,
@@ -1016,7 +972,6 @@ with col2:
         st.markdown("<div class='preview-actions'>", unsafe_allow_html=True)
         btn_col1, btn_col2 = st.columns(2)
 
-        # ---------- コピー ボタン ----------
         with btn_col1:
             # コピー用テキスト
             full_text = f"件名: {email['subject']}\n\n{email['body']}"
@@ -1028,39 +983,9 @@ with col2:
                 st.components.v1.html(
                     f"""
                     <script>
-                    (function() {{
-                        const text = {escaped_text};
-
-                        // 1. まず navigator.clipboard（新しめのAPI）を試す
-                        if (navigator.clipboard && navigator.clipboard.writeText) {{
-                            navigator.clipboard.writeText(text).then(function() {{
-                                console.log("Copied with navigator.clipboard");
-                            }}).catch(function(err) {{
-                                console.warn("navigator.clipboard failed:", err);
-                                fallbackCopy(text);
-                            }});
-                        }} else {{
-                            // 2. 非対応ブラウザや iframe 制限時はこちら
-                            fallbackCopy(text);
-                        }}
-
-                        function fallbackCopy(text) {{
-                            try {{
-                                const textarea = document.createElement('textarea');
-                                textarea.value = text;
-                                textarea.style.position = 'fixed';
-                                textarea.style.left = '-9999px';
-                                document.body.appendChild(textarea);
-                                textarea.focus();
-                                textarea.select();
-                                const ok = document.execCommand('copy');
-                                document.body.removeChild(textarea);
-                                console.log("Copied with execCommand, result:", ok);
-                            }} catch (e) {{
-                                console.error("Fallback copy failed:", e);
-                            }}
-                        }}
-                    }})();
+                    navigator.clipboard.writeText({escaped_text}).then(() => {{
+                        console.log("Copied!");
+                    }});
                     </script>
                     """,
                     height=0,
@@ -1072,7 +997,7 @@ with col2:
                     unsafe_allow_html=True,
                 )
 
-        # ---------- 再生成 ボタン ----------
+
         with btn_col2:
             if st.button("🔄 再生成", use_container_width=True):
                 st.session_state.messages.append(
@@ -1108,4 +1033,6 @@ with col2:
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
+
 
