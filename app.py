@@ -1,6 +1,5 @@
 import streamlit as st
 from datetime import datetime
-import random
 import html
 import textwrap
 import json
@@ -9,7 +8,6 @@ import json
 # 時候の挨拶（ヘルパー）
 # ============================================
 def get_seasonal_greeting() -> str:
-    """現在の月に応じた時候の挨拶を返す"""
     month = datetime.now().month
     greetings = {
         1: "新春の候",
@@ -25,7 +23,6 @@ def get_seasonal_greeting() -> str:
         11: "晩秋の候",
         12: "師走の候",
     }
-
     return greetings.get(month, "")
 
 # ============================================
@@ -95,13 +92,11 @@ def generate_email(template, tone, recipient, message, variation=0, seasonal_tex
     greeting_list = greetings_variations.get(recipient, ["お世話になっております。"])
     base_greeting = greeting_list[variation % len(greeting_list)]
 
-    # ★ 時候の挨拶を greeting にだけ付与する
     if seasonal_text:
         greeting = f"{seasonal_text}、{base_greeting}"
     else:
         greeting = base_greeting
 
-    # ★ body_variations から seasonal_block を削除
     body_variations = [
         f"""{greeting}
 
@@ -179,7 +174,7 @@ def generate_email(template, tone, recipient, message, variation=0, seasonal_tex
         "advice": advice,
         "variation": variation,
     }
-    
+
 # ============================================
 # ページ設定
 # ============================================
@@ -190,14 +185,12 @@ st.set_page_config(
 )
 
 # ============================================
-# カスタムCSS（統合版）
+# カスタムCSS
 # ============================================
 st.markdown(
     """
 <style>
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 /* 全体背景：濃い紺色 + ARKY背景画像 */
 .stApp {
@@ -228,25 +221,17 @@ st.markdown(
     background-color: rgba(5, 11, 35, 0.95);
     backdrop-filter: blur(10px);
 }
-body {
-    background-color: #050b23;
-}
+body { background-color: #050b23; }
 
 /* メインエリア調整 */
 main.block-container {
-    padding-top: 0rem;
+    padding-top: 0rem;  /* ← タイトル上のパディング 0 */
     padding-left: 1rem !important;
     padding-right: 1rem !important;
     max-width: 100% !important;
 }
 
-/* メインブロックの上下余白 */
-.stMainBlockContainer {
-    padding-top: 0 !important;
-    padding-bottom: 10px !important;
-}
-
-/* カラム、ブロックの幅調整 */
+/* カラムレイアウト */
 [data-testid="column"] {
     padding: 0 !important;
     width: 100% !important;
@@ -281,8 +266,19 @@ button[title="Close sidebar"] svg {
     color: #ffffff !important;
 }
 
+/* サイドバー上部ヘッダー縮小 */
+[data-testid="stSidebarHeader"] {
+    min-height: 0 !important;
+    height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+[data-testid="stSidebarContent"] {
+    padding-top: 7px !important;
+}
+
 /* -------------------------------------------
-   3D フリップボタン（Pure CSS）
+   すべてのボタン：3D フリップスタイル
 ------------------------------------------- */
 .stButton,
 .stFormSubmitButton {
@@ -351,7 +347,7 @@ button[title="Close sidebar"] svg {
   transform: translateZ(-25px) rotateX(-90deg);
 }
 
-/* ボタン内部のdivは表示するが、透明度を下げる */
+/* ボタン内部のdiv（テキスト） */
 .stButton > button > div,
 .stFormSubmitButton > button > div {
   position: relative;
@@ -361,27 +357,12 @@ button[title="Close sidebar"] svg {
   text-transform: uppercase;
 }
 
-/* 新規作成ボタン用のラッパ（緑系の3Dフリップ） */
-.create-button-container .stButton > button::before {
-  background-color: #10b981;
-  border-color: #10b981;
-  color: #ffffff;
-}
-
-.create-button-container .stButton > button::after {
-  background-color: #059669;
-  border-color: #059669;
-  color: #ffffff;
-}
-
 /* -------------------------------------------
-   メインエリア
+   メインエリア：ヘッダー・見出し
 ------------------------------------------- */
-
-/* トップバー */
 .top-bar {
     background: #050b23;
-    padding: 16px 8px 8px 8px;
+    padding: 0px 8px 8px 8px;  /* ← タイトル上 padding 0 */
     border-bottom: 1px solid #cfae63;
     margin-bottom: 20px;
 }
@@ -390,8 +371,6 @@ button[title="Close sidebar"] svg {
     font-weight: 700;
     color: #ffffff !important;
 }
-
-/* セクション見出し */
 .section-header {
     font-size: 16px;
     font-weight: 700;
@@ -399,7 +378,19 @@ button[title="Close sidebar"] svg {
     margin: 8px 0;
 }
 
-/* タイトル直下のメッセージエリア（アイコン＋AIバブル） */
+/* プレビュー見出し＋コピーアイコン */
+.preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.preview-copy-icon {
+    cursor: pointer;
+    font-size: 18px;
+    margin-left: 8px;
+}
+
+/* タイトル直下のメッセージエリア */
 .intro-wrapper {
     display: flex;
     align-items: flex-start;
@@ -417,7 +408,7 @@ button[title="Close sidebar"] svg {
     object-fit: contain;
 }
 
-/* ★ グラデ枠＋グラデ文字の AI バブル ★ */
+/* グラデ枠＋グラデ文字の AI バブル */
 .intro-bubble {
     position: relative;
     padding: 0;
@@ -504,25 +495,13 @@ button[title="Close sidebar"] svg {
     font-size: 13px;
     margin-top: 12px;
 }
-.copy-area textarea {
-    background: #f3f4f6 !important;
-    border-radius: 8px !important;
-    border: 1px solid #d1d5db !important;
-    color: #111827 !important;
-    font-size: 12px !important;
-    width: 100% !important;
-}
-
-/* コピー案内テキスト（白文字） */
 .copy-info {
     color: #ffffff;
     font-size: 13px;
     margin-bottom: 4px;
 }
 
-/* ============================================
-   チャットメッセージ（自前バブル表示）
-============================================ */
+/* チャットバブル */
 .chat-log {
     display: flex;
     flex-direction: column;
@@ -541,104 +520,73 @@ button[title="Close sidebar"] svg {
     box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 .chat-bubble.user {
-    position: relative;             /* ← しっぽの基準にする */
+    position: relative;
     background: #ffffff;
     color: #111827;
-    margin-left: auto;              /* 右寄せしたい場合。左寄せなら消してOK */
-    max-width: 80%;                 /* 余白を少し残すために調整（お好み） */
+    margin-left: auto;
+    max-width: 80%;
 }
-
-/* ユーザー吹き出しの“しっぽ”（右側） */
 .chat-bubble.user::after {
     content: "";
     position: absolute;
-    right: -8px;                    /* バブルの右外側に飛び出させる */
-    top: 14px;                      /* 縦位置。お好みで調整 */
+    right: -8px;
+    top: 14px;
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 8px 0 8px 8px;    /* 三角形のサイズ */
-    border-color: transparent transparent transparent #ffffff;  /* ← バブルと同じ色 */
-
-    /* 影をちょっと付けたい場合 */
+    border-width: 8px 0 8px 8px;
+    border-color: transparent transparent transparent #ffffff;
     filter: drop-shadow(-1px 1px 2px rgba(0,0,0,0.15));
 }
-
-/* ★ AIチャットバブルを intro-bubble と同じスタイルに変更 ★ */
 .chat-bubble.assistant {
     position: relative;
-    padding: 0;                     /* 内側の padding はテキスト側で制御 */
+    padding: 0;
     border-radius: 16px;
     background: transparent;
     overflow: visible;
-    margin-right: auto;             /* 左寄せ（必要に応じて調整） */
-    max-width: 85%;                 /* お好みで可変 */
+    margin-right: auto;
+    max-width: 85%;
 }
-
-/* 外側の光るグラデーション枠（assistant用） */
 .chat-bubble.assistant::before {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: 16px;
-    padding: 4px; /* 枠の太さ */
-
+    padding: 4px;
     background: linear-gradient(120deg, #6559ae, #ff7159, #6559ae);
     background-size: 400% 400%;
     animation: intro-gradient 3s ease-in-out infinite;
-
     -webkit-mask:
       linear-gradient(#000 0 0) content-box,
       linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
             mask-composite: exclude;
 }
-
-/* 内側テキストのグラデーション（assistant用） */
 .chat-bubble.assistant > span {
     position: relative;
     display: block;
     padding: 10px 18px;
     border-radius: 12px;
-
-    background: rgba(5, 11, 35, 0.85);      /* 半透明背景 */
+    background: rgba(5, 11, 35, 0.85);
     background-image: linear-gradient(120deg, #fdfbff, #ffd7b2, #ffe6ff);
     background-size: 400% 400%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-
     font-size: 14px;
     font-weight: 600;
     line-height: 1.6;
-
     animation: intro-gradient 3s ease-in-out infinite;
 }
 
-/* Streamlit の要素コンテナ余白を削る */
-.stElementContainer {
-    margin: 0 !important;
+/* サイドバーのラジオボタンの余白を詰める */
+[data-testid="stSidebar"] .stRadio > div {
+    margin-top: 2px !important;
+    margin-bottom: 2px !important;
     padding: 0 !important;
 }
-
-/* 一部アイコンの色を白に */
-.st-emotion-cache-pd6qx2 {
-    color: #ffffff !important;
-    fill: #ffffff !important;
+[data-testid="stSidebar"] .nav-label {
+    margin-bottom: 4px !important;
 }
-
-/* サイドバー上部ヘッダー（黄色で囲った余白）の高さを詰める */
-[data-testid="stSidebarHeader"] {
-    min-height: 0 !important;
-    height: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-}
-
-/* サイドバーコンテンツの上パディングも少しだけにする */
-[data-testid="stSidebarContent"] {
-    padding-top: 7px !important;   /* 0でもいいけど、開閉アイコンが見えなくなるからこれくらいが自然かも */
-}
-
 
 </style>
 """,
@@ -646,7 +594,7 @@ button[title="Close sidebar"] svg {
 )
 
 # ============================================
-# JavaScriptでボタンテキストを動的に設定
+# JS：全ボタンに data-text を付与（3D用）
 # ============================================
 st.components.v1.html(
     """
@@ -661,19 +609,9 @@ st.components.v1.html(
           }
         });
       }
-      
-      // 初回実行
       setTimeout(updateButtonText, 500);
-      
-      // MutationObserverで動的に追加されるボタンも監視
       const observer = new MutationObserver(updateButtonText);
-      observer.observe(parent.document.body, {
-        childList: true,
-        subtree: true
-      });
-      
-      // 定期的にも実行
-      setInterval(updateButtonText, 1000);
+      observer.observe(parent.document.body, { childList: true, subtree: true });
     })();
     </script>
     """,
@@ -699,7 +637,7 @@ st.markdown(
 )
 
 # ============================================
-# サイドバー
+# サイドバー（新規作成ボタンは削除）
 # ============================================
 with st.sidebar:
     st.markdown(
@@ -707,34 +645,24 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    # 新規作成ボタン（緑系3D）
-    st.markdown("<div class='create-button-container'>", unsafe_allow_html=True)
-    if st.button("新規作成", use_container_width=True):
-        st.session_state.messages = []
-        st.session_state.generated_email = None
-        st.session_state.variation_count = 0
-        st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
-
     # テンプレート
-    with st.container():
-        st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
-        st.markdown("<div class='nav-label'>テンプレート</div>", unsafe_allow_html=True)
-        template_display = st.radio(
-            "テンプレート",
-            [
-                "📧 依頼メール",
-                "✉️ 交渉メール",
-                "🙏 お礼メール",
-                "💼 謝罪メール",
-                "📩 挨拶メール",
-                "➕ その他",
-            ],
-            index=0,
-            label_visibility="collapsed",
-            key="template_radio",
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-label'>テンプレート</div>", unsafe_allow_html=True)
+    template_display = st.radio(
+        "テンプレート",
+        [
+            "📧 依頼メール",
+            "✉️ 交渉メール",
+            "🙏 お礼メール",
+            "💼 謝罪メール",
+            "📩 挨拶メール",
+            "➕ その他",
+        ],
+        index=0,
+        label_visibility="collapsed",
+        key="template_radio",
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
 
     display_to_template = {
         "📧 依頼メール": "依頼",
@@ -752,24 +680,23 @@ with st.sidebar:
         template = custom_template if custom_template else "その他"
 
     # トーン
-    with st.container():
-        st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
-        st.markdown("<div class='nav-label'>トーン</div>", unsafe_allow_html=True)
-        tone_display = st.radio(
-            "トーン",
-            [
-                "😊 カジュアル／フレンドリー（同僚向け）",
-                "📄 標準ビジネス（最も一般的）",
-                "📘 フォーマル（社外顧客／上位者／依頼交渉）",
-                "🙏 厳粛・儀礼的（謝罪・クレーム対応）",
-                "⏱️ 緊急・簡潔（即時対応が必要な通知）",
-                "🌿 柔らかめ（関係維持・お礼・広報向け）",
-            ],
-            index=1,
-            label_visibility="collapsed",
-            key="tone_radio",
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-label'>トーン</div>", unsafe_allow_html=True)
+    tone_display = st.radio(
+        "トーン",
+        [
+            "😊 カジュアル／フレンドリー（同僚向け）",
+            "📄 標準ビジネス（最も一般的）",
+            "📘 フォーマル（社外顧客／上位者／依頼交渉）",
+            "🙏 厳粛・儀礼的（謝罪・クレーム対応）",
+            "⏱️ 緊急・簡潔（即時対応が必要な通知）",
+            "🌿 柔らめ（関係維持・お礼・広報向け）",
+        ],
+        index=1,
+        label_visibility="collapsed",
+        key="tone_radio",
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
 
     display_to_tone = {
         "😊 カジュアル／フレンドリー（同僚向け）": "カジュアル／フレンドリー",
@@ -777,29 +704,28 @@ with st.sidebar:
         "📘 フォーマル（社外顧客／上位者／依頼交渉）": "フォーマル",
         "🙏 厳粛・儀礼的（謝罪・クレーム対応）": "厳粛・儀礼的",
         "⏱️ 緊急・簡潔（即時対応が必要な通知）": "緊急・簡潔",
-        "🌿 柔らかめ（関係維持・お礼・広報向け）": "柔らかめ",
+        "🌿 柔らめ（関係維持・お礼・広報向け）": "柔らめ",
     }
     tone = display_to_tone[tone_display]
 
     # 相手
-    with st.container():
-        st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
-        st.markdown("<div class='nav-label'>相手</div>", unsafe_allow_html=True)
-        recipient_display = st.radio(
-            "相手",
-            [
-                "👤 上司",
-                "😊 同僚",
-                "👔 部下",
-                "🏢 社外企業社員",
-                "🏪 取引先",
-                "➕ その他",
-            ],
-            index=0,
-            label_visibility="collapsed",
-            key="recipient_radio",
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-label'>相手</div>", unsafe_allow_html=True)
+    recipient_display = st.radio(
+        "相手",
+        [
+            "👤 上司",
+            "😊 同僚",
+            "👔 部下",
+            "🏢 社外企業社員",
+            "🏪 取引先",
+            "➕ その他",
+        ],
+        index=0,
+        label_visibility="collapsed",
+        key="recipient_radio",
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
 
     display_to_recipient = {
         "👤 上司": "上司",
@@ -817,17 +743,16 @@ with st.sidebar:
         recipient = custom_recipient if custom_recipient else "その他"
 
     # 時候の挨拶
-    with st.container():
-        st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
-        st.markdown("<div class='nav-label'>時候の挨拶</div>", unsafe_allow_html=True)
-        seasonal_option = st.radio(
-            "時候の挨拶",
-            ["不要", "追加する"],
-            index=0,
-            label_visibility="collapsed",
-            key="seasonal_radio",
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-section'>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-label'>時候の挨拶</div>", unsafe_allow_html=True)
+    seasonal_option = st.radio(
+        "時候の挨拶",
+        ["不要", "追加する"],
+        index=0,
+        label_visibility="collapsed",
+        key="seasonal_radio",
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
 
     add_seasonal = seasonal_option == "追加する"
     seasonal_text = get_seasonal_greeting() if add_seasonal else ""
@@ -846,7 +771,6 @@ with col1:
     st.markdown("<div class='section-header'>💬 メッセージ</div>", unsafe_allow_html=True)
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-    # タイトル直下のメッセージエリア（アイコン＋AIグラデバブル）
     st.markdown(
         """
         <div class="intro-wrapper">
@@ -867,7 +791,7 @@ with col1:
 
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-    # フォーム（intro-bubble の直下）
+    # フォーム
     with st.form("message_form", clear_on_submit=True):
         user_message = st.text_area(
             "メッセージを入力",
@@ -899,23 +823,15 @@ with col1:
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-    # 送信済みメッセージ一覧（ユーザー＆アシスタント）
-    chat_html_parts = []
-    chat_html_parts.append("<div class='chat-log'>")
-
+    # チャットログ
+    chat_html_parts = ["<div class='chat-log'>"]
     for msg in st.session_state.messages:
         role = msg["role"]
         text = html.escape(msg["content"]).replace("\n", "<br>")
         if role == "user":
-            chat_html_parts.append(
-                f"<div class='chat-bubble user'>{text}</div>"
-            )
+            chat_html_parts.append(f"<div class='chat-bubble user'>{text}</div>")
         else:
-            # ★ span で包むのがポイント
-            chat_html_parts.append(
-                f"<div class='chat-bubble assistant'><span>{text}</span></div>"
-            )
-
+            chat_html_parts.append(f"<div class='chat-bubble assistant'><span>{text}</span></div>")
     chat_html_parts.append("</div>")
     st.markdown("\n".join(chat_html_parts), unsafe_allow_html=True)
 
@@ -923,7 +839,16 @@ with col1:
 # 右：プレビュー
 # --------------------------------------------
 with col2:
-    st.markdown("<div class='section-header'>📄 プレビュー</div>", unsafe_allow_html=True)
+    # 見出し＋コピーアイコン
+    st.markdown(
+        """
+        <div class="section-header preview-header">
+          <span>📄 プレビュー</span>
+          <span class="preview-copy-icon" title="プレビューをコピー">📋</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
     if st.session_state.generated_email is None:
@@ -935,25 +860,71 @@ with col2:
             """
         )
         st.markdown(placeholder_html, unsafe_allow_html=True)
-
     else:
         email = st.session_state.generated_email
-
         body_html = html.escape(email["body"]).replace("\n", "<br>")
         subject_html = html.escape(email["subject"])
 
         preview_html = textwrap.dedent(
             f"""
             <div class="preview-main-wrapper">
-                <p><strong>件名</strong></p>
-                <p>{subject_html}</p>
+                <p class="preview-label"><strong>件名</strong></p>
+                <p class="preview-subject">{subject_html}</p>
                 <hr>
-                <p><strong>本文</strong></p>
-                <p>{body_html}</p>
+                <p class="preview-label"><strong>本文</strong></p>
+                <p class="preview-body">{body_html}</p>
             </div>
             """
         )
         st.markdown(preview_html, unsafe_allow_html=True)
+
+        # プレビュー全文をコピーするためのJS（アイコン用）
+        full_text = f"件名: {email['subject']}\n\n{email['body']}"
+        escaped_full_text = json.dumps(full_text)
+
+        st.components.v1.html(
+            f"""
+            <script>
+            (function() {{
+              function setupPreviewCopy() {{
+                const icon = parent.document.querySelector('.preview-copy-icon');
+                if (!icon) return;
+                icon.onclick = function() {{
+                  const text = {escaped_full_text};
+                  copyText(text);
+                }};
+              }}
+              function copyText(text) {{
+                if (navigator.clipboard && navigator.clipboard.writeText) {{
+                  navigator.clipboard.writeText(text).catch(function(err) {{
+                    console.warn("navigator.clipboard failed:", err);
+                    fallbackCopy(text);
+                  }});
+                }} else {{
+                  fallbackCopy(text);
+                }}
+              }}
+              function fallbackCopy(text) {{
+                try {{
+                  const textarea = document.createElement('textarea');
+                  textarea.value = text;
+                  textarea.style.position = 'fixed';
+                  textarea.style.left = '-9999px';
+                  document.body.appendChild(textarea);
+                  textarea.focus();
+                  textarea.select();
+                  document.execCommand('copy');
+                  document.body.removeChild(textarea);
+                }} catch (e) {{
+                  console.error("Fallback copy failed:", e);
+                }}
+              }}
+              setTimeout(setupPreviewCopy, 500);
+            }})();
+            </script>
+            """,
+            height=0,
+        )
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
@@ -969,39 +940,21 @@ with col2:
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-        st.markdown("<div class='preview-actions'>", unsafe_allow_html=True)
         btn_col1, btn_col2 = st.columns(2)
 
+        # ---------- リセット ボタン（元コピー） ----------
         with btn_col1:
-            # コピー用テキスト
-            full_text = f"件名: {email['subject']}\n\n{email['body']}"
-            escaped_text = json.dumps(full_text)  # JSに安全に渡す
+            if st.button("リセット", use_container_width=True):
+                st.session_state.messages = []
+                st.session_state.generated_email = None
+                st.session_state.variation_count = 0
+                st.rerun()
 
-            # Streamlit標準ボタン（3DフリップCSSが適用される）
-            if st.button("📋 コピー", use_container_width=True):
-                # JSを実行するHTMLを埋め込む（ボタン押下時にのみ発火）
-                st.components.v1.html(
-                    f"""
-                    <script>
-                    navigator.clipboard.writeText({escaped_text}).then(() => {{
-                        console.log("Copied!");
-                    }});
-                    </script>
-                    """,
-                    height=0,
-                )
-
-                # 視覚フィードバック
-                st.markdown(
-                    "<div class='copy-info'>✔ コピーしました</div>",
-                    unsafe_allow_html=True,
-                )
-
-
+        # ---------- 再生成 ボタン ----------
         with btn_col2:
-            if st.button("🔄 再生成", use_container_width=True):
+            if st.button("🔄 表現を変える", use_container_width=True):
                 st.session_state.messages.append(
-                    {"role": "assistant", "content": "メールを再生成しています..."}
+                    {"role": "assistant", "content": "メール文面を再作成しています..."}
                 )
 
                 last_user_message = None
@@ -1029,10 +982,6 @@ with col2:
                             ),
                         }
                     )
-
                 st.rerun()
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
 
 
