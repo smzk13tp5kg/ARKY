@@ -961,12 +961,13 @@ with col2:
                 <span>パターン {idx + 1}</span>
                 <span class="pattern-copy-icon"
                       data-pattern="{idx}"
-                      title="このパターンをコピー">📋</span>
+                      title="メッセージをコピーします">📋</span>
               </div>
               <div class="preview-body">
                 {block_html}
               </div>
             </div>
+            
             """
 
             st.markdown(card_html, unsafe_allow_html=True)
@@ -1011,8 +1012,9 @@ with col2:
 
             st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-        # 右上コピーアイコン用 JS
+        # 2) 右上のコピーアイコンに JS で挙動を付ける
         texts_json = json.dumps(copy_texts, ensure_ascii=False)
+
         st.components.v1.html(
             f"""
             <script>
@@ -1020,10 +1022,12 @@ with col2:
               const texts = {texts_json};
 
               function setupIcons() {{
+                // アプリ本体の DOM は親フレーム側なので parent.document を見る
                 const icons = parent.document.querySelectorAll('.pattern-copy-icon');
                 if (!icons || icons.length === 0) return;
 
                 function copyText(text) {{
+                  // まずは navigator.clipboard を試す
                   if (navigator.clipboard && navigator.clipboard.writeText) {{
                     navigator.clipboard.writeText(text).catch(function(err) {{
                       console.warn("navigator.clipboard failed:", err);
@@ -1039,6 +1043,7 @@ with col2:
                     const textarea = document.createElement('textarea');
                     textarea.value = text;
                     textarea.style.position = 'fixed';
+                    textarea.style.top = '-9999px';
                     textarea.style.left = '-9999px';
                     document.body.appendChild(textarea);
                     textarea.focus();
@@ -1053,11 +1058,14 @@ with col2:
                 icons.forEach(function(icon) {{
                   const idx = parseInt(icon.getAttribute('data-pattern'), 10);
                   if (!isNaN(idx) && texts[idx]) {{
-                    icon.onclick = function() {{ copyText(texts[idx]); }};
+                    icon.addEventListener('click', function() {{
+                      copyText(texts[idx]);
+                    }});
                   }}
                 }});
               }}
 
+              // DOM の描画完了を少し待ってからフックする
               setTimeout(setupIcons, 500);
             }})();
             </script>
