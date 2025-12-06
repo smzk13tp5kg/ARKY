@@ -2,6 +2,7 @@
 import os
 from openai import OpenAI
 
+# ローカルでは .env から、Streamlit Cloud では Secrets から環境変数を読む想定
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -25,7 +26,7 @@ def generate_email_with_openai(template, tone, recipient, message, seasonal_text
     """
     メタプロンプト＋gpt-4o-mini を使って、
     ビジネスメッセージ案を3パターン生成するラッパー関数。
-    Markdownテキストを返す。
+    戻り値は「Markdown形式のテキスト」（3パターン分まとめて）とする。
     """
 
     client = _get_client()
@@ -39,6 +40,9 @@ def generate_email_with_openai(template, tone, recipient, message, seasonal_text
     additional_info = seasonal_text or ""
     example_sentence = message
 
+    # ============================================
+    # メタプロンプト
+    # ============================================
     meta_prompt = f"""
 あなたは「ビジネスメッセージ生成AIのためのプロンプトを設計する専門家」です。
 
@@ -85,10 +89,59 @@ def generate_email_with_openai(template, tone, recipient, message, seasonal_text
 
 ---
 
-# 出力形式
-- あなたが作成するのは「最適なプロンプト本文のみ」
-- 他の説明・前置き・考察は一切書かない
-- 余分な語句なしで、別の生成AIに渡せるプロンプトだけを書いてください
+# 出力フォーマットに関する厳守ルール
+
+以下のフォーマットを **そのまま** 別の生成AIに渡すことを前提とするため、
+出力形式は次のMarkdown構造 **のみ** とし、それ以外はいっさい書かないこと。
+
+（出力例）
+
+## パターン1
+件名: ...
+本文:
+...
+
+- 改善点:
+  - ...
+- 注意点:
+  - ...
+
+## パターン2
+件名: ...
+本文:
+...
+
+- 改善点:
+  - ...
+- 注意点:
+  - ...
+
+## パターン3
+件名: ...
+本文:
+...
+
+- 改善点:
+  - ...
+- 注意点:
+  - ...
+
+---
+
+# フォーマット上の禁止事項
+
+- 「もちろんです」「では早速作成します」などの前置き文は一切書かないこと。
+- 上記の「## パターン1」「## パターン2」「## パターン3」以外の見出しは書かないこと。
+- 3パターンより多く（4パターン目以降）を出力しないこと。
+- 解説文や使い方説明など、パターン以外のテキストは書かないこと。
+
+---
+
+# あなたの最終出力内容
+
+- あなたが作成するのは「最適なプロンプト本文のみ」ではなく、
+  実際にこのフォーマットで文章を生成させるための"完成されたプロンプト"である。
+- ただし出力形式は上記のMarkdown構造に従うこと。
 """
 
     # ③ メタプロンプト → 最適プロンプトを生成
@@ -96,8 +149,8 @@ def generate_email_with_openai(template, tone, recipient, message, seasonal_text
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "あなたはプロンプト設計の専門家です。"},
-            {"role": "user", "content": meta_prompt}
-        ]
+            {"role": "user", "content": meta_prompt},
+        ],
     )
 
     final_prompt = meta_response.choices[0].message.content
@@ -107,9 +160,9 @@ def generate_email_with_openai(template, tone, recipient, message, seasonal_text
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "あなたはビジネス文書を最適化するプロ編集者です。"},
-            {"role": "user", "content": final_prompt}
-        ]
+            {"role": "user", "content": final_prompt},
+        ],
     )
 
     generated_text = message_response.choices[0].message.content
-    return generated_text  # Markdown 形式のテキスト
+    return generated_text  # Markdown 形式のテキスト（3パターン分）
