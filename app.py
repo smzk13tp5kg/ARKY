@@ -245,6 +245,18 @@ st.markdown(
 }
 body { background-color: #050b23; }
 
+/* ツールバー消す */
+div[data-testid="stToolbar"] {
+    height: 0 !important;
+    min-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    overflow: hidden !important;
+}
+div[data-testid="stToolbar"] > div {
+    display: none !important;
+}
+
 /* メインエリア調整 */
 main.block-container {
     padding-top: 0rem;  /* ← タイトル上のパディング 0 */
@@ -1078,3 +1090,4 @@ with col2:
                     st.warning("直近のユーザー入力が見つかりません。先にメッセージを送信してください。")
 
                 st.rerun()
+
