@@ -1,12 +1,16 @@
-from openai import OpenAI
-from dotenv import load_dotenv
 import os
+from openai import OpenAI
 
-load_dotenv()
+# .env がある環境では読み込む（ローカル用）
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except:
+    pass
 
-print("APIキー:", os.getenv("OPENAI_API_KEY")) 
+API_KEY = os.environ.get("OPENAI_API_KEY")
 
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+client = OpenAI(api_key=API_KEY)
 
 # -------------------------
 # ① ユーザー入力（アプリから渡される値）
