@@ -351,9 +351,9 @@ div[data-testid="stHorizontalBlock"] {
    サイドバー
 ------------------------------------------- */
 [data-testid="stSidebar"] {
-    width: 450px !important;
-    min-width: 450px !important;
-    max-width: 450px !important;
+    width: 430px !important;
+    min-width: 430px !important;
+    max-width: 430px !important;
     background: #050b23;
     border-right: 1px solid #cfae63;
 }
@@ -1287,5 +1287,6 @@ with col2:
             """,
             height=0,
         )
+
 
 
