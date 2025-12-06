@@ -612,29 +612,88 @@ main.block-container {
     border-color: transparent transparent transparent #ffffff;
     filter: drop-shadow(-1px 1px 2px rgba(0,0,0,0.15));
 }
+/* アシスタント（ガイド）の吹き出し：枠も文字も動的に光らせる */
 .chat-bubble.assistant {
     position: relative;
     padding: 0;
-    border-radius: 16px;
+    border-radius: 18px;
     background: transparent;
     overflow: visible;
     margin-right: auto;
     max-width: 85%;
+
+    /* 枠のグラデーションアニメーション */
+    animation: assistant-glow-border 4s ease-in-out infinite;
 }
+
+/* 外枠（グラデーション枠） */
+.chat-bubble.assistant::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    padding: 3px;
+    background: linear-gradient(120deg, #6559ae, #ff9f4a, #ffd666, #ff7159, #6559ae);
+    background-size: 300% 300%;
+    animation: assistant-glow-border 4s ease-in-out infinite;
+
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+}
+
+/* 内側テキスト部分：グラデ＋うっすら光り方を変える */
 .chat-bubble.assistant > span {
     position: relative;
     display: block;
     padding: 10px 18px;
-    border-radius: 12px;
-    background: rgba(5, 11, 35, 0.85);
+    border-radius: 14px;
+
+    background: rgba(5, 11, 35, 0.9);
     background-image: linear-gradient(120deg, #fdfbff, #ffd7b2, #ffe6ff);
-    background-size: 400% 400%;
+    background-size: 300% 300%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+
     font-size: 14px;
     font-weight: 600;
     line-height: 1.6;
-    animation: intro-gradient 3s ease-in-out infinite;
+
+    animation: assistant-glow-text 4s ease-in-out infinite;
+}
+
+/* 枠のグローアニメーション */
+@keyframes assistant-glow-border {
+    0% {
+        background-position: 0% 50%;
+        box-shadow: 0 0 0px rgba(255, 214, 102, 0.0);
+    }
+    50% {
+        background-position: 100% 50%;
+        box-shadow: 0 0 16px rgba(255, 214, 102, 0.35);
+    }
+    100% {
+        background-position: 0% 50%;
+        box-shadow: 0 0 0px rgba(255, 214, 102, 0.0);
+    }
+}
+
+/* テキストのグラデ移動＆ほんのり発光 */
+@keyframes assistant-glow-text {
+    0% {
+        background-position: 0% 50%;
+        text-shadow: 0 0 0px rgba(255, 214, 102, 0.0);
+    }
+    50% {
+        background-position: 100% 50%;
+        text-shadow: 0 0 8px rgba(255, 214, 102, 0.4);
+    }
+    100% {
+        background-position: 0% 50%;
+        text-shadow: 0 0 0px rgba(255, 214, 102, 0.0);
+    }
 }
 
 /* サイドバーのラジオボタンの余白を詰める */
