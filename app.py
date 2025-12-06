@@ -1008,8 +1008,10 @@ with col1:
             elif recipient == "その他" and not custom_recipient:
                 st.error("⚠️ カスタム相手を入力してください")
             else:
+                # ① ベースメッセージ保存
                 st.session_state.last_user_message = user_message
 
+                # ② 従来ロジックでのベースメール（subject/body）も一応生成しておく
                 st.session_state.variation_count = 0
                 base_email = generate_email(
                     template,
@@ -1021,42 +1023,68 @@ with col1:
                 )
                 st.session_state.generated_email = base_email
 
+                # ③ チャットログ（選択内容付き）
                 user_display_text = (
                     f"{user_message}\n\n"
                     f"――――――――――\n"
                     f"テンプレート: {template} / トーン: {tone} / 相手: {recipient}"
                 )
-                st.session_state.messages.append({"role": "user", "content": user_display_text})
+                st.session_state.messages.append(
+                    {"role": "user", "content": user_display_text}
+                )
 
                 guide = (
                     f"{template}メールを「{tone}」なトーンで、"
                     f"{recipient}宛に作成しました！右側のプレビューをご覧ください。"
                 )
-                st.session_state.messages.append({"role": "assistant", "content": guide})
+                st.session_state.messages.append(
+                    {"role": "assistant", "content": guide}
+                )
 
-                st.session_state.ai_suggestions = generate_email_with_openai(
+                # ④ OpenAI案（3パターン分 Markdown）を生成して保持
+                ai_text = generate_email_with_openai(
                     template=template,
                     tone=tone,
                     recipient=recipient,
                     message=user_message,
                     seasonal_text=seasonal_text,
                 )
+                st.session_state.ai_suggestions = ai_text
 
-                if HAS_DB:
+                # ⑤ DB保存（あれば）: 3パターン分を subject/body だけ抜き出して一括保存
+                if HAS_DB and ai_text:
                     try:
-                        save_email_record(
+                        # 「## パターンN」で分割
+                        raw_blocks = re.split(
+                            r"(?=^##\s*パターン\s*\d+)", ai_text, flags=re.MULTILINE
+                        )
+                        blocks = [b.strip() for b in raw_blocks if b.strip()]
+                        blocks = blocks[:3]
+                        while len(blocks) < 3:
+                            blocks.append("このパターンはまだ生成されていません。")
+
+                        patterns_for_db = []
+                        for b in blocks:
+                            parsed = parse_pattern_block(b)
+                            patterns_for_db.append(
+                                {
+                                    "subject": parsed.get("subject", ""),
+                                    "body": parsed.get("body", ""),
+                                }
+                            )
+
+                        # db_logic.save_email_batch を呼ぶ
+                        save_email_batch(
                             template=template,
                             tone=tone,
                             recipient=recipient,
-                            seasonal_text=seasonal_text or "",
-                            user_message=user_message,
-                            subject=base_email["subject"],
-                            body=base_email["body"],
-                            ai_suggestions=st.session_state.ai_suggestions,
+                            message=user_message,
+                            patterns=patterns_for_db,
                         )
                     except Exception as e:
                         st.warning(f"DB保存時にエラーが発生しました: {e}")
 
+                # ⑥ チャットログを最大50件に制限
                 if len(st.session_state.messages) > 50:
                     st.session_state.messages = st.session_state.messages[-50:]
 
@@ -1254,4 +1282,5 @@ with col2:
             """,
             height=0,
         )
+
 
