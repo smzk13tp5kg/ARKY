@@ -1119,19 +1119,39 @@ with col2:
             improve = html.escape(parsed["improve"] or "").replace("\n", "<br>")
             caution = html.escape(parsed["caution"] or "").replace("\n", "<br>")
 
+            # ★ ここからカードHTML（内側の「パターン1」テキストを削除／件名上の余白を4pxに）
             card_html = f"""
             <div class="preview-main-wrapper">
               <div class="preview-header">
-                <span>パターン {idx + 1}</span>
+                <span></span>
                 <span class="pattern-copy-icon"
                       data-pattern="{idx}"
                       title="メッセージをコピーします">📋</span>
               </div>
 
-              <div style="margin-top:8px;">
+              <div style="margin-top:4px;">
                 <div class="preview-section-label">件名</div>
                 <div class="preview-subject">{subj}</div>
               </div>
+
+              <div style="margin-top:12px;">
+                <div class="preview-section-label">本文</div>
+                <div class="preview-body">{body}</div>
+              </div>
+
+              <div style="margin-top:12px;">
+                <div class="preview-section-label">改善点</div>
+                <div class="preview-note-body">{improve}</div>
+              </div>
+
+              <div style="margin-top:12px;">
+                <div class="preview-section-label">注意点</div>
+                <div class="preview-note-body">{caution}</div>
+              </div>
+            </div>
+            """
+            
+            st.markdown(card_html, unsafe_allow_html=True)
 
               <div style="margin-top:12px;">
                 <div class="preview-section-label">本文</div>
@@ -1255,3 +1275,4 @@ with col2:
             """,
             height=0,
         )
+
