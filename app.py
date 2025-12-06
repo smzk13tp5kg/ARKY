@@ -939,85 +939,89 @@ with col2:
         )
         st.markdown(placeholder_html, unsafe_allow_html=True)
     else:
-        # ★ ここを修正：行頭の「## パターン数字」で分割（MULTILINE）
+        # ★ 行頭が「## パターン数字」の行で分割（MULTILINE）
         raw_blocks = re.split(r"(?=^##\s*パターン\s*\d+)", ai_text, flags=re.MULTILINE)
         blocks = [b.strip() for b in raw_blocks if b.strip()]
 
+        # 先頭3つだけ使う（4つ作られても UI では3つに切り詰める）
         blocks = blocks[:3]
 
+        # 3つに満たない場合はプレースホルダで埋める（保険）
         while len(blocks) < 3:
             blocks.append("このパターンはまだ生成されていません。")
 
+        # コピー用テキスト配列
         copy_texts = blocks.copy()
 
         for idx, block in enumerate(blocks):
-    st.markdown(
-        f"<div class='section-header'>◆ パターン {idx + 1}</div>",
-        unsafe_allow_html=True,
-    )
+            st.markdown(
+                f"<div class='section-header'>◆ パターン {idx + 1}</div>",
+                unsafe_allow_html=True,
+            )
 
-    # block を HTML用にエスケープして <br> で改行
-    block_html = html.escape(block).replace("\n", "<br>")
+            # block を HTML用にエスケープして <br> で改行
+            block_html = html.escape(block).replace("\n", "<br>")
 
-    # カード全体を 1 つの HTML として描画
-    card_html = f"""
-    <div class="preview-main-wrapper">
-      <div class="preview-header">
-        <span>パターン {idx + 1}</span>
-        <span class="pattern-copy-icon"
-              data-pattern="{idx}"
-              title="このパターンをコピー">📋</span>
-      </div>
-      <div class="preview-body">
-        {block_html}
-      </div>
-    </div>
-    """
+            # カード全体を 1 つの HTML として描画
+            card_html = f"""
+            <div class="preview-main-wrapper">
+              <div class="preview-header">
+                <span>パターン {idx + 1}</span>
+                <span class="pattern-copy-icon"
+                      data-pattern="{idx}"
+                      title="このパターンをコピー">📋</span>
+              </div>
+              <div class="preview-body">
+                {block_html}
+              </div>
+            </div>
+            """
 
-    st.markdown(card_html, unsafe_allow_html=True)
+            st.markdown(card_html, unsafe_allow_html=True)
 
-    # ボタン行（ここから下は今のコードのままで OK）
-    btn_col1, btn_col2 = st.columns(2)
-    with btn_col1:
-        if st.button("リセット", key=f"reset_{idx}", use_container_width=True):
-            st.session_state.messages = []
-            st.session_state.last_user_message = ""
-            st.session_state.ai_suggestions = None
-            st.session_state.variation_count = 0
-            st.rerun()
+            # ボタン行（リセット／表現を変える）
+            btn_col1, btn_col2 = st.columns(2)
+            with btn_col1:
+                if st.button("リセット", key=f"reset_{idx}", use_container_width=True):
+                    st.session_state.messages = []
+                    st.session_state.last_user_message = ""
+                    st.session_state.ai_suggestions = None
+                    st.session_state.variation_count = 0
+                    st.rerun()
 
-    with btn_col2:
-        if st.button("🔄 表現を変える", key=f"regen_{idx}", use_container_width=True):
-            if st.session_state.last_user_message:
-                st.session_state.variation_count += 1
+            with btn_col2:
+                if st.button("🔄 表現を変える", key=f"regen_{idx}", use_container_width=True):
+                    # 今は簡易実装として、「押したパターンに関係なく3パターン全部」を再生成
+                    if st.session_state.last_user_message:
+                        st.session_state.variation_count += 1
 
-                st.session_state.ai_suggestions = generate_email_with_openai(
-                    template=template,
-                    tone=tone,
-                    recipient=recipient,
-                    message=st.session_state.last_user_message,
-                    seasonal_text=seasonal_text,
-                )
+                        st.session_state.ai_suggestions = generate_email_with_openai(
+                            template=template,
+                            tone=tone,
+                            recipient=recipient,
+                            message=st.session_state.last_user_message,
+                            seasonal_text=seasonal_text,
+                        )
 
-                st.session_state.messages.append(
-                    {
-                        "role": "assistant",
-                        "content": (
-                            f"AIによる新しい3パターン（バリエーション "
-                            f"{st.session_state.variation_count + 1}）を生成しました。"
-                        ),
-                    }
-                )
-                if len(st.session_state.messages) > 50:
-                    st.session_state.messages = st.session_state.messages[-50:]
-            else:
-                st.warning("直近のユーザー入力が見つかりません。先にメッセージを送信してください。")
+                        st.session_state.messages.append(
+                            {
+                                "role": "assistant",
+                                "content": (
+                                    f"AIによる新しい3パターン（バリエーション "
+                                    f"{st.session_state.variation_count + 1}）を生成しました。"
+                                ),
+                            }
+                        )
+                        if len(st.session_state.messages) > 50:
+                            st.session_state.messages = st.session_state.messages[-50:]
+                    else:
+                        st.warning("直近のユーザー入力が見つかりません。先にメッセージを送信してください。")
 
-            st.rerun()
+                    st.rerun()
 
-    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-
+        # 2) 右上のコピーアイコンに JS で挙動を付ける
         texts_json = json.dumps(copy_texts, ensure_ascii=False)
 
         st.components.v1.html(
@@ -1071,4 +1075,3 @@ with col2:
             """,
             height=0,
         )
-
