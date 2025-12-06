@@ -3,6 +3,7 @@ from datetime import datetime
 import html
 import textwrap
 import json
+import re
 
 # 外部ロジックをインポート
 from openai_logic import generate_email_with_openai
@@ -942,8 +943,6 @@ with col1:
 # --------------------------------------------
 # 右：AIが作った3パターンのプレビュー
 # --------------------------------------------
-import re  # ファイルの先頭などで一度だけ import しておく
-
 with col2:
     st.markdown(
         "<div class='section-header'>📄 AI生成プレビュー（3パターン）</div>",
@@ -964,28 +963,34 @@ with col2:
         )
         st.markdown(placeholder_html, unsafe_allow_html=True)
     else:
-        # 1) ai_suggestions から3パターンに分割する
-        # 例: "### パターン1 ... ### パターン2 ... ### パターン3 ..." のような出力を想定
-        blocks = re.split(r"(?=###\s*パターン)", ai_text)
-        blocks = [b.strip() for b in blocks if b.strip()]
+        # 1) ai_suggestions からパターンごとに分割する
+        #
+        # 例：
+        # パターン1: ...
+        # パターン2: ...
+        # パターン3: ...
+        #
+        # という出力を想定して、「パターン + 数字」でsplit
+        raw_blocks = re.split(r"(?=パターン\s*\d+)", ai_text)
+        blocks = [b.strip() for b in raw_blocks if b.strip()]
 
-        # もしうまく分割できなければ、全体を1ブロックとして扱う（保険）
-        if len(blocks) == 0:
-            blocks = [ai_text]
+        # ★ 先頭3つだけ使う（4つ作られても UI では3つに切り詰める）
+        blocks = blocks[:3]
 
-        # JS に渡すため、コピー用テキストの配列を作っておく
-        copy_texts = []
+        # 3つに満たない場合はプレースホルダで埋める（保険）
+        while len(blocks) < 3:
+            blocks.append("このパターンはまだ生成されていません。")
+
+        # コピー用テキスト配列
+        copy_texts = blocks.copy()
 
         for idx, block in enumerate(blocks):
-            # 件名＋本文を含んだテキスト全体をコピー対象にする
-            copy_texts.append(block)
-
             st.markdown(
                 f"<div class='section-header'>◆ パターン {idx + 1}</div>",
                 unsafe_allow_html=True,
             )
 
-            # プレビューカード本体（中身は Markdown として描画）
+            # カード本体開始
             st.markdown(
                 """
                 <div class="preview-main-wrapper">
@@ -993,7 +998,7 @@ with col2:
                 unsafe_allow_html=True,
             )
 
-            # 上部行：タイトル＋コピーアイコン
+            # ヘッダ行（タイトル＋コピーアイコン）
             st.markdown(
                 f"""
                 <div class="preview-header">
@@ -1004,7 +1009,7 @@ with col2:
                 unsafe_allow_html=True,
             )
 
-            # 本文部分：Markdownとして表示
+            # 本文：Markdownとして表示
             st.markdown(block, unsafe_allow_html=False)
 
             st.markdown("</div>", unsafe_allow_html=True)  # /preview-main-wrapper
@@ -1021,10 +1026,8 @@ with col2:
 
             with btn_col2:
                 if st.button("🔄 表現を変える", key=f"regen_{idx}", use_container_width=True):
-                    # 今の実装では「表現を変える」ボタンは押したパターンだけでなく
-                    # 全パターンをまとめて再生成する仕様にしておく（簡易版）
+                    # 今は簡易実装として、「押したパターンに関係なく3パターン全部」を再生成
                     if st.session_state.last_user_message:
-                        # 変化度合いを variation_count で渡す（プロンプト側は調整してもOK）
                         st.session_state.variation_count += 1
 
                         st.session_state.ai_suggestions = generate_email_with_openai(
@@ -1053,7 +1056,7 @@ with col2:
 
             st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-        # 2) コピーアイコンに JS で挙動を付与
+        # 2) 右上のコピーアイコンに JS で挙動を付ける
         texts_json = json.dumps(copy_texts, ensure_ascii=False)
 
         st.components.v1.html(
