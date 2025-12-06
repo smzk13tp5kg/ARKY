@@ -4,6 +4,16 @@ import html
 import textwrap
 import json
 
+# 外部ロジックをインポート
+from openai_logic import generate_email_with_openai
+
+# DB保存ロジック（あれば使う）
+try:
+    from db_logic import save_email_record
+    HAS_DB = True
+except ImportError:
+    HAS_DB = False
+
 # ============================================
 # 時候の挨拶（ヘルパー）
 # ============================================
@@ -155,7 +165,7 @@ def generate_email(template, tone, recipient, message, variation=0, seasonal_tex
         ],
     }
     closing_list = closings_variations.get(recipient, ["よろしくお願いいたします。"])
-    closing = closing_list[variation % len(closing_list)]
+    closing = closing_list[variation % len(closings_variations)]
 
     body = body_start + closing
 
@@ -535,7 +545,7 @@ button[title="Close sidebar"] svg {
     height: 0;
     border-style: solid;
     border-width: 8px 0 8px 8px;
-    border-color: transparent transparent transparent #ffffff;
+    border-color: transparent透明透明 #ffffff;
     filter: drop-shadow(-1px 1px 2px rgba(0,0,0,0.15));
 }
 .chat-bubble.assistant {
@@ -627,6 +637,8 @@ if "generated_email" not in st.session_state:
     st.session_state.generated_email = None
 if "variation_count" not in st.session_state:
     st.session_state.variation_count = 0
+if "ai_suggestions" not in st.session_state:
+    st.session_state.ai_suggestions = None
 
 # ============================================
 # トップバー
@@ -807,18 +819,52 @@ with col1:
             elif recipient == "その他" and not custom_recipient:
                 st.error("⚠️ カスタム相手を入力してください")
             else:
+                # チャットログにユーザー入力を追加
                 st.session_state.messages.append({"role": "user", "content": user_message})
 
+                # プレビュー用メール生成（従来ロジック）
+                st.session_state.variation_count = 0
+                email_obj = generate_email(
+                    template, tone, recipient, user_message, variation=0, seasonal_text=seasonal_text
+                )
+                st.session_state.generated_email = email_obj
+
+                # ガイドメッセージ
                 response = (
                     f"{template}メールを「{tone}」なトーンで、"
                     f"{recipient}宛に作成しました！右側のプレビューをご覧ください。"
                 )
                 st.session_state.messages.append({"role": "assistant", "content": response})
 
-                st.session_state.variation_count = 0
-                st.session_state.generated_email = generate_email(
-                    template, tone, recipient, user_message, variation=0, seasonal_text=seasonal_text
+                # OpenAI案（3パターン）生成
+                st.session_state.ai_suggestions = generate_email_with_openai(
+                    template=template,
+                    tone=tone,
+                    recipient=recipient,
+                    message=user_message,
+                    seasonal_text=seasonal_text,
                 )
+
+                # DB保存（db_logic.py に save_email_record がある場合）
+                if HAS_DB:
+                    try:
+                        save_email_record(
+                            template=template,
+                            tone=tone,
+                            recipient=recipient,
+                            seasonal_text=seasonal_text or "",
+                            user_message=user_message,
+                            subject=email_obj["subject"],
+                            body=email_obj["body"],
+                            ai_suggestions=st.session_state.ai_suggestions,
+                        )
+                    except Exception as e:
+                        st.warning(f"DB保存時にエラーが発生しました: {e}")
+
+                # メモリ対策：チャット履歴を最大50件に制限
+                if len(st.session_state.messages) > 50:
+                    st.session_state.messages = st.session_state.messages[-50:]
+
                 st.rerun()
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
@@ -916,7 +962,7 @@ with col2:
                   document.execCommand('copy');
                   document.body.removeChild(textarea);
                 }} catch (e) {{
-                  console.error("Fallback copy failed:", e);
+                  console.error("Fallback copy.failed:", e);
                 }}
               }}
               setTimeout(setupPreviewCopy, 500);
@@ -940,14 +986,22 @@ with col2:
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
+        # ★ OpenAI案（3パターン）の表示
+        if st.session_state.ai_suggestions:
+            st.markdown("### 🤖 OpenAI案（3パターン）")
+            st.markdown(st.session_state.ai_suggestions)
+
+        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+
         btn_col1, btn_col2 = st.columns(2)
 
-        # ---------- リセット ボタン（元コピー） ----------
+        # ---------- リセット ボタン ----------
         with btn_col1:
             if st.button("リセット", use_container_width=True):
                 st.session_state.messages = []
                 st.session_state.generated_email = None
                 st.session_state.variation_count = 0
+                st.session_state.ai_suggestions = None
                 st.rerun()
 
         # ---------- 再生成 ボタン ----------
@@ -973,6 +1027,14 @@ with col2:
                         variation=st.session_state.variation_count,
                         seasonal_text=seasonal_text,
                     )
+                    # 必要なら OpenAI案も再生成
+                    st.session_state.ai_suggestions = generate_email_with_openai(
+                        template=template,
+                        tone=tone,
+                        recipient=recipient,
+                        message=last_user_message,
+                        seasonal_text=seasonal_text,
+                    )
                     st.session_state.messages.append(
                         {
                             "role": "assistant",
@@ -983,5 +1045,3 @@ with col2:
                         }
                     )
                 st.rerun()
-
-
