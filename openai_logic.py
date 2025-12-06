@@ -6,7 +6,7 @@ load_dotenv()
 
 print("APIキー:", os.getenv("OPENAI_API_KEY")) 
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 # -------------------------
 # ① ユーザー入力（アプリから渡される値）
