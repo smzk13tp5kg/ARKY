@@ -1008,10 +1008,10 @@ with col1:
             elif recipient == "その他" and not custom_recipient:
                 st.error("⚠️ カスタム相手を入力してください")
             else:
-                # ① ベースメッセージ保存
+        # ① ベースメッセージ保存
                 st.session_state.last_user_message = user_message
 
-                # ② 従来ロジックでのベースメール（subject/body）も一応生成しておく
+        # ② 従来ロジックでのベースメール（subject/body）も一応生成しておく
                 st.session_state.variation_count = 0
                 base_email = generate_email(
                     template,
@@ -1023,7 +1023,7 @@ with col1:
                 )
                 st.session_state.generated_email = base_email
 
-                # ③ チャットログ（選択内容付き）
+        # ③ チャットログ（選択内容付き）
                 user_display_text = (
                     f"{user_message}\n\n"
                     f"――――――――――\n"
@@ -1041,7 +1041,7 @@ with col1:
                     {"role": "assistant", "content": guide}
                 )
 
-                # ④ OpenAI案（3パターン分 Markdown）を生成して保持
+        # ④ OpenAI案（3パターン分 Markdown）を生成して保持
                 ai_text = generate_email_with_openai(
                     template=template,
                     tone=tone,
@@ -1051,7 +1051,7 @@ with col1:
                 )
                 st.session_state.ai_suggestions = ai_text
 
-                # ⑤ DB保存（あれば）: 3パターン分を subject/body だけ抜き出して一括保存
+        # ⑤ DB保存（あれば）
                 if HAS_DB and ai_text:
                     try:
                         # 「## パターンN」で分割
@@ -1079,12 +1079,16 @@ with col1:
                             tone=tone,
                             recipient=recipient,
                             message=user_message,
+                            seasonal_greeting=add_seasonal,  # 追加
                             patterns=patterns_for_db,
                         )
+                
+                    st.success("✅ データベースへの保存に成功しました！")
+                
                     except Exception as e:
-                        st.warning(f"DB保存時にエラーが発生しました: {e}")
+                        st.error(f"❌ DB保存エラー: {str(e)}")
 
-                # ⑥ チャットログを最大50件に制限
+        # ⑥ チャットログを最大50件に制限
                 if len(st.session_state.messages) > 50:
                     st.session_state.messages = st.session_state.messages[-50:]
 
@@ -1282,5 +1286,6 @@ with col2:
             """,
             height=0,
         )
+
 
 
