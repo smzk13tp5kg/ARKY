@@ -1,13 +1,14 @@
 # db_logic.py
 import os
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import List, Dict
 from supabase import create_client, Client
 
 try:
     from dotenv import load_dotenv
     load_dotenv()
 except Exception:
+    # Cloud 環境では Secrets から入る想定なので無視してよい
     pass
 
 # ============================================
@@ -22,32 +23,33 @@ else:
     supabase = None
 
 
-def _get_next_generatedid(table: str) -> int:
+def _get_next_generation_id(table: str) -> int:
     """
-    test-arky テーブルの現在の最大 generatedid を取得し、
-    次に使う generatedid を返す。
+    test-arky テーブルの現在の最大 generation_id を取得し、
+    次に使う generation_id を返す。
     """
     if supabase is None:
+        # Supabase 未設定の場合、とりあえず 1 を返す
         return 1
-    
+
     res = (
         supabase.table(table)
-        .select("generatedid")
-        .order("generatedid", desc=True)
+        .select("generation_id")
+        .order("generation_id", desc=True)
         .limit(1)
         .execute()
     )
-    
+
     if res.data:
-        max_generatedid = res.data[0].get("generatedid", 0) or 0
+        max_generation_id = res.data[0].get("generation_id", 0) or 0
     else:
-        max_generatedid = 0
-    
-    return max_generatedid + 1
+        max_generation_id = 0
+
+    return max_generation_id + 1
 
 
 # ============================================
-# 3パターン分をまとめて保存する関数
+# 3パターン分を「3レコード」として保存する関数
 # ============================================
 def save_email_batch(
     template: str,
@@ -59,49 +61,51 @@ def save_email_batch(
     table_name: str = "test-arky",
 ) -> None:
     """
-    App 側から渡された 3パターン分の subject/body を
-    Supabase の test-arky テーブルに1レコードとして保存する。
-    
     patterns: [
         {"subject": "...", "body": "..."},
         {"subject": "...", "body": "..."},
         {"subject": "...", "body": "..."},
-    ]
+    ] を想定。
+    1パターン = 1レコードとして、最大3レコード insert する。
+    3件未満の時は空文字で埋める。
     """
+
     if supabase is None:
-        raise Exception("Supabase接続情報が設定されていません。環境変数を確認してください。")
-    
+        raise Exception("Supabase接続情報が設定されていません。（SUPABASE_URL / SUPABASE_KEY）")
+
     if not patterns:
         raise Exception("保存するパターンが空です。")
-    
+
     # 念のため 3件に揃える
     patterns = list(patterns)
     patterns = patterns[:3]
     while len(patterns) < 3:
         patterns.append({"subject": "", "body": ""})
-    
-    # 次の generatedid を取得
-    generatedid = _get_next_generatedid(table_name)
-    
-    # 1レコード分のデータを作成
-    row = {
-        "generatedid": generatedid,
-        "template": template,
-        "tone": tone,
-        "recipient": recipient,
-        "seasonal_greeting": seasonal_greeting,
-        "user_message": message,
-        "subject_1": patterns[0].get("subject", ""),
-        "body_1": patterns[0].get("body", ""),
-        "subject_2": patterns[1].get("subject", ""),
-        "body_2": patterns[1].get("body", ""),
-        "subject_3": patterns[2].get("subject", ""),
-        "body_3": patterns[2].get("body", ""),
-    }
-    
-    # 挿入実行
+
+    # 1回の生成を識別する generation_id を採番
+    generation_id = _get_next_generation_id(table_name)
+
+    # 各パターンを 1 レコードとして作成
+    rows = []
+    for idx, pat in enumerate(patterns, start=1):
+        row = {
+            "generation_id": generation_id,
+            "pattern_no": idx,                      # 1,2,3
+            "template": template,
+            "tone": tone,
+            "recipient": recipient,
+            "seasonal_flag": seasonal_greeting,
+            "user_message": message,
+            "subject": pat.get("subject", ""),
+            "body": pat.get("body", ""),
+            "created_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        }
+        rows.append(row)
+
+    # 挿入実行（まとめて insert）
     try:
-        res = supabase.table(table_name).insert(row).execute()
-        print("[save_email_batch] 挿入成功:", res.data)
+        res = supabase.table(table_name).insert(rows).execute()
+        print("[save_email_batch] 挿入成功件数:", len(res.data or []))
     except Exception as e:
+        # App.py 側でメッセージを出す前提で、例外はそのまま投げる
         raise Exception(f"Supabase挿入エラー: {str(e)}")
