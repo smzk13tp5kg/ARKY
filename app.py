@@ -175,7 +175,6 @@ def generate_email(
         ],
     }
     closing_list = closings_variations.get(recipient, ["よろしくお願いいたします。"])
-    # ★ 元のバグ修正：len(closings_variations) ではなく len(closing_list)
     closing = closing_list[variation % len(closing_list)]
 
     body = body_start + closing
@@ -229,8 +228,8 @@ st.markdown(
     height: 100%;
 
     background-image: url('https://raw.githubusercontent.com/smzk13tp5kg/ARKY/main/ARKYappbackgroundimage.png');
-    background-size: contain;          /* ★ cover → contain に変更 */
-    background-position: center top;   /* 上寄せ＋中央揃え（お好みで） */
+    background-size: contain;
+    background-position: center top;
     background-repeat: no-repeat;
 
     opacity: 0.4;
@@ -263,7 +262,7 @@ div[data-testid="stToolbar"] > div {
 
 /* メインエリア調整 */
 main.block-container {
-    padding-top: 0rem;  /* ← タイトル上のパディング 0 */
+    padding-top: 0rem;
     padding-left: 1rem !important;
     padding-right: 1rem !important;
     max-width: 100% !important;
@@ -400,7 +399,7 @@ button[title="Close sidebar"] svg {
 ------------------------------------------- */
 .top-bar {
     background: #050b23;
-    padding: 0px 8px 8px 8px;  /* ← タイトル上 padding 0 */
+    padding: 0px 8px 8px 8px;
     border-bottom: 1px solid #cfae63;
     margin-bottom: 20px;
 }
@@ -583,7 +582,6 @@ main.block-container {
     height: 0;
     border-style: solid;
     border-width: 8px 0 8px 8px;
-    /* ★ 誤字修正: transparent透明透明 → transparent transparent transparent */
     border-color: transparent transparent transparent #ffffff;
     filter: drop-shadow(-1px 1px 2px rgba(0,0,0,0.15));
 }
@@ -595,21 +593,6 @@ main.block-container {
     overflow: visible;
     margin-right: auto;
     max-width: 85%;
-}
-.chat-bubble.assistant::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 16px;
-    padding: 4px;
-    background: linear-gradient(120deg, #6559ae, #ff7159, #6559ae);
-    background-size: 400% 400%;
-    animation: intro-gradient 3s ease-in-out infinite;
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-            mask-composite: exclude;
 }
 .chat-bubble.assistant > span {
     position: relative;
@@ -850,7 +833,7 @@ with col1:
 
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-    # フォーム（★ col1 の中にインデントさせるのがポイント）
+    # フォーム
     with st.form("message_form", clear_on_submit=True):
         user_message = st.text_area(
             "メッセージを入力",
@@ -866,10 +849,8 @@ with col1:
             elif recipient == "その他" and not custom_recipient:
                 st.error("⚠️ カスタム相手を入力してください")
             else:
-                # ① ベースメッセージ保存
                 st.session_state.last_user_message = user_message
 
-                # ② variation をリセットして、ベース版を生成
                 st.session_state.variation_count = 0
                 base_email = generate_email(
                     template,
@@ -881,7 +862,6 @@ with col1:
                 )
                 st.session_state.generated_email = base_email
 
-                # ③ チャットログ（選択内容付き）
                 user_display_text = (
                     f"{user_message}\n\n"
                     f"――――――――――\n"
@@ -895,7 +875,6 @@ with col1:
                 )
                 st.session_state.messages.append({"role": "assistant", "content": guide})
 
-                # ④ OpenAI案（3パターン）生成
                 st.session_state.ai_suggestions = generate_email_with_openai(
                     template=template,
                     tone=tone,
@@ -904,7 +883,6 @@ with col1:
                     seasonal_text=seasonal_text,
                 )
 
-                # ⑤ DB保存（あれば）
                 if HAS_DB:
                     try:
                         save_email_record(
@@ -920,7 +898,6 @@ with col1:
                     except Exception as e:
                         st.warning(f"DB保存時にエラーが発生しました: {e}")
 
-                # ⑥ チャットログを最大50件に制限
                 if len(st.session_state.messages) > 50:
                     st.session_state.messages = st.session_state.messages[-50:]
 
@@ -928,7 +905,6 @@ with col1:
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-    # チャットログ
     chat_html_parts = ["<div class='chat-log'>"]
     for msg in st.session_state.messages:
         role = msg["role"]
@@ -939,6 +915,7 @@ with col1:
             chat_html_parts.append(f"<div class='chat-bubble assistant'><span>{text}</span></div>")
     chat_html_parts.append("</div>")
     st.markdown("\n".join(chat_html_parts), unsafe_allow_html=True)
+
 
 # --------------------------------------------
 # 右：AIが作った3パターンのプレビュー
@@ -953,7 +930,6 @@ with col2:
     ai_text = st.session_state.ai_suggestions
 
     if not ai_text:
-        # まだ生成されていない場合のプレースホルダ
         placeholder_html = textwrap.dedent(
             """
             <div class="preview-main-wrapper">
@@ -963,25 +939,15 @@ with col2:
         )
         st.markdown(placeholder_html, unsafe_allow_html=True)
     else:
-        # 1) ai_suggestions からパターンごとに分割する
-        #
-        # 例：
-        # パターン1: ...
-        # パターン2: ...
-        # パターン3: ...
-        #
-        # という出力を想定して、「パターン + 数字」でsplit
-        raw_blocks = re.split(r"(?=パターン\s*\d+)", ai_text)
+        # ★ ここを修正：行頭の「## パターン数字」で分割（MULTILINE）
+        raw_blocks = re.split(r"(?=^##\s*パターン\s*\d+)", ai_text, flags=re.MULTILINE)
         blocks = [b.strip() for b in raw_blocks if b.strip()]
 
-        # ★ 先頭3つだけ使う（4つ作られても UI では3つに切り詰める）
         blocks = blocks[:3]
 
-        # 3つに満たない場合はプレースホルダで埋める（保険）
         while len(blocks) < 3:
             blocks.append("このパターンはまだ生成されていません。")
 
-        # コピー用テキスト配列
         copy_texts = blocks.copy()
 
         for idx, block in enumerate(blocks):
@@ -990,7 +956,6 @@ with col2:
                 unsafe_allow_html=True,
             )
 
-            # カード本体開始
             st.markdown(
                 """
                 <div class="preview-main-wrapper">
@@ -998,7 +963,6 @@ with col2:
                 unsafe_allow_html=True,
             )
 
-            # ヘッダ行（タイトル＋コピーアイコン）
             st.markdown(
                 f"""
                 <div class="preview-header">
@@ -1009,12 +973,10 @@ with col2:
                 unsafe_allow_html=True,
             )
 
-            # 本文：Markdownとして表示
             st.markdown(block, unsafe_allow_html=False)
 
-            st.markdown("</div>", unsafe_allow_html=True)  # /preview-main-wrapper
+            st.markdown("</div>", unsafe_allow_html=True)
 
-            # ボタン行（リセット／表現を変える）
             btn_col1, btn_col2 = st.columns(2)
             with btn_col1:
                 if st.button("リセット", key=f"reset_{idx}", use_container_width=True):
@@ -1026,7 +988,6 @@ with col2:
 
             with btn_col2:
                 if st.button("🔄 表現を変える", key=f"regen_{idx}", use_container_width=True):
-                    # 今は簡易実装として、「押したパターンに関係なく3パターン全部」を再生成
                     if st.session_state.last_user_message:
                         st.session_state.variation_count += 1
 
@@ -1056,7 +1017,6 @@ with col2:
 
             st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-        # 2) 右上のコピーアイコンに JS で挙動を付ける
         texts_json = json.dumps(copy_texts, ensure_ascii=False)
 
         st.components.v1.html(
@@ -1110,4 +1070,3 @@ with col2:
             """,
             height=0,
         )
-
