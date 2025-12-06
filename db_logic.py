@@ -68,11 +68,11 @@ def save_email_batch(
     message: str,
     seasonal_greeting: bool,
     patterns: List[Dict[str, str]],
-    table_name: str = "test-arky",
+    table_name: str = "test_arky_patterns",
 ) -> None:
     """
     App 側から渡された 3パターン分の subject/body を
-    Supabase の test-arky テーブルに「3レコード」として保存する。
+    Supabase の test_arky_patterns テーブルに「3レコード」として保存する。
 
     前提テーブル構成（例）:
       - id : bigint, PK (identity)
@@ -135,3 +135,4 @@ def save_email_batch(
     except Exception as e:
         # App 側で st.error に出したいので、そのまま投げる
         raise RuntimeError(f"Supabase 挿入エラー: {e}")
+
