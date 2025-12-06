@@ -1,140 +1,129 @@
 # db_logic.py
-"""
-Supabase へメール生成結果を保存するためのヘルパーモジュール。
-Streamlit の UI は一切書かない。
-"""
-
-from __future__ import annotations
-
 import os
 from datetime import datetime
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 
 from supabase import create_client, Client
 
-# .env があればローカルで読み込む（Cloud では Secrets 前提）
 try:
     from dotenv import load_dotenv
-
     load_dotenv()
 except Exception:
+    # dotenv が無くても無視（Cloud環境では Secrets から入る想定）
     pass
 
 
+# ============================================
+# Supabase クライアント初期化
+# ============================================
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
+if SUPABASE_URL and SUPABASE_KEY:
+    supabase: Client | None = create_client(SUPABASE_URL, SUPABASE_KEY)
+else:
+    supabase = None
 
-def _get_supabase() -> Optional[Client]:
+
+def _get_next_ids(table: str, n: int = 3) -> Dict[str, Any]:
     """
-    Supabase クライアントを返す。
-    URL / KEY が設定されていなければ None を返す。
-    """
-    if not SUPABASE_URL or not SUPABASE_KEY:
-        return None
-    return create_client(SUPABASE_URL, SUPABASE_KEY)
-
-
-supabase: Optional[Client] = _get_supabase()
-
-
-def _get_next_ids() -> Dict[str, int]:
-    """
-    test-arky テーブルから max(id), max(generatedid) を取得し、
-    次に使う id と generatedid を返す。
-
-    戻り値:
-        {
-            "next_id":      次の id,
-            "next_genid":   次の generatedid
-        }
+    test-arky テーブルの現在の最大 id / generatedid を取得し、
+    次に使う id 群（n件分）と、新しい generatedid を返す。
     """
     if supabase is None:
-        return {"next_id": 1, "next_genid": 1}
+        return {"ids": [], "generatedid": None}
 
-    # id の最大値
-    resp_id = (
-        supabase.table("test-arky")
-        .select("id")
+    # 最新行を1件取得
+    res = (
+        supabase.table(table)
+        .select("id, generatedid")
         .order("id", desc=True)
         .limit(1)
         .execute()
     )
-    max_id = resp_id.data[0]["id"] if resp_id.data else 0
 
-    # generatedid の最大値
-    resp_gen = (
-        supabase.table("test-arky")
-        .select("generatedid")
-        .order("generatedid", desc=True)
-        .limit(1)
-        .execute()
-    )
-    max_genid = resp_gen.data[0]["generatedid"] if resp_gen.data else 0
+    if res.data:
+        max_id = res.data[0].get("id", 0) or 0
+        max_generatedid = res.data[0].get("generatedid", 0) or 0
+    else:
+        max_id = 0
+        max_generatedid = 0
 
-    return {"next_id": max_id + 1, "next_genid": max_genid + 1}
+    # 連番 id を n件分ふる
+    ids = [max_id + i + 1 for i in range(n)]
+    new_generatedid = max_generatedid + 1
+
+    return {"ids": ids, "generatedid": new_generatedid}
 
 
+# ============================================
+# 3パターン分をまとめて保存する関数
+# ============================================
 def save_email_batch(
     template: str,
     tone: str,
     recipient: str,
     message: str,
     patterns: List[Dict[str, str]],
+    table_name: str = "test-arky",
 ) -> None:
     """
-    3パターン（または1〜3パターン）の生成結果を Supabase にまとめて保存する。
+    App 側から渡された 3パターン分の subject/body を
+    Supabase の test-arky テーブルにまとめて保存する。
 
-    引数:
-        template : 「依頼」「謝罪」などテンプレート種別
-        tone     : 「標準ビジネス」「フォーマル」などトーン
-        recipient: 「上司」「同僚」など相手種別
-        message  : ユーザーが入力した元メッセージ
-        patterns : 生成結果のリスト
-                   [
-                     {"subject": "...", "body": "..."},
-                     {"subject": "...", "body": "..."},
-                     {"subject": "...", "body": "..."},
-                   ]
-                   のような形式を想定（1〜3要素）
-
-    挙動:
-        - 1回の呼び出しにつき generatedid は共通の値を採番
-        - patterns の要素ごとに 1 行ずつ INSERT
-        - regeneratedid には "1","2","3" ... のようにパターン番号を文字列で保存
+    patterns: [
+        {"subject": "...", "body": "..."},
+        {"subject": "...", "body": "..."},
+        {"subject": "...", "body": "..."},
+    ]
     """
+
     if supabase is None:
-        # DB 未設定の場合は何もしない
+        # 接続情報が無い場合は何もしない（App 側は警告だけ出す想定）
+        print("[save_email_batch] Supabase client is None. Skipping DB insert.")
         return
 
     if not patterns:
+        print("[save_email_batch] patterns is empty. Nothing to insert.")
         return
 
-    ids = _get_next_ids()
-    next_id = ids["next_id"]
-    genid = ids["next_genid"]
+    # 念のため 3件に揃える（過不足があっても動くように）
+    patterns = list(patterns)
+    patterns = patterns[:3]
+    while len(patterns) < 3:
+        patterns.append({"subject": "", "body": ""})
 
-    rows: List[Dict[str, Any]] = []
-    now = datetime.utcnow().isoformat()
+    # id / generatedid を採番
+    id_info = _get_next_ids(table_name, n=len(patterns))
+    ids = id_info.get("ids", [])
+    generatedid = id_info.get("generatedid")
 
+    if not ids or generatedid is None:
+        print("[save_email_batch] Failed to get next ids/generatedid. Skipping insert.")
+        return
+
+    # 現在時刻（任意：作成日時を残したい場合）
+    now_str = datetime.utcnow().isoformat()
+
+    rows = []
     for idx, pat in enumerate(patterns):
-        subject = pat.get("subject", "")
-        body = pat.get("body", "")
+        rows.append(
+            {
+                "id": ids[idx],
+                "generatedid": generatedid,
+                # ここでは 1,2,3 を regeneratedid として入れておく
+                "regeneratedid": str(idx + 1),
+                "template": template,
+                "tone": tone,
+                "recipient": recipient,
+                "message": message,
+                "subject": pat.get("subject", ""),
+                "body": pat.get("body", ""),
+                # テーブルに created_at 等のカラムがあればここで追加
+                # "created_at": now_str,
+            }
+        )
 
-        row = {
-            "id": next_id + idx,          # 連番で付与
-            "generatedid": genid,         # 3パターン共通
-            "regeneratedid": str(idx + 1),  # "1", "2", "3" ...
-            "template": template,
-            "tone": tone,
-            "recipient": recipient,
-            "message": message,
-            "subject": subject,
-            "body": body,
-            # 追加で使いたければ created_at カラムをテーブルに作っておく
-            # "created_at": now,
-        }
-        rows.append(row)
-
-    # まとめて insert
-    supabase.table("test-arky").insert(rows).execute()
+    # 挿入実行
+    res = supabase.table(table_name).insert(rows).execute()
+    print("[save_email_batch] Inserted rows:", res.data)
