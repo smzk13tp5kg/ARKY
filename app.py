@@ -226,14 +226,17 @@ st.markdown(
     left: 450px;
     right: 0;
     height: 100%;
-    background-image: url('https://raw.githubusercontent.com/smzk13tp5kg/ARKY/main/ARKYbackgroundimage.png');
-    background-size: cover;
-    background-position: center center;
+
+    background-image: url('https://raw.githubusercontent.com/smzk13tp5kg/ARKY/main/ARKY%20background%20image.png');
+    background-size: contain;          /* ★ cover → contain に変更 */
+    background-position: center top;   /* 上寄せ＋中央揃え（お好みで） */
     background-repeat: no-repeat;
+
     opacity: 0.4;
     z-index: 0;
     pointer-events: none;
 }
+
 [data-testid="stAppViewContainer"] {
     background-color: transparent;
     position: relative;
@@ -1100,6 +1103,7 @@ with col2:
                     st.warning("直近のユーザー入力が見つかりません。先にメッセージを送信してください。")
 
                 st.rerun()
+
 
 
 
