@@ -951,71 +951,72 @@ with col2:
         copy_texts = blocks.copy()
 
         for idx, block in enumerate(blocks):
-            st.markdown(
-                f"<div class='section-header'>◆ パターン {idx + 1}</div>",
-                unsafe_allow_html=True,
-            )
+    st.markdown(
+        f"<div class='section-header'>◆ パターン {idx + 1}</div>",
+        unsafe_allow_html=True,
+    )
 
-            st.markdown(
-                """
-                <div class="preview-main-wrapper">
-                """,
-                unsafe_allow_html=True,
-            )
+    # block を HTML用にエスケープして <br> で改行
+    block_html = html.escape(block).replace("\n", "<br>")
 
-            st.markdown(
-                f"""
-                <div class="preview-header">
-                  <span>パターン {idx + 1}</span>
-                  <span class="pattern-copy-icon" data-pattern="{idx}" title="このパターンをコピー">📋</span>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+    # カード全体を 1 つの HTML として描画
+    card_html = f"""
+    <div class="preview-main-wrapper">
+      <div class="preview-header">
+        <span>パターン {idx + 1}</span>
+        <span class="pattern-copy-icon"
+              data-pattern="{idx}"
+              title="このパターンをコピー">📋</span>
+      </div>
+      <div class="preview-body">
+        {block_html}
+      </div>
+    </div>
+    """
 
-            st.markdown(block, unsafe_allow_html=False)
+    st.markdown(card_html, unsafe_allow_html=True)
 
-            st.markdown("</div>", unsafe_allow_html=True)
+    # ボタン行（ここから下は今のコードのままで OK）
+    btn_col1, btn_col2 = st.columns(2)
+    with btn_col1:
+        if st.button("リセット", key=f"reset_{idx}", use_container_width=True):
+            st.session_state.messages = []
+            st.session_state.last_user_message = ""
+            st.session_state.ai_suggestions = None
+            st.session_state.variation_count = 0
+            st.rerun()
 
-            btn_col1, btn_col2 = st.columns(2)
-            with btn_col1:
-                if st.button("リセット", key=f"reset_{idx}", use_container_width=True):
-                    st.session_state.messages = []
-                    st.session_state.last_user_message = ""
-                    st.session_state.ai_suggestions = None
-                    st.session_state.variation_count = 0
-                    st.rerun()
+    with btn_col2:
+        if st.button("🔄 表現を変える", key=f"regen_{idx}", use_container_width=True):
+            if st.session_state.last_user_message:
+                st.session_state.variation_count += 1
 
-            with btn_col2:
-                if st.button("🔄 表現を変える", key=f"regen_{idx}", use_container_width=True):
-                    if st.session_state.last_user_message:
-                        st.session_state.variation_count += 1
+                st.session_state.ai_suggestions = generate_email_with_openai(
+                    template=template,
+                    tone=tone,
+                    recipient=recipient,
+                    message=st.session_state.last_user_message,
+                    seasonal_text=seasonal_text,
+                )
 
-                        st.session_state.ai_suggestions = generate_email_with_openai(
-                            template=template,
-                            tone=tone,
-                            recipient=recipient,
-                            message=st.session_state.last_user_message,
-                            seasonal_text=seasonal_text,
-                        )
+                st.session_state.messages.append(
+                    {
+                        "role": "assistant",
+                        "content": (
+                            f"AIによる新しい3パターン（バリエーション "
+                            f"{st.session_state.variation_count + 1}）を生成しました。"
+                        ),
+                    }
+                )
+                if len(st.session_state.messages) > 50:
+                    st.session_state.messages = st.session_state.messages[-50:]
+            else:
+                st.warning("直近のユーザー入力が見つかりません。先にメッセージを送信してください。")
 
-                        st.session_state.messages.append(
-                            {
-                                "role": "assistant",
-                                "content": (
-                                    f"AIによる新しい3パターン（バリエーション "
-                                    f"{st.session_state.variation_count + 1}）を生成しました。"
-                                ),
-                            }
-                        )
-                        if len(st.session_state.messages) > 50:
-                            st.session_state.messages = st.session_state.messages[-50:]
-                    else:
-                        st.warning("直近のユーザー入力が見つかりません。先にメッセージを送信してください。")
+            st.rerun()
 
-                    st.rerun()
+    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-            st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
         texts_json = json.dumps(copy_texts, ensure_ascii=False)
 
@@ -1070,3 +1071,4 @@ with col2:
             """,
             height=0,
         )
+
