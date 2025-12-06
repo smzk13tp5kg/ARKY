@@ -1,31 +1,45 @@
+# openai_logic.py
 import os
 from openai import OpenAI
 
-# .env がある環境では読み込む（ローカル用）
 try:
     from dotenv import load_dotenv
     load_dotenv()
-except:
+except Exception:
+    # dotenv が無くても無視（Cloud環境ではSecretsから環境変数が入る想定）
     pass
 
-API_KEY = os.environ.get("OPENAI_API_KEY")
 
-client = OpenAI(api_key=API_KEY)
+def _get_client():
+    """
+    OpenAIクライアントを返すヘルパー。
+    APIキーが設定されていない場合は None を返す。
+    """
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        return None
+    return OpenAI(api_key=api_key)
 
-# -------------------------
-# ① ユーザー入力（アプリから渡される値）
-# -------------------------
-receiver = "上司"
-receiver_character = "丁寧で慎重"
-situation = "欠勤連絡"
-additional_info = "急な発熱のため。明日の会議に出席不可。業務引き継ぎは佐藤さんに依頼済み。"
-example_sentence = "明日の会議欠席しないといけません。すみません。"
 
-# -------------------------
-# ② メタプロンプト（他のAIに送るプロンプトを生成）
-# -------------------------
+def generate_email_with_openai(template, tone, recipient, message, seasonal_text=None):
+    """
+    メタプロンプト＋gpt-4o-mini を使って、
+    ビジネスメッセージ案を3パターン生成するラッパー関数。
+    Markdownテキストを返す。
+    """
 
-meta_prompt = f"""
+    client = _get_client()
+    if client is None:
+        # import 時には例外を投げず、呼び出されたときだけ安全なメッセージを返す
+        return "⚠️ OpenAI APIキーが設定されていません。（環境変数 OPENAI_API_KEY を確認してください）"
+
+    receiver = recipient
+    receiver_character = f"{recipient}向け / トーン: {tone}"
+    situation = f"{template}メール"
+    additional_info = seasonal_text or ""
+    example_sentence = message
+
+    meta_prompt = f"""
 あなたは「ビジネスメッセージ生成AIのためのプロンプトを設計する専門家」です。
 
 以下の入力情報をもとに、別の生成AIがビジネス文章を作るための
@@ -37,12 +51,8 @@ meta_prompt = f"""
 # 役割①：状況分析者（Reasoning Agent）
 与えられた状況（相手・性格・シチュエーション・補足情報・例文）を読み取り、
 「どのような文章を書くべきか」について、
-**自分で“理由”を論理的に言語化する工程を必ず行う。**
+自分で“理由”を論理的に言語化する工程を必ず行う。
 
-例：
-- なぜこの敬語レベルを使うべきなのか
-- なぜこの順番（結論→背景など）が適切なのか
-- なぜこの相手にはこういう言い回しが良いのか　など
 ※ この思考結果は文章としてユーザーに見せず、生成AIの内部思考として扱う。
 
 ---
@@ -71,7 +81,7 @@ meta_prompt = f"""
 - 過剰に丁寧すぎず、読みやすさを重視する指示
 - Markdown形式で出力する指示
 - 「理由を先に考えてから文章を作る」という流れを明示すること
-- ただし、**内部思考（理由）は最終出力に含めない** と明記すること
+- ただし、内部思考（理由）は最終出力に含めない と明記すること
 
 ---
 
@@ -81,33 +91,25 @@ meta_prompt = f"""
 - 余分な語句なしで、別の生成AIに渡せるプロンプトだけを書いてください
 """
 
+    # ③ メタプロンプト → 最適プロンプトを生成
+    meta_response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "あなたはプロンプト設計の専門家です。"},
+            {"role": "user", "content": meta_prompt}
+        ]
+    )
 
-meta_response = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[
-        {"role": "system", "content": "あなたはプロンプト設計の専門家です。"},
-        {"role": "user", "content": meta_prompt}
-    ]
-)
+    final_prompt = meta_response.choices[0].message.content
 
-final_prompt = meta_response.choices[0].message.content
-print("【生成されたプロンプトA】")
-print(final_prompt)
-print("──────────────────────")
+    # ④ 実際の文章生成（3パターン）
+    message_response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "あなたはビジネス文書を最適化するプロ編集者です。"},
+            {"role": "user", "content": final_prompt}
+        ]
+    )
 
-# -------------------------
-# ③ 実際の文章生成（3パターン）
-# -------------------------
-
-message_response = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[
-        {"role": "system", "content": "あなたはビジネス文書を最適化するプロ編集者です。"},
-        {"role": "user", "content": final_prompt}
-    ]
-)
-
-generated_text = message_response.choices[0].message.content
-
-print("【生成されたビジネスメッセージ（3パターン）】")
-print(generated_text)
+    generated_text = message_response.choices[0].message.content
+    return generated_text  # Markdown 形式のテキスト
