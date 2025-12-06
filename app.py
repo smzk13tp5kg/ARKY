@@ -948,7 +948,6 @@ with col1:
 # 右：AIが作った3パターンのプレビュー
 # --------------------------------------------
 with col2:
-    # ★ 見出しは付けず、いきなり中身だけ描画する
     ai_text = st.session_state.ai_suggestions
 
     if not ai_text:
@@ -961,27 +960,31 @@ with col2:
         )
         st.markdown(placeholder_html, unsafe_allow_html=True)
     else:
-        # 行頭が「## パターン数字」の行で分割（MULTILINE）
+        # ★ 行頭が「## パターン数字」の行で分割（MULTILINE）
         raw_blocks = re.split(r"(?=^##\s*パターン\s*\d+)", ai_text, flags=re.MULTILINE)
         blocks = [b.strip() for b in raw_blocks if b.strip()]
 
-        # 先頭3つだけ使う
+        # 先頭3つだけ使う（4つ作られても UI では3つに切り詰める）
         blocks = blocks[:3]
 
-        # 3つに満たない場合はプレースホルダで埋める
+        # 3つに満たない場合はプレースホルダで埋める（保険）
         while len(blocks) < 3:
             blocks.append("このパターンはまだ生成されていません。")
 
+        # コピー用テキスト配列
         copy_texts = blocks.copy()
 
+        # ===== ここからカード描画 =====
         for idx, block in enumerate(blocks):
             st.markdown(
                 f"<div class='section-header'>◆ パターン {idx + 1}</div>",
                 unsafe_allow_html=True,
             )
 
+            # block を HTML用にエスケープして <br> で改行
             block_html = html.escape(block).replace("\n", "<br>")
 
+            # カード全体を 1 つの HTML として描画
             card_html = f"""
             <div class="preview-main-wrapper">
               <div class="preview-header">
@@ -994,11 +997,11 @@ with col2:
                 {block_html}
               </div>
             </div>
-            
             """
 
             st.markdown(card_html, unsafe_allow_html=True)
 
+            # ボタン行（リセット／表現を変える）
             btn_col1, btn_col2 = st.columns(2)
             with btn_col1:
                 if st.button("リセット", key=f"reset_{idx}", use_container_width=True):
@@ -1010,6 +1013,7 @@ with col2:
 
             with btn_col2:
                 if st.button("🔄 表現を変える", key=f"regen_{idx}", use_container_width=True):
+                    # 今は簡易実装として、「押したパターンに関係なく3パターン全部」を再生成
                     if st.session_state.last_user_message:
                         st.session_state.variation_count += 1
 
@@ -1039,66 +1043,66 @@ with col2:
 
             st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-        # 2) 右上のコピーアイコンに JS で挙動を付ける
-texts_json = json.dumps(copy_texts, ensure_ascii=False)
+        # ===== ここからコピーアイコン用 JS =====
+        texts_json = json.dumps(copy_texts, ensure_ascii=False)
 
-st.components.v1.html(
-    f"""
-    <script>
-    (function() {{
-      const texts = {texts_json};
+        st.components.v1.html(
+            f"""
+            <script>
+            (function() {{
+              const texts = {texts_json};
 
-      function setupIcons() {{
-        const icons = parent.document.querySelectorAll('.pattern-copy-icon');
-        if (!icons || icons.length === 0) return;
+              function setupIcons() {{
+                const icons = parent.document.querySelectorAll('.pattern-copy-icon');
+                if (!icons || icons.length === 0) return;
 
-        function copyText(text) {{
-          if (navigator.clipboard && navigator.clipboard.writeText) {{
-            navigator.clipboard.writeText(text).catch(function(err) {{
-              console.warn("navigator.clipboard failed:", err);
-              fallbackCopy(text);
-            }});
-          }} else {{
-            fallbackCopy(text);
-          }}
-        }}
+                function copyText(text) {{
+                  if (navigator.clipboard && navigator.clipboard.writeText) {{
+                    navigator.clipboard.writeText(text).catch(function(err) {{
+                      console.warn("navigator.clipboard failed:", err);
+                      fallbackCopy(text);
+                    }});
+                  }} else {{
+                    fallbackCopy(text);
+                  }}
+                }}
 
-        function fallbackCopy(text) {{
-          try {{
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed';
-            textarea.style.top = '-9999px';
-            textarea.style.left = '-9999px';
-            document.body.appendChild(textarea);
-            textarea.focus();
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-          }} catch (e) {{
-            console.error("Fallback copy failed:", e);
-          }}
-        }}
+                function fallbackCopy(text) {{
+                  try {{
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.style.position = 'fixed';
+                    textarea.style.top = '-9999px';
+                    textarea.style.left = '-9999px';
+                    document.body.appendChild(textarea);
+                    textarea.focus();
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                  }} catch (e) {{
+                    console.error("Fallback copy failed:", e);
+                  }}
+                }}
 
-        icons.forEach(function(icon) {{
-          const idx = parseInt(icon.getAttribute('data-pattern'), 10);
-          if (!isNaN(idx) && texts[idx]) {{
-            icon.addEventListener('click', function() {{
-              // 1) テキストをコピー
-              copyText(texts[idx]);
+                icons.forEach(function(icon) {{
+                  const idx = parseInt(icon.getAttribute('data-pattern'), 10);
+                  if (!isNaN(idx) && texts[idx]) {{
+                    icon.addEventListener('click', function() {{
+                      // 1) テキストをコピー
+                      copyText(texts[idx]);
 
-              // 2) いったんクラスを外してから付け直し → アニメーションを再生
-              icon.classList.remove('copy-flash');
-              void icon.offsetWidth; // reflow を発生させてアニメーションをリセット
-              icon.classList.add('copy-flash');
-            }});
-          }}
-        }});
-      }}
+                      // 2) クリック時にキラッとアニメーション
+                      icon.classList.remove('copy-flash');
+                      void icon.offsetWidth; // reflow でアニメーションをリセット
+                      icon.classList.add('copy-flash');
+                    }});
+                  }}
+                }});
+              }}
 
-      setTimeout(setupIcons, 500);
-    }})();
-    </script>
-    """,
-    height=0,
-)
+              setTimeout(setupIcons, 500);
+            }})();
+            </script>
+            """,
+            height=0,
+        )
