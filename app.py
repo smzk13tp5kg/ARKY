@@ -228,7 +228,7 @@ st.markdown(
     right: 0;
     height: 100%;
 
-    background-image: url('https://raw.githubusercontent.com/smzk13tp5kg/ARKY/main/ARKY%20background%20image.png');
+    background-image: url('https://raw.githubusercontent.com/smzk13tp5kg/ARKY/main/ARKYappbackgroundimage.png');
     background-size: contain;          /* ★ cover → contain に変更 */
     background-position: center top;   /* 上寄せ＋中央揃え（お好みで） */
     background-repeat: no-repeat;
@@ -1110,3 +1110,4 @@ with col2:
             """,
             height=0,
         )
+
