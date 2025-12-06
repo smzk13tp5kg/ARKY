@@ -412,6 +412,16 @@ button[title="Close sidebar"] svg {
     margin: 8px 0;
 }
 
+/* メインブロック（stMainBlockContainer）の上パディングを強制的に6pxに変更 */
+div.stMainBlockContainer {
+    padding-top: 6px !important;
+}
+
+/* Streamlit が付ける block-container（同一要素の場合）も一応抑えておく */
+main.block-container {
+    padding-top: 6px !important;
+}
+
 /* プレビュー見出し＋コピーアイコン */
 .preview-header {
     display: flex;
@@ -1090,5 +1100,6 @@ with col2:
                     st.warning("直近のユーザー入力が見つかりません。先にメッセージを送信してください。")
 
                 st.rerun()
+
 
 
