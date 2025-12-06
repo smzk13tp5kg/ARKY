@@ -10,11 +10,10 @@ from openai_logic import generate_email_with_openai
 
 # DB保存ロジック（あれば使う）
 try:
-    from db_logic import save_email_record
+    from db_logic import save_email_batch
     HAS_DB = True
 except ImportError:
     HAS_DB = False
-
 
 # ============================================
 # 時候の挨拶（ヘルパー）
@@ -1255,3 +1254,4 @@ with col2:
             """,
             height=0,
         )
+
