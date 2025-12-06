@@ -928,7 +928,11 @@ with col2:
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
     ai_text = st.session_state.ai_suggestions
-
+    
+    # ★ デバッグ用：OpenAIから帰ってきた生テキストを確認
+    if ai_text:
+        st.code(ai_text[:1000], language="markdown")
+        
     if not ai_text:
         placeholder_html = textwrap.dedent(
             """
@@ -1075,3 +1079,4 @@ with col2:
             """,
             height=0,
         )
+
