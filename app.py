@@ -939,171 +939,171 @@ with col1:
     chat_html_parts.append("</div>")
     st.markdown("\n".join(chat_html_parts), unsafe_allow_html=True)
 
+# --------------------------------------------
+# 右：AIが作った3パターンのプレビュー
+# --------------------------------------------
+import re  # ファイルの先頭などで一度だけ import しておく
 
-# --------------------------------------------
-# 右：プレビュー
-# --------------------------------------------
 with col2:
-    # 見出し＋コピーアイコン
     st.markdown(
-        """
-        <div class="section-header preview-header">
-          <span>📄 プレビュー</span>
-          <span class="preview-copy-icon" title="プレビューをコピー">📋</span>
-        </div>
-        """,
+        "<div class='section-header'>📄 AI生成プレビュー（3パターン）</div>",
         unsafe_allow_html=True,
     )
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-    if st.session_state.generated_email is None:
+    ai_text = st.session_state.ai_suggestions
+
+    if not ai_text:
+        # まだ生成されていない場合のプレースホルダ
         placeholder_html = textwrap.dedent(
             """
             <div class="preview-main-wrapper">
-                <p><em>メールを生成すると、ここにプレビューが表示されます。</em></p>
+                <p><em>メッセージを送信すると、ここにAIが生成した3パターンのプレビューが表示されます。</em></p>
             </div>
             """
         )
         st.markdown(placeholder_html, unsafe_allow_html=True)
     else:
-        email = st.session_state.generated_email
-        body_html = html.escape(email["body"]).replace("\n", "<br>")
-        subject_html = html.escape(email["subject"])
+        # 1) ai_suggestions から3パターンに分割する
+        # 例: "### パターン1 ... ### パターン2 ... ### パターン3 ..." のような出力を想定
+        blocks = re.split(r"(?=###\s*パターン)", ai_text)
+        blocks = [b.strip() for b in blocks if b.strip()]
 
-        preview_html = textwrap.dedent(
-            f"""
-            <div class="preview-main-wrapper">
-                <p class="preview-label"><strong>件名</strong></p>
-                <p class="preview-subject">{subject_html}</p>
-                <hr>
-                <p class="preview-label"><strong>本文</strong></p>
-                <p class="preview-body">{body_html}</p>
-            </div>
-            """
-        )
-        st.markdown(preview_html, unsafe_allow_html=True)
+        # もしうまく分割できなければ、全体を1ブロックとして扱う（保険）
+        if len(blocks) == 0:
+            blocks = [ai_text]
 
-        # プレビュー全文をコピーするためのJS（アイコン用）
-        full_text = f"件名: {email['subject']}\n\n{email['body']}"
-        escaped_full_text = json.dumps(full_text)
+        # JS に渡すため、コピー用テキストの配列を作っておく
+        copy_texts = []
+
+        for idx, block in enumerate(blocks):
+            # 件名＋本文を含んだテキスト全体をコピー対象にする
+            copy_texts.append(block)
+
+            st.markdown(
+                f"<div class='section-header'>◆ パターン {idx + 1}</div>",
+                unsafe_allow_html=True,
+            )
+
+            # プレビューカード本体（中身は Markdown として描画）
+            st.markdown(
+                """
+                <div class="preview-main-wrapper">
+                """,
+                unsafe_allow_html=True,
+            )
+
+            # 上部行：タイトル＋コピーアイコン
+            st.markdown(
+                f"""
+                <div class="preview-header">
+                  <span>パターン {idx + 1}</span>
+                  <span class="pattern-copy-icon" data-pattern="{idx}" title="このパターンをコピー">📋</span>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+            # 本文部分：Markdownとして表示
+            st.markdown(block, unsafe_allow_html=False)
+
+            st.markdown("</div>", unsafe_allow_html=True)  # /preview-main-wrapper
+
+            # ボタン行（リセット／表現を変える）
+            btn_col1, btn_col2 = st.columns(2)
+            with btn_col1:
+                if st.button("リセット", key=f"reset_{idx}", use_container_width=True):
+                    st.session_state.messages = []
+                    st.session_state.last_user_message = ""
+                    st.session_state.ai_suggestions = None
+                    st.session_state.variation_count = 0
+                    st.rerun()
+
+            with btn_col2:
+                if st.button("🔄 表現を変える", key=f"regen_{idx}", use_container_width=True):
+                    # 今の実装では「表現を変える」ボタンは押したパターンだけでなく
+                    # 全パターンをまとめて再生成する仕様にしておく（簡易版）
+                    if st.session_state.last_user_message:
+                        # 変化度合いを variation_count で渡す（プロンプト側は調整してもOK）
+                        st.session_state.variation_count += 1
+
+                        st.session_state.ai_suggestions = generate_email_with_openai(
+                            template=template,
+                            tone=tone,
+                            recipient=recipient,
+                            message=st.session_state.last_user_message,
+                            seasonal_text=seasonal_text,
+                        )
+
+                        st.session_state.messages.append(
+                            {
+                                "role": "assistant",
+                                "content": (
+                                    f"AIによる新しい3パターン（バリエーション "
+                                    f"{st.session_state.variation_count + 1}）を生成しました。"
+                                ),
+                            }
+                        )
+                        if len(st.session_state.messages) > 50:
+                            st.session_state.messages = st.session_state.messages[-50:]
+                    else:
+                        st.warning("直近のユーザー入力が見つかりません。先にメッセージを送信してください。")
+
+                    st.rerun()
+
+            st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+
+        # 2) コピーアイコンに JS で挙動を付与
+        texts_json = json.dumps(copy_texts, ensure_ascii=False)
 
         st.components.v1.html(
             f"""
             <script>
             (function() {{
-              function setupPreviewCopy() {{
-                const icon = parent.document.querySelector('.preview-copy-icon');
-                if (!icon) return;
-                icon.onclick = function() {{
-                  const text = {escaped_full_text};
-                  copyText(text);
-                }};
-              }}
-              function copyText(text) {{
-                if (navigator.clipboard && navigator.clipboard.writeText) {{
-                  navigator.clipboard.writeText(text).catch(function(err) {{
-                    console.warn("navigator.clipboard failed:", err);
+              const texts = {texts_json};
+
+              function setupIcons() {{
+                const icons = parent.document.querySelectorAll('.pattern-copy-icon');
+                if (!icons || icons.length === 0) return;
+
+                function copyText(text) {{
+                  if (navigator.clipboard && navigator.clipboard.writeText) {{
+                    navigator.clipboard.writeText(text).catch(function(err) {{
+                      console.warn("navigator.clipboard failed:", err);
+                      fallbackCopy(text);
+                    }});
+                  }} else {{
                     fallbackCopy(text);
-                  }});
-                }} else {{
-                  fallbackCopy(text);
+                  }}
                 }}
-              }}
-              function fallbackCopy(text) {{
-                try {{
-                  const textarea = document.createElement('textarea');
-                  textarea.value = text;
-                  textarea.style.position = 'fixed';
-                  textarea.style.left = '-9999px';
-                  document.body.appendChild(textarea);
-                  textarea.focus();
-                  textarea.select();
-                  document.execCommand('copy');
-                  document.body.removeChild(textarea);
-                }} catch (e) {{
-                  console.error("Fallback copy failed:", e);
+
+                function fallbackCopy(text) {{
+                  try {{
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.style.position = 'fixed';
+                    textarea.style.left = '-9999px';
+                    document.body.appendChild(textarea);
+                    textarea.focus();
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                  }} catch (e) {{
+                    console.error("Fallback copy failed:", e);
+                  }}
                 }}
+
+                icons.forEach(function(icon) {{
+                  const idx = parseInt(icon.getAttribute('data-pattern'), 10);
+                  if (!isNaN(idx) && texts[idx]) {{
+                    icon.onclick = function() {{ copyText(texts[idx]); }};
+                  }}
+                }});
               }}
-              setTimeout(setupPreviewCopy, 500);
+
+              setTimeout(setupIcons, 500);
             }})();
             </script>
             """,
             height=0,
         )
-
-        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-
-        advice_html = textwrap.dedent(
-            f"""
-            <div class="advice-box">
-                <strong>💡 アドバイス</strong><br>
-                {email['advice']}
-            </div>
-            """
-        )
-        st.markdown(advice_html, unsafe_allow_html=True)
-
-        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-
-        # ★ OpenAI案（3パターン）の表示
-        if st.session_state.ai_suggestions:
-            st.markdown("### 🤖 OpenAI案（3パターン）")
-            st.markdown(st.session_state.ai_suggestions)
-
-        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-
-        btn_col1, btn_col2 = st.columns(2)
-
-        # ---------- リセット ボタン ----------
-        with btn_col1:
-            if st.button("リセット", use_container_width=True):
-                st.session_state.messages = []
-                st.session_state.generated_email = None
-                st.session_state.variation_count = 0
-                st.session_state.last_user_message = ""
-                st.session_state.ai_suggestions = None
-                st.rerun()
-
-        # ---------- 再生成 ボタン ----------
-        with btn_col2:
-            if st.button("🔄 表現を変える", use_container_width=True):
-                if st.session_state.last_user_message:
-                    st.session_state.variation_count += 1
-                    new_email = generate_email(
-                        template,
-                        tone,
-                        recipient,
-                        st.session_state.last_user_message,
-                        variation=st.session_state.variation_count,
-                        seasonal_text=seasonal_text,
-                    )
-                    st.session_state.generated_email = new_email
-
-                    # OpenAI案も再生成
-                    st.session_state.ai_suggestions = generate_email_with_openai(
-                        template=template,
-                        tone=tone,
-                        recipient=recipient,
-                        message=st.session_state.last_user_message,
-                        seasonal_text=seasonal_text,
-                    )
-
-                    st.session_state.messages.append(
-                        {
-                            "role": "assistant",
-                            "content": (
-                                f"新しいバージョン（バリエーション "
-                                f"{st.session_state.variation_count + 1}）を生成しました！プレビューをご確認ください。"
-                            ),
-                        }
-                    )
-                    if len(st.session_state.messages) > 50:
-                        st.session_state.messages = st.session_state.messages[-50:]
-                else:
-                    st.warning("直近のユーザー入力が見つかりません。先にメッセージを送信してください。")
-
-                st.rerun()
-
-
-
-
