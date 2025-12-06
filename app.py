@@ -39,6 +39,71 @@ def get_seasonal_greeting() -> str:
 
 
 # ============================================
+# AI パターンブロックを分解するヘルパー
+# ============================================
+def parse_pattern_block(block: str) -> dict:
+    """
+    openai_logic から返ってきた 1 パターン分の Markdown テキストから、
+    件名／本文／改善点／注意点 をざっくり抽出する。
+    """
+    # 先頭の "## パターンX" 行を削除
+    block = re.sub(r"^##\s*パターン[^\n]*\n?", "", block, count=1, flags=re.MULTILINE)
+
+    subject = ""
+    body = ""
+    improve = ""
+    caution = ""
+
+    # 件名
+    m = re.search(r"件名[:：]\s*(.+)", block)
+    if m:
+        subject = m.group(1).strip()
+
+    # "本文:" 以降を切り出し
+    pos_body_label = block.find("本文:")
+    if pos_body_label != -1:
+        rest = block[pos_body_label + len("本文:") :]
+    else:
+        rest = block
+
+    # 改善点・注意点の位置
+    idx_improve = rest.find("- 改善点")
+    idx_caution = rest.find("- 注意点")
+
+    # 本文
+    if idx_improve != -1:
+        body = rest[:idx_improve].strip()
+        rest2 = rest[idx_improve:]
+    else:
+        body = rest.strip()
+        rest2 = ""
+
+    # 改善点・注意点
+    if rest2:
+        if idx_caution != -1 and rest2.find("- 注意点") > -1:
+            split_pos = rest2.find("- 注意点")
+            improve_block = rest2[:split_pos].strip()
+            caution_block = rest2[split_pos:].strip()
+        else:
+            improve_block = rest2.strip()
+            caution_block = ""
+    else:
+        improve_block = ""
+        caution_block = ""
+
+    # ラベル部分を削る
+    improve = re.sub(r"^-+\s*改善点[:：]?\s*", "", improve_block, flags=re.MULTILINE).strip()
+    caution = re.sub(r"^-+\s*注意点[:：]?\s*", "", caution_block, flags=re.MULTILINE).strip()
+
+    return {
+        "subject": subject,
+        "body": body,
+        "improve": improve,
+        "caution": caution,
+    }
+
+
+# ============================================
 # メール生成関数（既存ロジック）
 # ============================================
 def generate_email(
@@ -425,6 +490,27 @@ main.block-container {
     padding-top: 6px !important;
 }
 
+/* プレビュー内の小見出し行 */
+.preview-section-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+/* 改善点・注意点の本文エリア背景 #fffff9 */
+.preview-note-body {
+    background: #fffff9;
+    border-radius: 8px;
+    border: 1px solid #f3e7c4;
+    color: #111827;
+    font-size: 13px;
+    padding: 10px 12px;
+    line-height: 1.5;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
 /* プレビュー見出し＋コピーアイコン */
 .preview-header {
     display: flex;
@@ -432,7 +518,7 @@ main.block-container {
     justify-content: space-between;
 }
 
-/* コピーアイコン（パターン用）の基本スタイル強化 */
+/* コピーアイコン（パターン用） */
 .pattern-copy-icon {
     cursor: pointer;
     font-size: 18px;
@@ -445,7 +531,6 @@ main.block-container {
     animation: copy-flash 0.5s ease-out;
 }
 
-/* エフェクトの中身 */
 @keyframes copy-flash {
     0% {
         transform: scale(1);
@@ -533,18 +618,18 @@ main.block-container {
     border: 1px solid #e5e7eb;
     padding: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    min-height: 350px; 
+    min-height: 350px;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
     display: flex;
-    flex-direction: column; 
+    flex-direction: column;
     overflow: hidden;
 }
 .preview-subject {
-    color: #111827; 
-    font-size: 14px; 
-    margin-bottom: 16px;
+    color: #111827;
+    font-size: 14px;
+    margin-bottom: 8px;
     font-weight: bold;
 }
 .preview-body {
@@ -555,9 +640,9 @@ main.block-container {
     font-size: 14px;
     padding: 12px;
     flex-grow: 1;
-    min-height: 200px;
+    min-height: 120px;
     overflow-y: auto;
-    word-break: break-word; 
+    word-break: break-word;
     white-space: pre-wrap;
 }
 .advice-box {
@@ -621,12 +706,7 @@ main.block-container {
     overflow: visible;
     margin-right: auto;
     max-width: 85%;
-
-    /* 枠のグラデーションアニメーション */
-    animation: assistant-glow-border 4s ease-in-out infinite;
 }
-
-/* 外枠（グラデーション枠） */
 .chat-bubble.assistant::before {
     content: "";
     position: absolute;
@@ -636,31 +716,25 @@ main.block-container {
     background: linear-gradient(120deg, #6559ae, #ff9f4a, #ffd666, #ff7159, #6559ae);
     background-size: 300% 300%;
     animation: assistant-glow-border 4s ease-in-out infinite;
-
     -webkit-mask:
       linear-gradient(#000 0 0) content-box,
       linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
             mask-composite: exclude;
 }
-
-/* 内側テキスト部分：グラデ＋うっすら光り方を変える */
 .chat-bubble.assistant > span {
     position: relative;
     display: block;
     padding: 10px 18px;
     border-radius: 14px;
-
     background: rgba(5, 11, 35, 0.9);
     background-image: linear-gradient(120deg, #fdfbff, #ffd7b2, #ffe6ff);
     background-size: 300% 300%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-
     font-size: 14px;
     font-weight: 600;
     line-height: 1.6;
-
     animation: assistant-glow-text 4s ease-in-out infinite;
 }
 
@@ -1019,31 +1093,32 @@ with col2:
         )
         st.markdown(placeholder_html, unsafe_allow_html=True)
     else:
-        # ★ 行頭が「## パターン数字」の行で分割（MULTILINE）
+        # 行頭が「## パターン数字」の行で分割（MULTILINE）
         raw_blocks = re.split(r"(?=^##\s*パターン\s*\d+)", ai_text, flags=re.MULTILINE)
         blocks = [b.strip() for b in raw_blocks if b.strip()]
 
-        # 先頭3つだけ使う（4つ作られても UI では3つに切り詰める）
+        # 先頭3つだけ使う
         blocks = blocks[:3]
 
-        # 3つに満たない場合はプレースホルダで埋める（保険）
+        # 3つに満たない場合はプレースホルダで埋める
         while len(blocks) < 3:
             blocks.append("このパターンはまだ生成されていません。")
 
-        # コピー用テキスト配列
+        # コピー用テキスト配列（元の Markdown まるごと）
         copy_texts = blocks.copy()
 
-        # ===== ここからカード描画 =====
         for idx, block in enumerate(blocks):
             st.markdown(
                 f"<div class='section-header'>◆ パターン {idx + 1}</div>",
                 unsafe_allow_html=True,
             )
 
-            # block を HTML用にエスケープして <br> で改行
-            block_html = html.escape(block).replace("\n", "<br>")
+            parsed = parse_pattern_block(block)
+            subj = html.escape(parsed["subject"] or "").replace("\n", "<br>")
+            body = html.escape(parsed["body"] or "").replace("\n", "<br>")
+            improve = html.escape(parsed["improve"] or "").replace("\n", "<br>")
+            caution = html.escape(parsed["caution"] or "").replace("\n", "<br>")
 
-            # カード全体を 1 つの HTML として描画
             card_html = f"""
             <div class="preview-main-wrapper">
               <div class="preview-header">
@@ -1052,8 +1127,25 @@ with col2:
                       data-pattern="{idx}"
                       title="メッセージをコピーします">📋</span>
               </div>
-              <div class="preview-body">
-                {block_html}
+
+              <div style="margin-top:8px;">
+                <div class="preview-section-label">件名</div>
+                <div class="preview-subject">{subj}</div>
+              </div>
+
+              <div style="margin-top:12px;">
+                <div class="preview-section-label">本文</div>
+                <div class="preview-body">{body}</div>
+              </div>
+
+              <div style="margin-top:12px;">
+                <div class="preview-section-label">改善点</div>
+                <div class="preview-note-body">{improve}</div>
+              </div>
+
+              <div style="margin-top:12px;">
+                <div class="preview-section-label">注意点</div>
+                <div class="preview-note-body">{caution}</div>
               </div>
             </div>
             """
@@ -1072,7 +1164,6 @@ with col2:
 
             with btn_col2:
                 if st.button("🔄 表現を変える", key=f"regen_{idx}", use_container_width=True):
-                    # 今は簡易実装として、「押したパターンに関係なく3パターン全部」を再生成
                     if st.session_state.last_user_message:
                         st.session_state.variation_count += 1
 
@@ -1102,7 +1193,7 @@ with col2:
 
             st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-        # ===== ここからコピーアイコン用 JS =====
+        # コピーアイコン用 JS
         texts_json = json.dumps(copy_texts, ensure_ascii=False)
 
         st.components.v1.html(
@@ -1147,12 +1238,11 @@ with col2:
                   const idx = parseInt(icon.getAttribute('data-pattern'), 10);
                   if (!isNaN(idx) && texts[idx]) {{
                     icon.addEventListener('click', function() {{
-                      // 1) テキストをコピー
                       copyText(texts[idx]);
 
-                      // 2) クリック時にキラッとアニメーション
+                      // クリック時にキラッとアニメーション
                       icon.classList.remove('copy-flash');
-                      void icon.offsetWidth; // reflow でアニメーションをリセット
+                      void icon.offsetWidth;
                       icon.classList.add('copy-flash');
                     }});
                   }}
