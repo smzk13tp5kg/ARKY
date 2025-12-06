@@ -36,7 +36,7 @@ def get_seasonal_greeting() -> str:
     return greetings.get(month, "")
 
 # ============================================
-# メール生成関数
+# メール生成関数（従来ロジック）
 # ============================================
 def generate_email(template, tone, recipient, message, variation=0, seasonal_text: str | None = None):
     subject_variations = {
@@ -195,409 +195,13 @@ st.set_page_config(
 )
 
 # ============================================
-# カスタムCSS
+# カスタムCSS（あなたのコードをそのまま利用）
 # ============================================
 st.markdown(
     """
 <style>
 * { box-sizing: border-box; }
-
-/* 全体背景：濃い紺色 + ARKY背景画像 */
-.stApp {
-    background-color: #050b23;
-    position: relative;
-}
-.stApp::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 450px;
-    right: 0;
-    height: 100%;
-    background-image: url('https://raw.githubusercontent.com/smzk13tp5kg/ARKY/main/ARKY%20background%20image.png');
-    background-size: cover;
-    background-position: center center;
-    background-repeat: no-repeat;
-    opacity: 0.4;
-    z-index: 0;
-    pointer-events: none;
-}
-[data-testid="stAppViewContainer"] {
-    background-color: transparent;
-    position: relative;
-    z-index: 1;
-}
-[data-testid="stHeader"] {
-    background-color: rgba(5, 11, 35, 0.95);
-    backdrop-filter: blur(10px);
-}
-body { background-color: #050b23; }
-
-/* メインエリア調整 */
-main.block-container {
-    padding-top: 0rem;  /* ← タイトル上のパディング 0 */
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    max-width: 100% !important;
-}
-
-/* カラムレイアウト */
-[data-testid="column"] {
-    padding: 0 !important;
-    width: 100% !important;
-    min-width: 0 !important;
-}
-div[data-testid="stHorizontalBlock"] {
-    gap: 0.5rem !important;
-    width: 100% !important;
-}
-[data-testid="stVerticalBlock"] > div {
-    max-width: 100% !important;
-}
-
-/* -------------------------------------------
-   サイドバー
-------------------------------------------- */
-[data-testid="stSidebar"] {
-    width: 450px !important;
-    min-width: 450px !important;
-    max-width: 450px !important;
-    background: #050b23;
-    border-right: 1px solid #cfae63;
-}
-[data-testid="stSidebar"] * {
-    color: #ffffff !important;
-}
-
-/* サイドバー開閉ボタンのアイコン色 */
-button[title="Open sidebar"] svg,
-button[title="Close sidebar"] svg {
-    fill: #ffffff !important;
-    color: #ffffff !important;
-}
-
-/* サイドバー上部ヘッダー縮小 */
-[data-testid="stSidebarHeader"] {
-    min-height: 0 !important;
-    height: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-}
-[data-testid="stSidebarContent"] {
-    padding-top: 7px !important;
-}
-
-/* -------------------------------------------
-   すべてのボタン：3D フリップスタイル
-------------------------------------------- */
-.stButton,
-.stFormSubmitButton {
-  perspective: 1000px;
-  display: inline-block;
-  width: 100%;
-}
-
-.stButton > button,
-.stFormSubmitButton > button {
-  position: relative;
-  width: 100%;
-  height: 50px;
-  font-size: 1.0rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  transform-style: preserve-3d;
-  transform: translateZ(-25px);
-  transition: transform 0.25s;
-  color: transparent !important;
-}
-
-.stButton > button::before,
-.stButton > button::after,
-.stFormSubmitButton > button::before,
-.stFormSubmitButton > button::after {
-  position: absolute;
-  width: 100%;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 5px solid #000;
-  box-sizing: border-box;
-  border-radius: 8px;
-  left: 0;
-  top: 0;
-}
-
-/* 前面（オレンジ背景×白文字） */
-.stButton > button::before,
-.stFormSubmitButton > button::before {
-  content: attr(data-text);
-  background-color: #ff8c00;
-  color: #ffffff;
-  border-color: #ff8c00;
-  transform: rotateY(0deg) translateZ(25px);
-}
-
-/* 背面（黄色背景×白文字） */
-.stButton > button::after,
-.stFormSubmitButton > button::after {
-  content: attr(data-text);
-  background-color: #ffd700;
-  color: #ffffff;
-  border-color: #ffd700;
-  transform: rotateX(90deg) translateZ(25px);
-}
-
-/* ホバー時：X軸90度回転でフリップ */
-.stButton > button:hover,
-.stFormSubmitButton > button:hover {
-  transform: translateZ(-25px) rotateX(-90deg);
-}
-
-/* ボタン内部のdiv（テキスト） */
-.stButton > button > div,
-.stFormSubmitButton > button > div {
-  position: relative;
-  z-index: 10;
-  color: #ffffff !important;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-/* -------------------------------------------
-   メインエリア：ヘッダー・見出し
-------------------------------------------- */
-.top-bar {
-    background: #050b23;
-    padding: 0px 8px 8px 8px;  /* ← タイトル上 padding 0 */
-    border-bottom: 1px solid #cfae63;
-    margin-bottom: 20px;
-}
-.app-title {
-    font-size: 24px;
-    font-weight: 700;
-    color: #ffffff !important;
-}
-.section-header {
-    font-size: 16px;
-    font-weight: 700;
-    color: #ffd666;
-    margin: 8px 0;
-}
-
-/* プレビュー見出し＋コピーアイコン */
-.preview-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-.preview-copy-icon {
-    cursor: pointer;
-    font-size: 18px;
-    margin-left: 8px;
-}
-
-/* タイトル直下のメッセージエリア */
-.intro-wrapper {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 0px;
-}
-.intro-icon {
-    width: 120px;
-    height: 120px;
-    flex-shrink: 0;
-}
-.intro-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-/* グラデ枠＋グラデ文字の AI バブル */
-.intro-bubble {
-    position: relative;
-    padding: 0;
-    border-radius: 16px;
-    background: transparent;
-    overflow: visible;
-}
-.intro-bubble::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 16px;
-    padding: 4px;
-    background: linear-gradient(120deg, #6559ae, #ff7159, #6559ae);
-    background-size: 400% 400%;
-    animation: intro-gradient 3s ease-in-out infinite;
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-            mask-composite: exclude;
-}
-.intro-bubble-text {
-    position: relative;
-    display: block;
-    padding: 10px 18px;
-    border-radius: 12px;
-    background: rgba(5, 11, 35, 0.85);
-    background-image: linear-gradient(120deg, #fdfbff, #ffd7b2, #ffe6ff);
-    background-size: 400% 400%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 1.6;
-    animation: intro-gradient 3s ease-in-out infinite;
-}
-@keyframes intro-gradient {
-    0%   { background-position: 14% 0%; }
-    50%  { background-position: 87% 100%; }
-    100% { background-position: 14% 0%; }
-}
-
-/* 右：プレビューカード */
-.preview-main-wrapper {
-    background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
-    padding: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    min-height: 350px; 
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column; 
-    overflow: hidden;
-}
-.preview-subject {
-    color: #111827; 
-    font-size: 14px; 
-    margin-bottom: 16px;
-    font-weight: bold;
-}
-.preview-body {
-    background: #f3f4f6;
-    border-radius: 8px;
-    border: 1px solid #d1d5db;
-    color: #111827;
-    font-size: 14px;
-    padding: 12px;
-    flex-grow: 1;
-    min-height: 200px;
-    overflow-y: auto;
-    word-break: break-word; 
-    white-space: pre-wrap;
-}
-.advice-box {
-    background: #fffbe6;
-    border: 1px solid #ffd666;
-    border-radius: 8px;
-    padding: 10px;
-    color: #4b5563;
-    font-size: 13px;
-    margin-top: 12px;
-}
-.copy-info {
-    color: #ffffff;
-    font-size: 13px;
-    margin-bottom: 4px;
-}
-
-/* チャットバブル */
-.chat-log {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    max-height: 420px;
-    overflow-y: auto;
-    padding-right: 8px;
-}
-.chat-bubble {
-    border-radius: 12px;
-    padding: 8px 12px;
-    max-width: 100%;
-    font-size: 14px;
-    line-height: 1.5;
-    word-break: break-word;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-}
-.chat-bubble.user {
-    position: relative;
-    background: #ffffff;
-    color: #111827;
-    margin-left: auto;
-    max-width: 80%;
-}
-.chat-bubble.user::after {
-    content: "";
-    position: absolute;
-    right: -8px;
-    top: 14px;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 8px 0 8px 8px;
-    border-color: transparent透明透明 #ffffff;
-    filter: drop-shadow(-1px 1px 2px rgba(0,0,0,0.15));
-}
-.chat-bubble.assistant {
-    position: relative;
-    padding: 0;
-    border-radius: 16px;
-    background: transparent;
-    overflow: visible;
-    margin-right: auto;
-    max-width: 85%;
-}
-.chat-bubble.assistant::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 16px;
-    padding: 4px;
-    background: linear-gradient(120deg, #6559ae, #ff7159, #6559ae);
-    background-size: 400% 400%;
-    animation: intro-gradient 3s ease-in-out infinite;
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-            mask-composite: exclude;
-}
-.chat-bubble.assistant > span {
-    position: relative;
-    display: block;
-    padding: 10px 18px;
-    border-radius: 12px;
-    background: rgba(5, 11, 35, 0.85);
-    background-image: linear-gradient(120deg, #fdfbff, #ffd7b2, #ffe6ff);
-    background-size: 400% 400%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 1.6;
-    animation: intro-gradient 3s ease-in-out infinite;
-}
-
-/* サイドバーのラジオボタンの余白を詰める */
-[data-testid="stSidebar"] .stRadio > div {
-    margin-top: 2px !important;
-    margin-bottom: 2px !important;
-    padding: 0 !important;
-}
-[data-testid="stSidebar"] .nav-label {
-    margin-bottom: 4px !important;
-}
-
+/* ……（ここはあなたのCSSそのままなので省略せず貼ってOK） …… */
 </style>
 """,
     unsafe_allow_html=True,
@@ -633,10 +237,10 @@ st.components.v1.html(
 # ============================================
 if "messages" not in st.session_state:
     st.session_state.messages = []
-if "generated_email" not in st.session_state:
-    st.session_state.generated_email = None
-if "variation_count" not in st.session_state:
-    st.session_state.variation_count = 0
+if "last_user_message" not in st.session_state:
+    st.session_state.last_user_message = ""
+if "pattern_variations" not in st.session_state:
+    st.session_state.pattern_variations = [0, 0, 0]  # 3パターン分
 if "ai_suggestions" not in st.session_state:
     st.session_state.ai_suggestions = None
 
@@ -649,7 +253,7 @@ st.markdown(
 )
 
 # ============================================
-# サイドバー（新規作成ボタンは削除）
+# サイドバー
 # ============================================
 with st.sidebar:
     st.markdown(
@@ -777,7 +381,7 @@ with st.sidebar:
 col1, col2 = st.columns([3, 2], gap="medium")
 
 # --------------------------------------------
-# 左：メッセージ＋フォーム
+# 左：メッセージ＋フォーム＋チャットログ
 # --------------------------------------------
 with col1:
     st.markdown("<div class='section-header'>💬 メッセージ</div>", unsafe_allow_html=True)
@@ -803,7 +407,6 @@ with col1:
 
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-    # フォーム
     with st.form("message_form", clear_on_submit=True):
         user_message = st.text_area(
             "メッセージを入力",
@@ -819,24 +422,26 @@ with col1:
             elif recipient == "その他" and not custom_recipient:
                 st.error("⚠️ カスタム相手を入力してください")
             else:
-                # チャットログにユーザー入力を追加
-                st.session_state.messages.append({"role": "user", "content": user_message})
+                # ベースメッセージを保存
+                st.session_state.last_user_message = user_message
+                # 各パターンの variation 初期化
+                st.session_state.pattern_variations = [0, 1, 2]
 
-                # プレビュー用メール生成（従来ロジック）
-                st.session_state.variation_count = 0
-                email_obj = generate_email(
-                    template, tone, recipient, user_message, variation=0, seasonal_text=seasonal_text
+                # チャットログに選択内容付きで記録
+                user_display_text = (
+                    f"{user_message}\n\n"
+                    f"――――――――――\n"
+                    f"テンプレート: {template} / トーン: {tone} / 相手: {recipient}"
                 )
-                st.session_state.generated_email = email_obj
+                st.session_state.messages.append({"role": "user", "content": user_display_text})
 
-                # ガイドメッセージ
-                response = (
+                guide = (
                     f"{template}メールを「{tone}」なトーンで、"
-                    f"{recipient}宛に作成しました！右側のプレビューをご覧ください。"
+                    f"{recipient}宛に3パターン生成しました！右側のプレビューをご覧ください。"
                 )
-                st.session_state.messages.append({"role": "assistant", "content": response})
+                st.session_state.messages.append({"role": "assistant", "content": guide})
 
-                # OpenAI案（3パターン）生成
+                # OpenAI案（3パターン解説）を生成
                 st.session_state.ai_suggestions = generate_email_with_openai(
                     template=template,
                     tone=tone,
@@ -845,17 +450,25 @@ with col1:
                     seasonal_text=seasonal_text,
                 )
 
-                # DB保存（db_logic.py に save_email_record がある場合）
+                # DB保存（あれば）
                 if HAS_DB:
                     try:
+                        base_email = generate_email(
+                            template,
+                            tone,
+                            recipient,
+                            user_message,
+                            variation=0,
+                            seasonal_text=seasonal_text,
+                        )
                         save_email_record(
                             template=template,
                             tone=tone,
                             recipient=recipient,
                             seasonal_text=seasonal_text or "",
                             user_message=user_message,
-                            subject=email_obj["subject"],
-                            body=email_obj["body"],
+                            subject=base_email["subject"],
+                            body=base_email["body"],
                             ai_suggestions=st.session_state.ai_suggestions,
                         )
                     except Exception as e:
@@ -869,7 +482,7 @@ with col1:
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-    # チャットログ
+    # チャットログ表示
     chat_html_parts = ["<div class='chat-log'>"]
     for msg in st.session_state.messages:
         role = msg["role"]
@@ -882,166 +495,115 @@ with col1:
     st.markdown("\n".join(chat_html_parts), unsafe_allow_html=True)
 
 # --------------------------------------------
-# 右：プレビュー
+# 右：プレビュー（3パターン）
 # --------------------------------------------
 with col2:
-    # 見出し＋コピーアイコン
     st.markdown(
-        """
-        <div class="section-header preview-header">
-          <span>📄 プレビュー</span>
-          <span class="preview-copy-icon" title="プレビューをコピー">📋</span>
-        </div>
-        """,
+        "<div class='section-header'>📄 プレビュー（3パターン）</div>",
         unsafe_allow_html=True,
     )
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-    if st.session_state.generated_email is None:
+    if not st.session_state.last_user_message:
         placeholder_html = textwrap.dedent(
             """
             <div class="preview-main-wrapper">
-                <p><em>メールを生成すると、ここにプレビューが表示されます。</em></p>
+                <p><em>メールを生成すると、ここに3パターンのプレビューが表示されます。</em></p>
             </div>
             """
         )
         st.markdown(placeholder_html, unsafe_allow_html=True)
     else:
-        email = st.session_state.generated_email
-        body_html = html.escape(email["body"]).replace("\n", "<br>")
-        subject_html = html.escape(email["subject"])
+        # 3パターン分ループ
+        for idx in range(3):
+            variation = st.session_state.pattern_variations[idx]
+            email = generate_email(
+                template,
+                tone,
+                recipient,
+                st.session_state.last_user_message,
+                variation=variation,
+                seasonal_text=seasonal_text,
+            )
 
-        preview_html = textwrap.dedent(
-            f"""
-            <div class="preview-main-wrapper">
-                <p class="preview-label"><strong>件名</strong></p>
-                <p class="preview-subject">{subject_html}</p>
-                <hr>
-                <p class="preview-label"><strong>本文</strong></p>
-                <p class="preview-body">{body_html}</p>
-            </div>
-            """
-        )
-        st.markdown(preview_html, unsafe_allow_html=True)
+            st.markdown(
+                f"<div class='section-header'>◆ パターン {idx+1}</div>",
+                unsafe_allow_html=True,
+            )
 
-        # プレビュー全文をコピーするためのJS（アイコン用）
-        full_text = f"件名: {email['subject']}\n\n{email['body']}"
-        escaped_full_text = json.dumps(full_text)
+            body_html = html.escape(email["body"]).replace("\n", "<br>")
+            subject_html = html.escape(email["subject"])
 
-        st.components.v1.html(
-            f"""
-            <script>
-            (function() {{
-              function setupPreviewCopy() {{
-                const icon = parent.document.querySelector('.preview-copy-icon');
-                if (!icon) return;
-                icon.onclick = function() {{
-                  const text = {escaped_full_text};
-                  copyText(text);
-                }};
-              }}
-              function copyText(text) {{
-                if (navigator.clipboard && navigator.clipboard.writeText) {{
-                  navigator.clipboard.writeText(text).catch(function(err) {{
-                    console.warn("navigator.clipboard failed:", err);
-                    fallbackCopy(text);
-                  }});
-                }} else {{
-                  fallbackCopy(text);
-                }}
-              }}
-              function fallbackCopy(text) {{
-                try {{
-                  const textarea = document.createElement('textarea');
-                  textarea.value = text;
-                  textarea.style.position = 'fixed';
-                  textarea.style.left = '-9999px';
-                  document.body.appendChild(textarea);
-                  textarea.focus();
-                  textarea.select();
-                  document.execCommand('copy');
-                  document.body.removeChild(textarea);
-                }} catch (e) {{
-                  console.error("Fallback copy.failed:", e);
-                }}
-              }}
-              setTimeout(setupPreviewCopy, 500);
-            }})();
-            </script>
-            """,
-            height=0,
-        )
+            preview_html = textwrap.dedent(
+                f"""
+                <div class="preview-main-wrapper">
+                    <p class="preview-label"><strong>件名</strong></p>
+                    <p class="preview-subject">{subject_html}</p>
+                    <hr>
+                    <p class="preview-label"><strong>本文</strong></p>
+                    <p class="preview-body">{body_html}</p>
+                </div>
+                """
+            )
+            st.markdown(preview_html, unsafe_allow_html=True)
 
-        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+            # コピー用テキスト
+            full_text = f"件名: {email['subject']}\n\n{email['body']}"
+            escaped_full_text = json.dumps(full_text)
 
-        advice_html = textwrap.dedent(
-            f"""
-            <div class="advice-box">
-                <strong>💡 アドバイス</strong><br>
-                {email['advice']}
-            </div>
-            """
-        )
-        st.markdown(advice_html, unsafe_allow_html=True)
+            btn_col1, btn_col2, btn_col3 = st.columns(3)
 
-        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+            # 📋 コピー
+            with btn_col1:
+                if st.button("📋 コピー", key=f"copy_{idx}", use_container_width=True):
+                    st.components.v1.html(
+                        f"""
+                        <script>
+                        (function() {{
+                          const text = {escaped_full_text};
+                          function copyText(t) {{
+                              if (navigator.clipboard && navigator.clipboard.writeText) {{
+                                  navigator.clipboard.writeText(t).catch(function(err) {{
+                                      console.warn("navigator.clipboard failed:", err);
+                                  }});
+                              }} else {{
+                                  const textarea = document.createElement('textarea');
+                                  textarea.value = t;
+                                  textarea.style.position = 'fixed';
+                                  textarea.style.left = '-9999px';
+                                  document.body.appendChild(textarea);
+                                  textarea.focus();
+                                  textarea.select();
+                                  document.execCommand('copy');
+                                  document.body.removeChild(textarea);
+                              }}
+                          }}
+                          copyText(text);
+                        }})();
+                        </script>
+                        """,
+                        height=0,
+                    )
+                    st.success(f"パターン{idx+1}をコピーしました")
 
-        # ★ OpenAI案（3パターン）の表示
+            # 🔄 リセット（全体リセット）
+            with btn_col2:
+                if st.button("リセット", key=f"reset_{idx}", use_container_width=True):
+                    st.session_state.messages = []
+                    st.session_state.last_user_message = ""
+                    st.session_state.pattern_variations = [0, 0, 0]
+                    st.session_state.ai_suggestions = None
+                    st.rerun()
+
+            # 🎲 表現を変える（このパターンだけ）
+            with btn_col3:
+                if st.button("🔄 表現を変える", key=f"regen_{idx}", use_container_width=True):
+                    st.session_state.pattern_variations[idx] += 1
+                    st.rerun()
+
+            st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+
+        # ↓ OpenAI案（3パターン解説）は、カードの下にまとめて表示
         if st.session_state.ai_suggestions:
-            st.markdown("### 🤖 OpenAI案（3パターン）")
+            st.markdown("### 🤖 OpenAI案（3パターン解説）")
             st.markdown(st.session_state.ai_suggestions)
-
-        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-
-        btn_col1, btn_col2 = st.columns(2)
-
-        # ---------- リセット ボタン ----------
-        with btn_col1:
-            if st.button("リセット", use_container_width=True):
-                st.session_state.messages = []
-                st.session_state.generated_email = None
-                st.session_state.variation_count = 0
-                st.session_state.ai_suggestions = None
-                st.rerun()
-
-        # ---------- 再生成 ボタン ----------
-        with btn_col2:
-            if st.button("🔄 表現を変える", use_container_width=True):
-                st.session_state.messages.append(
-                    {"role": "assistant", "content": "メール文面を再作成しています..."}
-                )
-
-                last_user_message = None
-                for msg in reversed(st.session_state.messages):
-                    if msg["role"] == "user":
-                        last_user_message = msg["content"]
-                        break
-
-                if last_user_message:
-                    st.session_state.variation_count += 1
-                    st.session_state.generated_email = generate_email(
-                        template,
-                        tone,
-                        recipient,
-                        last_user_message,
-                        variation=st.session_state.variation_count,
-                        seasonal_text=seasonal_text,
-                    )
-                    # 必要なら OpenAI案も再生成
-                    st.session_state.ai_suggestions = generate_email_with_openai(
-                        template=template,
-                        tone=tone,
-                        recipient=recipient,
-                        message=last_user_message,
-                        seasonal_text=seasonal_text,
-                    )
-                    st.session_state.messages.append(
-                        {
-                            "role": "assistant",
-                            "content": (
-                                f"新しいバージョン（バリエーション "
-                                f"{st.session_state.variation_count + 1}）を生成しました！プレビューをご確認ください。"
-                            ),
-                        }
-                    )
-                st.rerun()
