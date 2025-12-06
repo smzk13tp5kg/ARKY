@@ -23,6 +23,9 @@ if SUPABASE_URL and SUPABASE_KEY:
 else:
     supabase = None
 
+# このモジュールで使うテーブル名（DDL に合わせる）
+TABLE_NAME = "test_arky_patterns"
+
 
 def _assert_client():
     """Supabaseクライアントが無い場合は例外を投げる。"""
@@ -68,24 +71,27 @@ def save_email_batch(
     message: str,
     seasonal_greeting: bool,
     patterns: List[Dict[str, str]],
-    table_name: str = "test_arky_patterns",
+    table_name: str = TABLE_NAME,
 ) -> None:
     """
     App 側から渡された 3パターン分の subject/body を
     Supabase の test_arky_patterns テーブルに「3レコード」として保存する。
 
-    前提テーブル構成（例）:
-      - id : bigint, PK (identity)
-      - generatedid : bigint  … 同一入力で共通のグループID
-      - pattern_no : int      … 1,2,3
-      - template : text
-      - tone : text
-      - recipient : text
-      - message : text        … ユーザーの元入力
-      - seasonal_greeting : boolean
-      - subject : text
-      - body : text
-      - created_at : timestamptz (default now())
+    対応テーブル構成（DDL）:
+      create table public.test_arky_patterns (
+        id                bigserial primary key,
+        generatedid       bigint      not null,    -- 同一入力で共通のグループID
+        pattern_index     integer     not null,    -- 1,2,3
+        template          text        null,
+        tone              text        null,
+        recipient         text        null,
+        seasonal_greeting boolean     null,
+        user_message      text        null,        -- ユーザーの元入力
+        subject           text        null,
+        body              text        null,
+        created_at        timestamptz not null default now(),
+        constraint chk_pattern_index check (pattern_index >= 1 and pattern_index <= 3)
+      );
 
     patterns: [
       {"subject": "...", "body": "..."},
@@ -107,23 +113,20 @@ def save_email_batch(
     # グループ共通の generatedid を採番
     generatedid = _get_next_generatedid(table_name)
 
-    # created_at はアプリ側で明示的に入れても良いし、テーブル側 default now() でも OK
-    now_iso = datetime.now(timezone.utc).isoformat()
-
+    # created_at はテーブル側の default now() に任せるので明示指定しない
     rows = []
     for idx, p in enumerate(patterns, start=1):
         rows.append(
             {
                 "generatedid": generatedid,
-                "pattern_no": idx,  # 1, 2, 3
+                "pattern_index": idx,          # DDL に合わせて pattern_index
                 "template": template,
                 "tone": tone,
                 "recipient": recipient,
-                "message": message,
                 "seasonal_greeting": seasonal_greeting,
+                "user_message": message,       # DDL に合わせて user_message
                 "subject": p.get("subject", "") or "",
                 "body": p.get("body", "") or "",
-                "created_at": now_iso,  # テーブル側で default now() を使うなら省略可
             }
         )
 
@@ -135,4 +138,3 @@ def save_email_batch(
     except Exception as e:
         # App 側で st.error に出したいので、そのまま投げる
         raise RuntimeError(f"Supabase 挿入エラー: {e}")
-
