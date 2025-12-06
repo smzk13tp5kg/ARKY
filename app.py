@@ -431,10 +431,37 @@ main.block-container {
     align-items: center;
     justify-content: space-between;
 }
-.preview-copy-icon {
+
+/* コピーアイコン（パターン用）の基本スタイル強化 */
+.pattern-copy-icon {
     cursor: pointer;
     font-size: 18px;
     margin-left: 8px;
+    transition: transform 0.15s ease-out, text-shadow 0.15s ease-out;
+}
+
+/* クリック時のキラッとエフェクト */
+.pattern-copy-icon.copy-flash {
+    animation: copy-flash 0.5s ease-out;
+}
+
+/* エフェクトの中身 */
+@keyframes copy-flash {
+    0% {
+        transform: scale(1);
+        text-shadow: none;
+        color: #ffffff;
+    }
+    30% {
+        transform: scale(1.4);
+        text-shadow: 0 0 12px #ffd666;
+        color: #ffd666;
+    }
+    100% {
+        transform: scale(1);
+        text-shadow: none;
+        color: #ffffff;
+    }
 }
 
 /* タイトル直下のメッセージエリア */
@@ -1013,62 +1040,65 @@ with col2:
             st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
         # 2) 右上のコピーアイコンに JS で挙動を付ける
-        texts_json = json.dumps(copy_texts, ensure_ascii=False)
+texts_json = json.dumps(copy_texts, ensure_ascii=False)
 
-        st.components.v1.html(
-            f"""
-            <script>
-            (function() {{
-              const texts = {texts_json};
+st.components.v1.html(
+    f"""
+    <script>
+    (function() {{
+      const texts = {texts_json};
 
-              function setupIcons() {{
-                // アプリ本体の DOM は親フレーム側なので parent.document を見る
-                const icons = parent.document.querySelectorAll('.pattern-copy-icon');
-                if (!icons || icons.length === 0) return;
+      function setupIcons() {{
+        const icons = parent.document.querySelectorAll('.pattern-copy-icon');
+        if (!icons || icons.length === 0) return;
 
-                function copyText(text) {{
-                  // まずは navigator.clipboard を試す
-                  if (navigator.clipboard && navigator.clipboard.writeText) {{
-                    navigator.clipboard.writeText(text).catch(function(err) {{
-                      console.warn("navigator.clipboard failed:", err);
-                      fallbackCopy(text);
-                    }});
-                  }} else {{
-                    fallbackCopy(text);
-                  }}
-                }}
+        function copyText(text) {{
+          if (navigator.clipboard && navigator.clipboard.writeText) {{
+            navigator.clipboard.writeText(text).catch(function(err) {{
+              console.warn("navigator.clipboard failed:", err);
+              fallbackCopy(text);
+            }});
+          }} else {{
+            fallbackCopy(text);
+          }}
+        }}
 
-                function fallbackCopy(text) {{
-                  try {{
-                    const textarea = document.createElement('textarea');
-                    textarea.value = text;
-                    textarea.style.position = 'fixed';
-                    textarea.style.top = '-9999px';
-                    textarea.style.left = '-9999px';
-                    document.body.appendChild(textarea);
-                    textarea.focus();
-                    textarea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textarea);
-                  }} catch (e) {{
-                    console.error("Fallback copy failed:", e);
-                  }}
-                }}
+        function fallbackCopy(text) {{
+          try {{
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.top = '-9999px';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+          }} catch (e) {{
+            console.error("Fallback copy failed:", e);
+          }}
+        }}
 
-                icons.forEach(function(icon) {{
-                  const idx = parseInt(icon.getAttribute('data-pattern'), 10);
-                  if (!isNaN(idx) && texts[idx]) {{
-                    icon.addEventListener('click', function() {{
-                      copyText(texts[idx]);
-                    }});
-                  }}
-                }});
-              }}
+        icons.forEach(function(icon) {{
+          const idx = parseInt(icon.getAttribute('data-pattern'), 10);
+          if (!isNaN(idx) && texts[idx]) {{
+            icon.addEventListener('click', function() {{
+              // 1) テキストをコピー
+              copyText(texts[idx]);
 
-              // DOM の描画完了を少し待ってからフックする
-              setTimeout(setupIcons, 500);
-            }})();
-            </script>
-            """,
-            height=0,
-        )
+              // 2) いったんクラスを外してから付け直し → アニメーションを再生
+              icon.classList.remove('copy-flash');
+              void icon.offsetWidth; // reflow を発生させてアニメーションをリセット
+              icon.classList.add('copy-flash');
+            }});
+          }}
+        }});
+      }}
+
+      setTimeout(setupIcons, 500);
+    }})();
+    </script>
+    """,
+    height=0,
+)
