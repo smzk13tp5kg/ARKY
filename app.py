@@ -1301,8 +1301,8 @@ with col2:
               </div>
               <div style="margin-top:8px;">
                 <p style="font-size:14px; color:#4b5563; margin:0;">
-                  メッセージを生成する準備ができています。<br>
-                  左側で内容を入力し、「送信」ボタンをクリックしてください。
+                  メッセージを生成しています・・・<br>
+                  数秒お待ちください。
                 </p>
               </div>
             </div>
@@ -1433,3 +1433,4 @@ with col2:
             """,
             height=0,
         )
+
