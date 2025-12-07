@@ -825,6 +825,18 @@ main.block-container {
     border-radius: 8px !important;
 }
 
+/* 右ペインの Streamlit 標準ヘッダーを高さ0にする（非表示に近い） */
+[data-testid="stHeader"] {
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    background: transparent !important; /* 白帯を消す */
+    border: none !important;
+}
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -1331,6 +1343,7 @@ with col2:
             """,
             height=0,
         )
+
 
 
 
