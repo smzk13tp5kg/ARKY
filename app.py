@@ -1126,7 +1126,7 @@ with col1:
             label_visibility="collapsed",
         )
 
-        submit_col, reset_col = st.columns([3, 1])
+        submit_col, reset_col = st.columns([1, 1])
         with submit_col:
             submitted = st.form_submit_button("✓ 送信", use_container_width=True)
         with reset_col:
@@ -1386,3 +1386,4 @@ with col2:
             """,
             height=0,
         )
+
