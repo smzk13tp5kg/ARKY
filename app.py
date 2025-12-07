@@ -1347,12 +1347,12 @@ with col2:
                 improve = html.escape(parsed["improve"] or "").replace("\n", "<br>")
                 caution = html.escape(parsed["caution"] or "").replace("\n", "<br>")
 
-                # カード本体（ヘッダー右はボタンで埋めるので空にしておく）
+                # カード本体（ヘッダー右はスロットだけ用意しておく）
                 card_html = f"""
                 <div class="preview-main-wrapper">
                   <div class="preview-header">
                     <span></span>
-                    <span></span>
+                    <span id="copy-slot-{idx}"></span>
                   </div>
 
                   <div style="margin-top:4px;">
@@ -1365,7 +1365,7 @@ with col2:
                     <div class="preview-body">{body}</div>
                   </div>
 
-                  <div style="marginトップ:12px;">
+                  <div style="margin-top:12px;">
                     <div class="preview-section-label">改善点</div>
                     <div class="preview-note-body">{improve}</div>
                   </div>
@@ -1378,11 +1378,13 @@ with col2:
                 """
                 st.markdown(card_html, unsafe_allow_html=True)
 
-                # ★ コピー用ボタン（Pythonでクリックを検知する）
+                # ▼ ボタンをラップする div にIDを振る（後でヘッダー右に移動させる）
+                st.markdown(f'<div id="copy-btn-wrap-{idx}">', unsafe_allow_html=True)
                 copy_clicked = st.button(
-                    "📋 テキストコピー",     # 元のラベルを再利用
+                    "📋 テキストコピー",   # 元のラベル
                     key=f"copy_button_{idx}",
                 )
+                st.markdown("</div>", unsafe_allow_html=True)
 
                 if copy_clicked:
                     # Supabase にコピークリックを記録
@@ -1402,7 +1404,41 @@ with col2:
 
                 st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-        # ★ コピー対象テキストがあれば、JSでクリップボードにコピーする
+        # ▼ ここから：ボタンをカード右上に移動させ、見た目を元のアイコン＋キラキラにするJS
+        st.components.v1.html(
+            """
+            <script>
+            (function() {
+              const wraps = parent.document.querySelectorAll('[id^="copy-btn-wrap-"]');
+              wraps.forEach(wrap => {
+                const id = wrap.id.replace("copy-btn-wrap-", "");
+                const slot = parent.document.getElementById("copy-slot-" + id);
+                if (!slot) return;
+
+                // wrapごとヘッダー右側のスロットに移動
+                slot.appendChild(wrap);
+
+                const btn = wrap.querySelector('button');
+                if (!btn) return;
+
+                // ボタンに元のアイコン用クラスを付与して見た目を復元
+                btn.classList.add('pattern-copy-icon');
+
+                // ボタン内のテキストをそのまま使う（📋 テキストコピー）
+                // クリック時にキラキラエフェクト（copy-flash）を付ける
+                btn.addEventListener('click', function() {
+                  btn.classList.remove('copy-flash');
+                  void btn.offsetWidth;  // reflow
+                  btn.classList.add('copy-flash');
+                });
+              });
+            })();
+            </script>
+            """,
+            height=0,
+        )
+
+        # ▼ コピー対象テキストがあれば、JSでクリップボードにコピーする
         copy_target = st.session_state.get("copy_target_text", "")
 
         if copy_target:
