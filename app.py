@@ -317,11 +317,6 @@ st.markdown(
     z-index: 1;
 }
 
-/* Streamlit標準ヘッダーを丸ごと消す（＝開閉アイコンも消える） */
-[data-testid="stHeader"] {
-    display: none !important;
-}
-
 body { background-color: #050b23; }
 
 /* ツールバー消す */
@@ -370,13 +365,6 @@ div[data-testid="stHorizontalBlock"] {
 }
 [data-testid="stSidebar"] * {
     color: #ffffff !important;
-}
-
-/* -------------------------------------------
-   ヘッダー内のボタン（＝サイドバー開閉ボタン）を完全に非表示
-------------------------------------------- */
-[data-testid="stHeader"] button {
-    display: none !important;
 }
 
 /* サイドバー上部ヘッダー縮小 */
@@ -1318,52 +1306,3 @@ with col2:
             """,
             height=0,
         )
-
-# JS：サイドバー境界の「≪」トグルアイコンを強制的に消す
-st.components.v1.html(
-    """
-    <script>
-    (function() {
-      function hideSidebarToggle() {
-        const root = parent.document;
-        if (!root) return;
-
-        // テキストが「≪」または「≫」の要素をすべて探す
-        const candidates = Array.from(
-          root.querySelectorAll('button, div, span, a')
-        );
-
-        candidates
-          .filter(el => el.textContent && el.textContent.trim() === '≪')
-          .forEach(el => {
-            el.style.display = 'none';
-          });
-      }
-
-      // 初期実行
-      setTimeout(hideSidebarToggle, 500);
-
-      // レイアウト変化で再挿入されても消せるように監視
-      const observer = new MutationObserver(hideSidebarToggle);
-      observer.observe(parent.document.body, { childList: true, subtree: true });
-    })();
-    </script>
-    """,
-    height=0,
-)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
