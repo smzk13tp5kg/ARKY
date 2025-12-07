@@ -25,6 +25,7 @@ try:
 except ImportError:
     HAS_DB = False
 
+
 # ============================================
 # 時候の挨拶（ヘルパー）
 # ============================================
@@ -71,7 +72,7 @@ def parse_pattern_block(block: str) -> dict:
     # "本文:" 以降を切り出し
     pos_body_label = block.find("本文:")
     if pos_body_label != -1:
-        rest = block[pos_body_label + len("本文:"):]
+        rest = block[pos_body_label + len("本文:") :]
     else:
         rest = block
 
@@ -271,16 +272,6 @@ def generate_email(
 
 
 # ============================================
-# ページ設定
-# ============================================
-st.set_page_config(
-    page_title="ビジネスメール作成アシスタント",
-    page_icon="✉️",
-    layout="wide",
-)
-
-
-# ============================================
 # カスタムCSS
 # ============================================
 st.markdown(
@@ -368,7 +359,6 @@ div[data-testid="stHorizontalBlock"] {
 [data-testid="stSidebar"] [data-testid="collapsedControl"] {
     color: #cfae63 !important;
 }
-
 [data-testid="stSidebar"] [data-testid="collapsedControl"] svg {
     color: #cfae63 !important;
     fill: #cfae63 !important;
@@ -431,8 +421,8 @@ div[data-testid="stHorizontalBlock"] {
 }
 
 .stButton > button::before,
-.stButton > button::after,
 .stFormSubmitButton > button::before,
+.stButton > button::after,
 .stFormSubmitButton > button::after {
   position: absolute;
   width: 100%;
@@ -504,12 +494,10 @@ div[data-testid="stHorizontalBlock"] {
     margin: 8px 0;
 }
 
-/* メインブロック（stMainBlockContainer）の上パディングを強制的に6pxに変更 */
+/* メインブロック（stMainBlockContainer）の上パディング */
 div.stMainBlockContainer {
     padding-top: 6px !important;
 }
-
-/* Streamlit が付ける block-container（同一要素の場合）も一応抑えておく */
 main.block-container {
     padding-top: 6px !important;
 }
@@ -542,33 +530,55 @@ main.block-container {
     justify-content: space-between;
 }
 
-/* コピーアイコン（パターン用） */
+/* コピー用ボタン（パターン用） */
 .pattern-copy-icon {
     cursor: pointer;
-    font-size: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
     margin-left: 8px;
-    transition: transform 0.15s ease-out, text-shadow 0.15s ease-out;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 999px;
+    border: 1px solid #ffd666;
+    background: #111827;
+    color: #ffffff;
+    transition:
+        transform 0.15s ease-out,
+        box-shadow 0.15s ease-out,
+        background-color 0.15s ease-out,
+        border-color 0.15s ease-out;
+}
+.pattern-copy-icon:hover {
+    background: #1f2937;
+    border-color: #ffea99;
 }
 
 /* クリック時のキラッとエフェクト */
 .pattern-copy-icon.copy-flash {
     animation: copy-flash 0.5s ease-out;
 }
-
 @keyframes copy-flash {
     0% {
         transform: scale(1);
-        text-shadow: none;
+        box-shadow: none;
+        background-color: #111827;
+        border-color: #ffd666;
         color: #ffffff;
     }
     30% {
-        transform: scale(1.4);
-        text-shadow: 0 0 12px #ffd666;
-        color: #ffd666;
+        transform: scale(1.05);
+        box-shadow: 0 0 10px rgba(255, 214, 102, 0.8);
+        background-color: #ffd666;
+        border-color: #ffe9a3;
+        color: #111827;
     }
     100% {
         transform: scale(1);
-        text-shadow: none;
+        box-shadow: none;
+        background-color: #111827;
+        border-color: #ffd666;
         color: #ffffff;
     }
 }
@@ -810,16 +820,16 @@ main.block-container {
 
 /* 外側コンテナ：幅を30px狭める＆背景を消す */
 [data-testid="stSidebar"] [data-testid="stTextInput"] > div {
-    width: calc(100% - 30px) !important;  /* ← こっちを狭める */
+    width: calc(100% - 30px) !important;
     margin-left: 0 !important;
-    background: transparent !important;   /* 白い余白を消す */
+    background: transparent !important;
 }
 
 /* 実際の入力ボックス */
 [data-testid="stSidebar"] [data-testid="stTextInput"] input {
-    width: 100% !important;               /* コンテナ内でフル幅 */
-    background-color: #330033 !important; /* 背景色 */
-    border: 5px solid #ffffcc !important; /* 枠線 */
+    width: 100% !important;
+    background-color: #330033 !important;
+    border: 5px solid #ffffcc !important;
     color: #ffffff !important;
     padding: 6px 10px !important;
     border-radius: 8px !important;
@@ -833,7 +843,7 @@ main.block-container {
     padding: 0 !important;
     margin: 0 !important;
     overflow: hidden !important;
-    background: transparent !important; /* 白帯を消す */
+    background: transparent !important;
     border: none !important;
 }
 
@@ -841,79 +851,61 @@ main.block-container {
    プレビュータブの見た目カスタマイズ
    （パターン1〜3用）
 ============================================ */
-
-/* タブ全体の余白 少し下げるなら任意 */
 .stTabs {
     margin-top: 4px;
 }
-
-/* タブリストの並び調整 */
 .stTabs [role="tablist"] {
     gap: 0.5rem;
 }
-
-/* タブ本体のベーススタイル */
 .stTabs [role="tablist"] > [role="tab"] {
     position: relative;
     border: none;
     background: transparent;
     opacity: 1 !important;
-
     border-radius: 999px;
-    padding: 0;  /* 中身側でpaddingを取る */
-
+    padding: 0;
     color: #ffffff !important;
     font-weight: 600;
     font-size: 13px;
-
     cursor: pointer;
 }
-
-/* タブ内のテキストコンテナ */
 .stTabs [role="tablist"] > [role="tab"] > div {
     position: relative;
     border-radius: inherit;
     padding: 4px 16px;
 }
-
-/* ---- グラデーション枠（イントロバブル系） ---- */
+/* グラデ枠 */
 .stTabs [role="tablist"] > [role="tab"]::before {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: 999px;
-    padding: 2px;  /* 枠の太さ */
-
+    padding: 2px;
     background: linear-gradient(120deg, #6559ae, #ff7159, #ffd666, #ff7159, #6559ae);
     background-size: 400% 400%;
     animation: tab-gradient 4s ease-in-out infinite;
-
     -webkit-mask:
       linear-gradient(#000 0 0) content-box,
       linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
             mask-composite: exclude;
 }
-
-/* グラデーションの動き */
 @keyframes tab-gradient {
     0%   { background-position: 0% 0%;   box-shadow: 0 0 0px rgba(255,214,102,0.0); }
     50%  { background-position: 100% 100%; box-shadow: 0 0 10px rgba(255,214,102,0.4); }
     100% { background-position: 0% 0%;   box-shadow: 0 0 0px rgba(255,214,102,0.0); }
 }
-
-/* ---- パターン別の背景色 ---- */
+/* パターン別背景色 */
 .stTabs [role="tablist"] > [role="tab"]:nth-child(1) > div {
-    background-color: #990000;   /* パターン1 */
+    background-color: #990000;
 }
 .stTabs [role="tablist"] > [role="tab"]:nth-child(2) > div {
-    background-color: #660066;   /* パターン2 */
+    background-color: #660066;
 }
-.stTabs [role="tablist"] > [role="tab"]:nth-child(3) > [role="tab"]:nth-child(3) > div {
-    background-color: #336600;   /* パターン3 */
+.stTabs [role="tablist"] > [role="tab"]:nth-child(3) > div {
+    background-color: #336600;
 }
-
-/* 選択中タブだけ ほんの少し光らせる */
+/* 選択中タブの光り方 */
 .stTabs [role="tablist"] > [role="tab"][aria-selected="true"] > div {
     box-shadow: 0 0 8px rgba(255,214,102,0.6);
 }
@@ -948,7 +940,6 @@ st.components.v1.html(
     height=0,
 )
 
-
 # ============================================
 # セッション状態初期化
 # ============================================
@@ -963,7 +954,6 @@ if "variation_count" not in st.session_state:
 if "ai_suggestions" not in st.session_state:
     st.session_state.ai_suggestions = None
 
-
 # ============================================
 # トップバー
 # ============================================
@@ -971,7 +961,6 @@ st.markdown(
     "<div class='top-bar'><h1 class='app-title'>✉️ ビジネスメール作成アシスタント</h1></div>",
     unsafe_allow_html=True,
 )
-
 
 # ============================================
 # サイドバー
@@ -1096,12 +1085,10 @@ with st.sidebar:
 
     st.caption("© 2025 ARKY")
 
-
 # ============================================
 # メイン 2 カラム
 # ============================================
 col1, col2 = st.columns([1, 1], gap="medium")
-
 
 # --------------------------------------------
 # 左：メッセージ＋フォーム
@@ -1138,99 +1125,112 @@ with col1:
             height=120,
             label_visibility="collapsed",
         )
-        submitted = st.form_submit_button("✓ 送信")
 
-        if submitted and user_message:
-            if template == "その他" and not custom_template:
-                st.error("⚠️ カスタムテンプレートを入力してください")
-            elif recipient == "その他" and not custom_recipient:
-                st.error("⚠️ カスタム相手を入力してください")
-            else:
-                # ① ベースメッセージ保存
-                st.session_state.last_user_message = user_message
+        submit_col, reset_col = st.columns([3, 1])
+        with submit_col:
+            submitted = st.form_submit_button("✓ 送信", use_container_width=True)
+        with reset_col:
+            reset_clicked = st.form_submit_button("リセット", use_container_width=True)
 
-                # ② 従来ロジックでのベースメール（subject/body）も一応生成しておく
-                st.session_state.variation_count = 0
-                base_email = generate_email(
-                    template,
-                    tone,
-                    recipient,
-                    user_message,
-                    variation=0,
-                    seasonal_text=seasonal_text,
-                )
-                st.session_state.generated_email = base_email
+    # フォーム送信後の処理
+    if submitted and user_message:
+        if template == "その他" and not custom_template:
+            st.error("⚠️ カスタムテンプレートを入力してください")
+        elif recipient == "その他" and not custom_recipient:
+            st.error("⚠️ カスタム相手を入力してください")
+        else:
+            # ① ベースメッセージ保存
+            st.session_state.last_user_message = user_message
 
-                # ③ チャットログ（選択内容付き）
-                user_display_text = (
-                    f"{user_message}\n\n"
-                    f"――――――――――\n"
-                    f"テンプレート: {template} / トーン: {tone} / 相手: {recipient}"
-                )
-                st.session_state.messages.append(
-                    {"role": "user", "content": user_display_text}
-                )
+            # ② 従来ロジックでのベースメール（subject/body）も一応生成
+            st.session_state.variation_count = 0
+            base_email = generate_email(
+                template,
+                tone,
+                recipient,
+                user_message,
+                variation=0,
+                seasonal_text=seasonal_text,
+            )
+            st.session_state.generated_email = base_email
 
-                guide = (
-                    f"{template}メールを「{tone}」なトーンで、"
-                    f"{recipient}宛に作成しました！右側のプレビューをご覧ください。"
-                )
-                st.session_state.messages.append(
-                    {"role": "assistant", "content": guide}
-                )
+            # ③ チャットログ（選択内容付き）
+            user_display_text = (
+                f"{user_message}\n\n"
+                f"――――――――――\n"
+                f"テンプレート: {template} / トーン: {tone} / 相手: {recipient}"
+            )
+            st.session_state.messages.append(
+                {"role": "user", "content": user_display_text}
+            )
 
-                # ④ OpenAI案（3パターン分 Markdown）を生成して保持
-                ai_text = generate_email_with_openai(
-                    template=template,
-                    tone=tone,
-                    recipient=recipient,
-                    message=user_message,
-                    seasonal_text=seasonal_text,
-                )
-                st.session_state.ai_suggestions = ai_text
+            guide = (
+                f"{template}メールを「{tone}」なトーンで、"
+                f"{recipient}宛に作成しました！右側のプレビューをご覧ください。"
+            )
+            st.session_state.messages.append(
+                {"role": "assistant", "content": guide}
+            )
 
-                # ⑤ DB保存（あれば）
-                if HAS_DB and ai_text:
-                    try:
-                        # 「## パターンN」で分割
-                        raw_blocks = re.split(
-                            r"(?=^##\s*パターン\s*\d+)", ai_text, flags=re.MULTILINE
-                        )
-                        blocks = [b.strip() for b in raw_blocks if b.strip()]
-                        blocks = blocks[:3]
-                        while len(blocks) < 3:
-                            blocks.append("このパターンはまだ生成されていません。")
+            # ④ OpenAI案（3パターン分 Markdown）を生成して保持
+            ai_text = generate_email_with_openai(
+                template=template,
+                tone=tone,
+                recipient=recipient,
+                message=user_message,
+                seasonal_text=seasonal_text,
+            )
+            st.session_state.ai_suggestions = ai_text
 
-                        patterns_for_db = []
-                        for b in blocks:
-                            parsed = parse_pattern_block(b)
-                            patterns_for_db.append(
-                                {
-                                    "subject": parsed.get("subject", ""),
-                                    "body": parsed.get("body", ""),
-                                }
-                            )
+            # ⑤ DB保存（あれば）
+            if HAS_DB and ai_text:
+                try:
+                    raw_blocks = re.split(
+                        r"(?=^##\s*パターン\s*\d+)", ai_text, flags=re.MULTILINE
+                    )
+                    blocks = [b.strip() for b in raw_blocks if b.strip()]
+                    blocks = blocks[:3]
+                    while len(blocks) < 3:
+                        blocks.append("このパターンはまだ生成されていません。")
 
-                        # db_logic.save_email_batch を呼ぶ
-                        save_email_batch(
-                            template=template,
-                            tone=tone,
-                            recipient=recipient,
-                            message=user_message,
-                            seasonal_greeting=add_seasonal,
-                            patterns=patterns_for_db,
+                    patterns_for_db = []
+                    for b in blocks:
+                        parsed = parse_pattern_block(b)
+                        patterns_for_db.append(
+                            {
+                                "subject": parsed.get("subject", ""),
+                                "body": parsed.get("body", ""),
+                            }
                         )
 
-                        st.success("✅ データベースへの保存に成功しました！")
+                    save_email_batch(
+                        template=template,
+                        tone=tone,
+                        recipient=recipient,
+                        message=user_message,
+                        seasonal_greeting=add_seasonal,
+                        patterns=patterns_for_db,
+                    )
 
-                    except Exception as e:
-                        st.error(f"❌ DB保存エラー: {str(e)}")
+                    st.success("✅ データベースへの保存に成功しました！")
 
-                # ⑥ チャットログを最大50件に制限
-                if len(st.session_state.messages) > 50:
-                    st.session_state.messages = st.session_state.messages[-50:]
+                except Exception as e:
+                    st.error(f"❌ DB保存エラー: {str(e)}")
 
-                st.rerun()
+            # ⑥ チャットログを最大50件に制限
+            if len(st.session_state.messages) > 50:
+                st.session_state.messages = st.session_state.messages[-50:]
+
+            st.rerun()
+
+    elif reset_clicked:
+        # 全リセット
+        st.session_state.messages = []
+        st.session_state.last_user_message = ""
+        st.session_state.generated_email = None
+        st.session_state.ai_suggestions = None
+        st.session_state.variation_count = 0
+        st.rerun()
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
@@ -1241,12 +1241,14 @@ with col1:
         if role == "user":
             chat_html_parts.append(f"<div class='chat-bubble user'>{text}</div>")
         else:
-            chat_html_parts.append(f"<div class='chat-bubble assistant'><span>{text}</span></div>")
+            chat_html_parts.append(
+                f"<div class='chat-bubble assistant'><span>{text}</span></div>"
+            )
     chat_html_parts.append("</div>")
     st.markdown("\n".join(chat_html_parts), unsafe_allow_html=True)
 
 # --------------------------------------------
-# 右：AIが作った3パターンのプレビュー
+# 右：AIが作った3パターンのプレビュー（タブ表示）
 # --------------------------------------------
 with col2:
     ai_text = st.session_state.ai_suggestions
@@ -1261,7 +1263,7 @@ with col2:
         )
         st.markdown(placeholder_html, unsafe_allow_html=True)
     else:
-        # 行頭が「## パターン数字」の行で分割（MULTILINE）
+        # 行頭が「## パターン数字」の行で分割
         raw_blocks = re.split(r"(?=^##\s*パターン\s*\d+)", ai_text, flags=re.MULTILINE)
         blocks = [b.strip() for b in raw_blocks if b.strip()]
 
@@ -1275,13 +1277,12 @@ with col2:
         # コピー用テキスト配列（元の Markdown まるごと）
         copy_texts = blocks.copy()
 
-        # ----- ここからタブ生成 -----
+        # タブ生成
         tab_labels = [f"パターン {i + 1}" for i in range(len(blocks))]
         tabs = st.tabs(tab_labels)
 
         for idx, (tab, block) in enumerate(zip(tabs, blocks)):
             with tab:
-                
                 parsed = parse_pattern_block(block)
                 subj = html.escape(parsed["subject"] or "").replace("\n", "<br>")
                 body = html.escape(parsed["body"] or "").replace("\n", "<br>")
@@ -1320,51 +1321,10 @@ with col2:
                   </div>
                 </div>
                 """
-
                 st.markdown(card_html, unsafe_allow_html=True)
-
-                # ボタン行（リセット／表現を変える）
-                btn_col1, btn_col2 = st.columns(2)
-                with btn_col1:
-                    if st.button("リセット", key=f"reset_{idx}", use_container_width=True):
-                        st.session_state.messages = []
-                        st.session_state.last_user_message = ""
-                        st.session_state.ai_suggestions = None
-                        st.session_state.variation_count = 0
-                        st.rerun()
-
-                with btn_col2:
-                    if st.button("🔄 表現を変える", key=f"regen_{idx}", use_container_width=True):
-                        if st.session_state.last_user_message:
-                            st.session_state.variation_count += 1
-
-                            st.session_state.ai_suggestions = generate_email_with_openai(
-                                template=template,
-                                tone=tone,
-                                recipient=recipient,
-                                message=st.session_state.last_user_message,
-                                seasonal_text=seasonal_text,
-                            )
-
-                            st.session_state.messages.append(
-                                {
-                                    "role": "assistant",
-                                    "content": (
-                                        f"AIによる新しい3パターン（バリエーション "
-                                        f"{st.session_state.variation_count + 1}）を生成しました。"
-                                    ),
-                                }
-                            )
-                            if len(st.session_state.messages) > 50:
-                                st.session_state.messages = st.session_state.messages[-50:]
-                        else:
-                            st.warning("直近のユーザー入力が見つかりません。先にメッセージを送信してください。")
-
-                        st.rerun()
-
                 st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-        # コピーアイコン用 JS（そのまま）
+        # コピーアイコン用 JS
         texts_json = json.dumps(copy_texts, ensure_ascii=False)
 
         st.components.v1.html(
@@ -1422,10 +1382,7 @@ with col2:
 
               setTimeout(setupIcons, 500);
             }})();
-
             </script>
             """,
             height=0,
         )
-
-
