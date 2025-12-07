@@ -837,6 +837,87 @@ main.block-container {
     border: none !important;
 }
 
+/* ============================================
+   プレビュータブの見た目カスタマイズ
+   （パターン1〜3用）
+============================================ */
+
+/* タブ全体の余白 少し下げるなら任意 */
+.stTabs {
+    margin-top: 4px;
+}
+
+/* タブリストの並び調整 */
+.stTabs [role="tablist"] {
+    gap: 0.5rem;
+}
+
+/* タブ本体のベーススタイル */
+.stTabs [role="tablist"] > [role="tab"] {
+    position: relative;
+    border: none;
+    background: transparent;
+    opacity: 1 !important;
+
+    border-radius: 999px;
+    padding: 0;  /* 中身側でpaddingを取る */
+
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 13px;
+
+    cursor: pointer;
+}
+
+/* タブ内のテキストコンテナ */
+.stTabs [role="tablist"] > [role="tab"] > div {
+    position: relative;
+    border-radius: inherit;
+    padding: 4px 16px;
+}
+
+/* ---- グラデーション枠（イントロバブル系） ---- */
+.stTabs [role="tablist"] > [role="tab"]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    padding: 2px;  /* 枠の太さ */
+
+    background: linear-gradient(120deg, #6559ae, #ff7159, #ffd666, #ff7159, #6559ae);
+    background-size: 400% 400%;
+    animation: tab-gradient 4s ease-in-out infinite;
+
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+}
+
+/* グラデーションの動き */
+@keyframes tab-gradient {
+    0%   { background-position: 0% 0%;   box-shadow: 0 0 0px rgba(255,214,102,0.0); }
+    50%  { background-position: 100% 100%; box-shadow: 0 0 10px rgba(255,214,102,0.4); }
+    100% { background-position: 0% 0%;   box-shadow: 0 0 0px rgba(255,214,102,0.0); }
+}
+
+/* ---- パターン別の背景色 ---- */
+.stTabs [role="tablist"] > [role="tab"]:nth-child(1) > div {
+    background-color: #990000;   /* パターン1 */
+}
+.stTabs [role="tablist"] > [role="tab"]:nth-child(2) > div {
+    background-color: #660066;   /* パターン2 */
+}
+.stTabs [role="tablist"] > [role="tab"]:nth-child(3) > [role="tab"]:nth-child(3) > div {
+    background-color: #336600;   /* パターン3 */
+}
+
+/* 選択中タブだけ ほんの少し光らせる */
+.stTabs [role="tablist"] > [role="tab"][aria-selected="true"] > div {
+    box-shadow: 0 0 8px rgba(255,214,102,0.6);
+}
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -1350,3 +1431,4 @@ with col2:
             """,
             height=0,
         )
+
