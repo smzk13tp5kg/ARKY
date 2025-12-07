@@ -1347,15 +1347,12 @@ with col2:
                 improve = html.escape(parsed["improve"] or "").replace("\n", "<br>")
                 caution = html.escape(parsed["caution"] or "").replace("\n", "<br>")
 
+                # カード本体（コピーアイコンはHTMLから外す）
                 card_html = f"""
                 <div class="preview-main-wrapper">
                   <div class="preview-header">
                     <span></span>
-                    <span class="pattern-copy-icon"
-                          data-pattern="{idx}"
-                          title="メッセージをコピーします">
-                      📋 テキストコピー
-                    </span>
+                    <span></span>
                   </div>
 
                   <div style="margin-top:4px;">
@@ -1380,72 +1377,68 @@ with col2:
                 </div>
                 """
                 st.markdown(card_html, unsafe_allow_html=True)
+
+                # コピー用ボタン（ここでPython側でクリックを検知する）
+                copy_clicked = st.button(
+                    "📋 このパターンをコピー",
+                    key=f"copy_button_{idx}",
+                )
+
+                if copy_clicked:
+                    # Supabase にコピークリックを記録
+                    if HAS_DB:
+                        try:
+                            log_copy_click(
+                                template=template,
+                                tone=tone,
+                                recipient=recipient,
+                                pattern_index=idx + 1,
+                            )
+                        except Exception as e:
+                            st.error(f"コピークリックログ保存エラー: {e}")
+
+                    # このパターンのMarkdown全文をコピー対象として保存
+                    st.session_state.copy_target_text = copy_texts[idx]
+
                 st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-        # コピーアイコン用 JS
-        texts_json = json.dumps(copy_texts, ensure_ascii=False)
+        # ここから：コピー対象テキストがあれば、JSでクリップボードにコピーする
+        copy_target = st.session_state.get("copy_target_text", "")
 
-        st.components.v1.html(
-            f"""
-            <script>
-            (function() {{
-              const texts = {texts_json};
+        if copy_target:
+            copy_json = json.dumps(copy_target, ensure_ascii=False)
+            st.components.v1.html(
+                f"""
+                <script>
+                (function() {{
+                  const text = {copy_json};
+                  if (!text) return;
 
-              function setupIcons() {{
-                const icons = parent.document.querySelectorAll('.pattern-copy-icon');
-                if (!icons || icons.length === 0) return;
-
-                function copyText(text) {{
-                  if (navigator.clipboard && navigator.clipboard.writeText) {{
-                    navigator.clipboard.writeText(text).catch(function(err) {{
-                      console.warn("navigator.clipboard failed:", err);
-                      fallbackCopy(text);
-                    }});
-                  }} else {{
-                    fallbackCopy(text);
+                  function doCopy(t) {{
+                    if (navigator.clipboard && navigator.clipboard.writeText) {{
+                      navigator.clipboard.writeText(t).catch(function(err) {{
+                        console.warn("navigator.clipboard failed:", err);
+                      }});
+                    }} else {{
+                      const textarea = document.createElement('textarea');
+                      textarea.value = t;
+                      textarea.style.position = 'fixed';
+                      textarea.style.top = '-9999px';
+                      textarea.style.left = '-9999px';
+                      document.body.appendChild(textarea);
+                      textarea.focus();
+                      textarea.select();
+                      document.execCommand('copy');
+                      document.body.removeChild(textarea);
+                    }}
                   }}
-                }}
 
-                function fallbackCopy(text) {{
-                  try {{
-                    const textarea = document.createElement('textarea');
-                    textarea.value = text;
-                    textarea.style.position = 'fixed';
-                    textarea.style.top = '-9999px';
-                    textarea.style.left = '-9999px';
-                    document.body.appendChild(textarea);
-                    textarea.focus();
-                    textarea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textarea);
-                  }} catch (e) {{
-                    console.error("Fallback copy failed:", e);
-                  }}
-                }}
-
-                icons.forEach(function(icon) {{
-                  const idx = parseInt(icon.getAttribute('data-pattern'), 10);
-                  if (!isNaN(idx) && texts[idx]) {{
-                    icon.addEventListener('click', function() {{
-                      copyText(texts[idx]);
-
-                      // クリック時にキラッとアニメーション
-                      icon.classList.remove('copy-flash');
-                      void icon.offsetWidth;
-                      icon.classList.add('copy-flash');
-                    }});
-                  }}
-                }});
-              }}
-
-              setTimeout(setupIcons, 500);
-            }})();
-            </script>
-            """,
-            height=0,
-        )
-
-
-
-
-
+                  // 一回だけコピーして終わり
+                  doCopy(text);
+                }})();
+                </script>
+                """,
+                height=0,
+            )
+            # 次の再実行で再コピーされないようにクリア
+            st.session_state.copy_target_text = ""
