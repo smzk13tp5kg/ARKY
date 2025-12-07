@@ -979,6 +979,9 @@ if "ai_suggestions" not in st.session_state:
     st.session_state.ai_suggestions = None
 if "copy_target_text" not in st.session_state:
     st.session_state.copy_target_text = ""
+# ★ 追加：サイドナビのロック状態
+if "nav_locked" not in st.session_state:
+    st.session_state.nav_locked = False
 
 # ============================================
 # トップバー
@@ -1013,6 +1016,7 @@ with st.sidebar:
         index=0,
         label_visibility="collapsed",
         key="template_radio",
+        disabled=st.session_state.nav_locked,  # ★ ロック対応
     )
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1047,6 +1051,7 @@ with st.sidebar:
         index=1,
         label_visibility="collapsed",
         key="tone_radio",
+        disabled=st.session_state.nav_locked,  # ★ ロック対応
     )
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1076,6 +1081,7 @@ with st.sidebar:
         index=0,
         label_visibility="collapsed",
         key="recipient_radio",
+        disabled=st.session_state.nav_locked,  # ★ ロック対応
     )
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1103,6 +1109,7 @@ with st.sidebar:
         index=0,
         label_visibility="collapsed",
         key="seasonal_radio",
+        disabled=st.session_state.nav_locked,  # ★ ロック対応
     )
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1296,6 +1303,10 @@ with col1:
                     except Exception as e:
                         st.error(f"❌ DB保存エラー: {str(e)}")
 
+            # ★ 初回生成が終わったらサイドナビをロック
+            if is_first_generation and ai_text:
+                st.session_state.nav_locked = True
+
             # チャットログを最大50件に制限
             if len(st.session_state.messages) > 50:
                 st.session_state.messages = st.session_state.messages[-50:]
@@ -1309,6 +1320,7 @@ with col1:
         st.session_state.generated_email = None
         st.session_state.ai_suggestions = None
         st.session_state.variation_count = 0
+        st.session_state.nav_locked = False  # ★ ロック解除
         st.rerun()
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
