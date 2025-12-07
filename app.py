@@ -917,20 +917,44 @@ main.block-container {
 
 # ============================================
 # JS：全ボタンに data-text を付与（3D用）
+# ＋ COPY_TRIGGER_* ボタンは画面外に退避＆indexを属性で保持
 # ============================================
 st.components.v1.html(
     """
     <script>
     (function() {
       function updateButtonText() {
-        const buttons = parent.document.querySelectorAll('.stButton > button, .stFormSubmitButton > button');
+        const buttons = parent.document.querySelectorAll(
+          '.stButton > button, .stFormSubmitButton > button'
+        );
         buttons.forEach(btn => {
           const textDiv = btn.querySelector('div');
-          if (textDiv && textDiv.textContent) {
-            btn.setAttribute('data-text', textDiv.textContent.trim());
+          if (!textDiv || !textDiv.textContent) return;
+
+          const label = textDiv.textContent.trim();
+          // 3D ボタン用
+          btn.setAttribute('data-text', label);
+
+          // COPY_TRIGGER_* ボタンだけ special 処理
+          if (label.startsWith('COPY_TRIGGER_')) {
+            const idxStr = label.replace('COPY_TRIGGER_', '');
+            btn.setAttribute('data-copy-trigger-index', idxStr);
+
+            // 完全に画面外へ退避させて見えなくする
+            btn.style.position = 'absolute';
+            btn.style.left = '-9999px';
+            btn.style.top = '-9999px';
+            btn.style.width = '1px';
+            btn.style.height = '1px';
+            btn.style.padding = '0';
+            btn.style.margin = '0';
+            btn.style.opacity = '0';
+            btn.style.pointerEvents = 'none';
           }
         });
       }
+
+      // 初回 & DOM変化のたびに再実行
       setTimeout(updateButtonText, 500);
       const observer = new MutationObserver(updateButtonText);
       observer.observe(parent.document.body, { childList: true, subtree: true });
@@ -1379,8 +1403,7 @@ with col2:
                 st.markdown(card_html, unsafe_allow_html=True)
                 st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-                # ★ コピー回数ログ用の「隠しボタン」
-                #   ラベルは COPY_TRIGGER_{idx} にしておく（JS 側で識別する）
+                # ★ ここが「隠しボタン」本体（表示は JS 側で即座に消す）
                 hidden_label = f"COPY_TRIGGER_{idx}"
                 hidden_pressed = st.button(hidden_label, key=f"copy_trigger_{idx}")
 
@@ -1393,7 +1416,6 @@ with col2:
                             pattern_index=idx + 1,
                         )
                     except Exception as e:
-                        # コピー自体は成功しているので画面は止めず、軽くエラー表示のみ
                         st.error(f"コピー履歴の保存に失敗しました: {e}")
 
         # コピーアイコン用 JS（コピー＋隠しボタンクリック）
@@ -1442,22 +1464,25 @@ with col2:
                   if (isNaN(idx) || !texts[idx]) return;
 
                   icon.addEventListener('click', function() {{
-                    // ① クリップボードへコピー
+                    // ① テキストをクリップボードにコピー
                     copyText(texts[idx]);
 
-                    // ② 対応する「隠しボタン」をクリックして Python 側の log_copy_click を発火
+                    // ② data-copy-trigger-index で隠しボタンを特定してクリック
                     try {{
-                      const label = "COPY_TRIGGER_" + idx;
-                      const allButtons = parent.document.querySelectorAll('button');
-                      for (let i = 0; i < allButtons.length; i++) {{
-                        const btn = allButtons[i];
-                        if ((btn.innerText || "").trim() === label) {{
-                          btn.click();   // ここで st.button が押された扱いになる
-                          break;
-                        }}
+                      const selector = 'button[data-copy-trigger-index="' + idx + '"]';
+                      const triggerBtn = parent.document.querySelector(selector);
+                      if (triggerBtn) {{
+                        const ev = new MouseEvent('click', {{
+                          bubbles: true,
+                          cancelable: true,
+                          view: parent.window
+                        }});
+                        triggerBtn.dispatchEvent(ev);
+                      }} else {{
+                        console.warn('No hidden trigger button found for pattern index', idx);
                       }}
                     }} catch (e) {{
-                      console.warn("Hidden button click failed:", e);
+                      console.warn('Error clicking hidden trigger button:', e);
                     }}
 
                     // ③ キラキラエフェクト
