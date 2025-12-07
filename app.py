@@ -1347,7 +1347,7 @@ with col2:
                 improve = html.escape(parsed["improve"] or "").replace("\n", "<br>")
                 caution = html.escape(parsed["caution"] or "").replace("\n", "<br>")
 
-                # ① プレビューカード本体：右上に "ボタン置き場" スロットを作る
+                # ① カード本体（右上にボタンを埋めるため、ヘッダにスロットを用意）
                 card_html = f"""
                 <div class="preview-main-wrapper">
                   <div class="preview-header">
@@ -1378,15 +1378,16 @@ with col2:
                 """
                 st.markdown(card_html, unsafe_allow_html=True)
 
-                # ② 本物の Streamlit ボタンを一旦普通に描画し、wrap にIDを振っておく
+                # ② 本物の Streamlit ボタンを作る（見た目は後でCSSで整える）
+                #   wrap にIDを振って、あとでヘッダ右側に移動させる
                 st.markdown(f'<div id="copy-btn-wrap-{idx}">', unsafe_allow_html=True)
                 copy_clicked = st.button(
-                    "📋 テキストコピー",  # ラベルはそのまま
+                    "📋 テキストコピー",
                     key=f"copy_button_{idx}",
                 )
                 st.markdown("</div>", unsafe_allow_html=True)
 
-                # ③ Python側：本物ボタンがクリックされたらログを記録
+                # ③ Python側：クリックされたらログテーブルにレコード追加
                 if copy_clicked:
                     if HAS_DB:
                         try:
@@ -1399,13 +1400,9 @@ with col2:
                         except Exception as e:
                             st.error(f"コピークリックログ保存エラー: {e}")
 
-                    # ここでテキストをサーバ側に保持したければ使えるが、
-                    # コピー自体はJS側でやるので必須ではない。
-                    # st.session_state.copy_target_text = copy_texts[idx]
-
                 st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-        # ④ JS：ボタンをカード右上へ移動させ、pattern-copy-icon スタイル＆コピー機能を付与
+        # ④ JS：ボタンをカード右上に移動し、クリック時にコピー＋キラキラを追加
         texts_json = json.dumps(copy_texts, ensure_ascii=False)
 
         st.components.v1.html(
@@ -1414,71 +1411,71 @@ with col2:
             (function() {{
               const texts = {texts_json};
 
-              // ボタンの見た目と位置を整える
-              function setupButtons() {{
+              function setup() {{
                 const wraps = parent.document.querySelectorAll('[id^="copy-btn-wrap-"]');
                 wraps.forEach(wrap => {{
                   const id = wrap.id.replace("copy-btn-wrap-", "");
+                  const idx = parseInt(id, 10);
                   const slot = parent.document.getElementById("copy-slot-" + id);
-                  if (!slot) return;
+                  if (!slot || isNaN(idx) || !texts[idx]) return;
 
-                  // wrapごとカード右上のスロットに移動
+                  // wrapごとヘッダ右側に移動
                   slot.innerHTML = "";
                   slot.appendChild(wrap);
 
                   const btn = wrap.querySelector("button");
                   if (!btn) return;
 
-                  // デフォルトのオレンジスタイルを消し、pattern-copy-icon を適用
+                  // 3Dオレンジボタンのスタイルを打ち消し、pattern-copy-icon 風にする
                   btn.classList.add("pattern-copy-icon");
-                  // ボタン内部のテキストはそのまま（📋 テキストコピー）
-                }});
-              }}
+                  btn.style.border = "1px solid #ffd666";
+                  btn.style.backgroundColor = "#111827";
+                  btn.style.borderRadius = "999px";
+                  btn.style.padding = "4px 10px";
+                  btn.style.height = "auto";
+                  btn.style.width = "auto";
+                  btn.style.transform = "none";
+                  btn.style.boxShadow = "none";
 
-              // クリックでコピー＆キラキラ
-              function setupCopy() {{
-                const wraps = parent.document.querySelectorAll('[id^="copy-btn-wrap-"]');
-                wraps.forEach(wrap => {{
-                  const id = wrap.id.replace("copy-btn-wrap-", "");
-                  const idx = parseInt(id, 10);
-                  if (isNaN(idx) || !texts[idx]) return;
+                  // Streamlit の ::before / ::after を無効化
+                  btn.style.setProperty("--before-display", "none");
 
-                  const btn = wrap.querySelector("button");
-                  if (!btn) return;
-
-                  function copyText(text) {{
-                    if (navigator.clipboard && navigator.clipboard.writeText) {{
-                      navigator.clipboard.writeText(text).catch(function(err) {{
-                        console.warn("navigator.clipboard failed:", err);
-                        fallbackCopy(text);
-                      }});
-                    }} else {{
-                      fallbackCopy(text);
-                    }}
-                  }}
-
-                  function fallbackCopy(text) {{
-                    try {{
-                      const textarea = document.createElement('textarea');
-                      textarea.value = text;
-                      textarea.style.position = 'fixed';
-                      textarea.style.top = '-9999px';
-                      textarea.style.left = '-9999px';
-                      document.body.appendChild(textarea);
-                      textarea.focus();
-                      textarea.select();
-                      document.execCommand('copy');
-                      document.body.removeChild(textarea);
-                    }} catch (e) {{
-                      console.error("Fallback copy failed:", e);
-                    }}
-                  }}
-
+                  // クリック時：コピー＋キラキラ（ログは Python 側が処理）
                   btn.addEventListener("click", function(ev) {{
-                    // 本物ボタンのclickは Streamlitが拾ってPython側が rerun する
-                    // ここではコピー＆キラキラだけ追加でやる
-                    copyText(texts[idx]);
+                    // テキストコピー
+                    const text = texts[idx];
 
+                    function copyText(t) {{
+                      if (navigator.clipboard && navigator.clipboard.writeText) {{
+                        navigator.clipboard.writeText(t).catch(function(err) {{
+                          console.warn("navigator.clipboard failed:", err);
+                          fallbackCopy(t);
+                        }});
+                      }} else {{
+                        fallbackCopy(t);
+                      }}
+                    }}
+
+                    function fallbackCopy(t) {{
+                      try {{
+                        const textarea = document.createElement('textarea');
+                        textarea.value = t;
+                        textarea.style.position = 'fixed';
+                        textarea.style.top = '-9999px';
+                        textarea.style.left = '-9999px';
+                        document.body.appendChild(textarea);
+                        textarea.focus();
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                      }} catch (e) {{
+                        console.error("Fallback copy failed:", e);
+                      }}
+                    }}
+
+                    copyText(text);
+
+                    // キラキラエフェクト
                     btn.classList.remove("copy-flash");
                     void btn.offsetWidth;
                     btn.classList.add("copy-flash");
@@ -1486,12 +1483,7 @@ with col2:
                 }});
               }}
 
-              function init() {{
-                setupButtons();
-                setupCopy();
-              }}
-
-              setTimeout(init, 500);
+              setTimeout(setup, 500);
             }})();
             </script>
             """,
