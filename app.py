@@ -364,8 +364,8 @@ div[data-testid="stHorizontalBlock"] {
 /* サイドバー開閉ボタンのアイコン色 */
 button[title="Open sidebar"] svg,
 button[title="Close sidebar"] svg {
-    fill: #ffffff !important;
-    color: #ffffff !important;
+    fill: #050b23 !important;
+    color: #050b23 !important;
 }
 
 /* サイドバー上部ヘッダー縮小 */
@@ -1307,6 +1307,7 @@ with col2:
             """,
             height=0,
         )
+
 
 
 
