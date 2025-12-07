@@ -1133,49 +1133,76 @@ with col1:
             reset_clicked = st.form_submit_button("リセット", use_container_width=True)
 
     # フォーム送信後の処理
+    # フォーム送信後の処理
     if submitted and user_message:
         if template == "その他" and not custom_template:
             st.error("⚠️ カスタムテンプレートを入力してください")
         elif recipient == "その他" and not custom_recipient:
             st.error("⚠️ カスタム相手を入力してください")
         else:
-            # ① ベースメッセージ保存
-            st.session_state.last_user_message = user_message
+            # 既に3パターン生成済みかどうかで初回／再生成を判定
+            is_first_generation = st.session_state.ai_suggestions is None
 
-            # ② 従来ロジックでのベースメール（subject/body）も一応生成
-            st.session_state.variation_count = 0
-            base_email = generate_email(
-                template,
-                tone,
-                recipient,
-                user_message,
-                variation=0,
-                seasonal_text=seasonal_text,
-            )
-            st.session_state.generated_email = base_email
+            # 初回だけベースメッセージを記録
+            if is_first_generation:
+                st.session_state.last_user_message = user_message
 
-            # ③ チャットログ（選択内容付き）
-            user_display_text = (
-                f"{user_message}\n\n"
-                f"――――――――――\n"
-                f"テンプレート: {template} / トーン: {tone} / 相手: {recipient}"
-            )
-            st.session_state.messages.append(
-                {"role": "user", "content": user_display_text}
-            )
+            base_message = st.session_state.last_user_message or user_message
 
-            guide = (
-                f"{template}メールを「{tone}」なトーンで、"
-                f"{recipient}宛に作成しました！右側のプレビューをご覧ください。"
-            )
-            st.session_state.messages.append(
-                {"role": "assistant", "content": guide}
-            )
+            # チャットログ更新
+            if is_first_generation:
+                # 初回：元の要望をログに残す
+                user_display_text = (
+                    f"{user_message}\n\n"
+                    f"――――――――――\n"
+                    f"テンプレート: {template} / トーン: {tone} / 相手: {recipient}"
+                )
+                st.session_state.messages.append(
+                    {"role": "user", "content": user_display_text}
+                )
 
-            # ④ OpenAI案（3パターン分 Markdown）を生成して保持
-            #    ＋ DB保存（あれば）を「イントロbubble風ローディング表示」つきで実行
+                guide = (
+                    f"{template}メールを「{tone}」なトーンで、"
+                    f"{recipient}宛に作成しました！右側のプレビューをご覧ください。"
+                )
+                st.session_state.messages.append(
+                    {"role": "assistant", "content": guide}
+                )
+            else:
+                # 再生成：追加要望としてログに残す
+                user_display_text = (
+                    f"＜追加要望＞\n{user_message}\n\n"
+                    f"――――――――――\n"
+                    f"既に生成済みの3パターンに上記の要望を反映します。"
+                )
+                st.session_state.messages.append(
+                    {"role": "user", "content": user_display_text}
+                )
+
+                guide = (
+                    "追加要望を反映して、既存の3パターンすべてをリライトしました。"
+                    "右側のプレビューをご確認ください。"
+                )
+                st.session_state.messages.append(
+                    {"role": "assistant", "content": guide}
+                )
+
+            # 初回だけ既存ロジックのベースメールも作っておく（必要なら維持）
+            if is_first_generation:
+                st.session_state.variation_count = 0
+                base_email = generate_email(
+                    template,
+                    tone,
+                    recipient,
+                    base_message,
+                    variation=0,
+                    seasonal_text=seasonal_text,
+                )
+                st.session_state.generated_email = base_email
+
+            # --- OpenAI 生成＋DB保存を spinner＋イントロbubble 付きでまとめて実行 ---
             with st.spinner(""):
-                # イントロbubbleと同じスタイルで「生成中」メッセージを表示
+                # イントロbubbleスタイルの「生成中」メッセージ
                 loading_html = """
                 <div class="intro-bubble" style="margin-top: 8px;">
                   <span class="intro-bubble-text">
@@ -1186,13 +1213,27 @@ with col1:
                 """
                 st.markdown(loading_html, unsafe_allow_html=True)
 
-                # OpenAI 生成
+                # OpenAI に渡す message をモード別に決定
+                if is_first_generation:
+                    # 初回：元の要件をそのまま渡す
+                    llm_message = base_message
+                    prev_suggestions = None
+                    refine_flag = False
+                else:
+                    # 再生成：追加要望のみを渡し、既存3パターンは previous_suggestions で渡す
+                    llm_message = user_message
+                    prev_suggestions = st.session_state.ai_suggestions
+                    refine_flag = True
+
+                # ★ 修正ポイント：openai_logic の新シグネチャに合わせて引数追加
                 ai_text = generate_email_with_openai(
                     template=template,
                     tone=tone,
                     recipient=recipient,
-                    message=user_message,
+                    message=llm_message,
                     seasonal_text=seasonal_text,
+                    previous_suggestions=prev_suggestions,
+                    is_refine=refine_flag,
                 )
                 st.session_state.ai_suggestions = ai_text
 
@@ -1221,18 +1262,17 @@ with col1:
                             template=template,
                             tone=tone,
                             recipient=recipient,
-                            message=user_message,
+                            message=base_message,
                             seasonal_greeting=add_seasonal,
                             patterns=patterns_for_db,
                         )
 
-                        # 生成完了メッセージ（スタイルは今のまま）
                         st.success("✅ メッセージの生成が完了し、データベースに保存しました！")
 
                     except Exception as e:
                         st.error(f"❌ DB保存エラー: {str(e)}")
 
-            # ⑥ チャットログを最大50件に制限
+            # チャットログを最大50件に制限
             if len(st.session_state.messages) > 50:
                 st.session_state.messages = st.session_state.messages[-50:]
 
@@ -1401,5 +1441,6 @@ with col2:
             """,
             height=0,
         )
+
 
 
