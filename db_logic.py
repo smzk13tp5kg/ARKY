@@ -26,6 +26,18 @@ else:
 # このモジュールで使うテーブル名（DDL に合わせる）
 TABLE_NAME = "test_arky_patterns"
 
+# コピークリックログ用テーブル名
+# 想定DDL例：
+#   create table public.email_copy_log (
+#     id            bigserial primary key,
+#     created_at    timestamptz not null default now(),
+#     template      text not null,
+#     tone          text not null,
+#     recipient     text not null,
+#     pattern_index integer not null
+#   );
+COPY_LOG_TABLE_NAME = "email_copy_log"
+
 
 def _assert_client():
     """Supabaseクライアントが無い場合は例外を投げる。"""
@@ -138,3 +150,50 @@ def save_email_batch(
     except Exception as e:
         # App 側で st.error に出したいので、そのまま投げる
         raise RuntimeError(f"Supabase 挿入エラー: {e}")
+
+
+# ============================================
+# コピークリックを1レコードとして記録する関数
+# ============================================
+def log_copy_click(
+    template: str,
+    tone: str,
+    recipient: str,
+    pattern_index: int,
+    table_name: str = COPY_LOG_TABLE_NAME,
+) -> None:
+    """
+    「テキストコピー」ボタンがクリックされたことを記録する。
+
+    想定DDL:
+      create table public.email_copy_log (
+        id            bigserial primary key,
+        created_at    timestamptz not null default now(),
+        template      text not null,
+        tone          text not null,
+        recipient     text not null,
+        pattern_index integer not null
+      );
+
+    1クリック = 1行INSERT するだけ。
+    """
+    _assert_client()
+
+    if pattern_index < 1:
+        raise ValueError("pattern_index は 1 以上である必要があります。")
+
+    row = {
+        "template": template,
+        "tone": tone,
+        "recipient": recipient,
+        "pattern_index": int(pattern_index),
+    }
+
+    try:
+        res = supabase.table(table_name).insert(row).execute()
+        print("[log_copy_click] inserted row:", res.data)
+    except Exception as e:
+        # コピーのログ取得に失敗してもアプリ本体は止めたくない場合、
+        # ここで例外を握りつぶす選択肢もあるが、
+        # いったん RuntimeError として投げておく。
+        raise RuntimeError(f"Supabase 挿入エラー（コピークリックログ）: {e}")
