@@ -1336,7 +1336,6 @@ with col2:
         tab_labels = [f"パターン {i + 1}" for i in range(len(blocks))]
         tabs = st.tabs(tab_labels)
 
-        # 各タブ描画＋隠しボタン
         for idx, (tab, block) in enumerate(zip(tabs, blocks)):
             with tab:
                 parsed = parse_pattern_block(block)
@@ -1380,18 +1379,10 @@ with col2:
                 st.markdown(card_html, unsafe_allow_html=True)
                 st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-                # --- 隠しボタン（画面外に追い出して完全非表示） ---
-                # JS からこのボタンを click() させて log_copy_click を発火させる
-                st.markdown(
-                    f"<div style='position:absolute; left:-9999px; top:-9999px; width:0; height:0; overflow:hidden;'>",
-                    unsafe_allow_html=True,
-                )
-                hidden_label = f"__COPY_TRIGGER_{idx}__"
-                hidden_pressed = st.button(
-                    hidden_label,
-                    key=f"copy_trigger_{idx}",
-                )
-                st.markdown("</div>", unsafe_allow_html=True)
+                # ★ コピー回数ログ用の「隠しボタン」
+                #   ラベルは COPY_TRIGGER_{idx} にしておく（JS 側で識別する）
+                hidden_label = f"COPY_TRIGGER_{idx}"
+                hidden_pressed = st.button(hidden_label, key=f"copy_trigger_{idx}")
 
                 if hidden_pressed and HAS_DB:
                     try:
@@ -1402,6 +1393,7 @@ with col2:
                             pattern_index=idx + 1,
                         )
                     except Exception as e:
+                        # コピー自体は成功しているので画面は止めず、軽くエラー表示のみ
                         st.error(f"コピー履歴の保存に失敗しました: {e}")
 
         # コピーアイコン用 JS（コピー＋隠しボタンクリック）
@@ -1453,14 +1445,14 @@ with col2:
                     // ① クリップボードへコピー
                     copyText(texts[idx]);
 
-                    // ② 対応する隠しボタンをクリック（Python側で log_copy_click が動く）
+                    // ② 対応する「隠しボタン」をクリックして Python 側の log_copy_click を発火
                     try {{
-                      const label = "__COPY_TRIGGER_" + idx + "__";
+                      const label = "COPY_TRIGGER_" + idx;
                       const allButtons = parent.document.querySelectorAll('button');
                       for (let i = 0; i < allButtons.length; i++) {{
                         const btn = allButtons[i];
                         if ((btn.innerText || "").trim() === label) {{
-                          btn.click();
+                          btn.click();   // ここで st.button が押された扱いになる
                           break;
                         }}
                       }}
