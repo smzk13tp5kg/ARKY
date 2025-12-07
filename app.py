@@ -581,8 +581,8 @@ main.block-container {
     margin-bottom: 0px;
 }
 .intro-icon {
-    width: 120px;
-    height: 120px;
+    width: 130px;
+    height: 130px;
     flex-shrink: 0;
 }
 .intro-icon img {
@@ -1343,6 +1343,7 @@ with col2:
             """,
             height=0,
         )
+
 
 
 
