@@ -22,11 +22,27 @@ def _get_client():
     return OpenAI(api_key=api_key)
 
 
-def generate_email_with_openai(template, tone, recipient, message, seasonal_text=None):
+def generate_email_with_openai(
+    template: str,
+    tone: str,
+    recipient: str,
+    message: str,
+    seasonal_text: str | None = None,
+    previous_suggestions: str | None = None,
+    is_refine: bool = False,
+) -> str:
     """
-    メタプロンプト＋gpt-4o-mini を使って、
     ビジネスメッセージ案を3パターン生成するラッパー関数。
-    戻り値は「Markdown形式のテキスト」（3パターン分まとめて）とする。
+
+    - 初回生成:
+        is_refine=False または previous_suggestions が None の場合。
+        これまでどおり、メタプロンプト＋ gpt-4o-mini の2段階で
+        「## パターン1〜3＋件名＋本文＋改善点＋注意点」のMarkdownを生成する。
+
+    - 再生成（リライト）:
+        is_refine=True かつ previous_suggestions が存在する場合。
+        既存の3パターン＋追加要望 message をもとに、
+        3パターンすべてを書き直したMarkdownを1回の呼び出しで生成する。
     """
 
     client = _get_client()
@@ -34,6 +50,88 @@ def generate_email_with_openai(template, tone, recipient, message, seasonal_text
         # import 時には例外を投げず、呼び出されたときだけ安全なメッセージを返す
         return "⚠️ OpenAI APIキーが設定されていません。（環境変数 OPENAI_API_KEY を確認してください）"
 
+    # ----------------------------------------
+    # 1) 再生成（リライト）モード
+    # ----------------------------------------
+    if is_refine and previous_suggestions:
+        # 既存3パターン＋追加要望をもとにリライトさせるプロンプト
+        refine_prompt = f"""
+あなたはビジネスメールのプロ編集者です。
+
+以下に、すでに生成済みの3パターンのメール案があります。
+これらをベースに、追加要望を反映した新しい3パターンを作成してください。
+
+【メールの種類】
+- テンプレート種別: {template}
+- トーン: {tone}
+- 宛先: {recipient}
+- 時候の挨拶: {seasonal_text or "なし"}
+
+【既存の3パターン（そのまま引用）】
+{previous_suggestions}
+
+【追加要望】
+{message}
+
+【重要な指示】
+- 既存の3パターンの構成・ニュアンスは可能な限り維持してください。
+- 追加要望に必要な範囲だけを変更してください。
+- 各パターンの「件名」「本文」を必ず更新してください。
+- 各パターンについて「- 改善点」「- 注意点」も必ず記載してください。
+- 出力形式は次のMarkdown構造に【厳密に】従ってください。
+
+## パターン1
+件名: ...
+本文:
+...
+
+- 改善点:
+  - ...
+- 注意点:
+  - ...
+
+## パターン2
+件名: ...
+本文:
+...
+
+- 改善点:
+  - ...
+- 注意点:
+  - ...
+
+## パターン3
+件名: ...
+本文:
+...
+
+- 改善点:
+  - ...
+- 注意点:
+  - ...
+
+【禁止事項】
+- 「もちろんです」「では早速作成します」などの前置き文は一切書かないこと。
+- 上記の「## パターン1」「## パターン2」「## パターン3」以外の見出しや説明文は書かないこと。
+- 3パターンより多く（4パターン目以降）を出力しないこと。
+"""
+
+        message_response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "あなたはビジネス文書を最適化するプロ編集者です。",
+                },
+                {"role": "user", "content": refine_prompt},
+            ],
+        )
+        generated_text = message_response.choices[0].message.content
+        return generated_text  # Markdown形式のテキスト（3パターン分）
+
+    # ----------------------------------------
+    # 2) 初回生成モード（従来どおりのメタプロンプト方式）
+    # ----------------------------------------
     receiver = recipient
     receiver_character = f"{recipient}向け / トーン: {tone}"
     situation = f"{template}メール"
@@ -159,7 +257,10 @@ def generate_email_with_openai(template, tone, recipient, message, seasonal_text
     message_response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "あなたはビジネス文書を最適化するプロ編集者です。"},
+            {
+                "role": "system",
+                "content": "あなたはビジネス文書を最適化するプロ編集者です。",
+            },
             {"role": "user", "content": final_prompt},
         ],
     )
