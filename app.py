@@ -1053,7 +1053,7 @@ with col1:
     with st.form("message_form", clear_on_submit=True):
         user_message = st.text_area(
             "メッセージを入力",
-            placeholder="例：取引先に感謝を伝えるメールを作成したい",
+            placeholder="例：使用する会議室の交換をお願いしたい",
             height=120,
             label_visibility="collapsed",
         )
@@ -1343,6 +1343,7 @@ with col2:
             """,
             height=0,
         )
+
 
 
 
