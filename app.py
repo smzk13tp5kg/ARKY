@@ -1420,7 +1420,8 @@ with col2:
               const texts = {texts_json};
 
               function setupIcons() {{
-                const icons = parent.document.querySelectorAll('.pattern-copy-icon');
+                // プレビュー内のコピーアイコンだけを対象にする
+                const icons = parent.document.querySelectorAll('.preview-main-wrapper .pattern-copy-icon');
                 if (!icons || icons.length === 0) return;
 
                 function copyText(text) {{
@@ -1452,19 +1453,27 @@ with col2:
                 }}
 
                 icons.forEach(function(icon) {{
-                  const idx = parseInt(icon.getAttribute('data-pattern'), 10);
+                  const idxAttr = icon.getAttribute('data-pattern');
+                  const idx = parseInt(idxAttr, 10);
                   if (isNaN(idx) || !texts[idx]) return;
 
-                  icon.addEventListener('click', function() {{
-                    // ① これまで通りテキストをコピー
+                  icon.addEventListener('click', function(ev) {{
+                    // タブクリックなど親要素への伝播を止める
+                    ev.stopPropagation();
+
+                    // ① テキストをコピー
                     copyText(texts[idx]);
 
                     // ② 裏側の本物ボタンを押して Python 側にイベントを送る
-                    const wrap = parent.document.getElementById('real-copy-wrap-' + idx);
-                    if (wrap) {{
-                      const realBtn = wrap.querySelector('button');
-                      if (realBtn) realBtn.click();
-                    }}
+                    //    → label が real_copy_button_{idx} の button を探して click
+                    const allButtons = parent.document.querySelectorAll('button');
+                    allButtons.forEach(btn => {{
+                      try {{
+                        if (btn.innerText.trim() === `real_copy_button_${{idx}}`) {{
+                          btn.click();
+                        }}
+                      }} catch (e) {{}}
+                    }});
 
                     // ③ キラキラエフェクト（元のCSSをそのまま利用）
                     icon.classList.remove('copy-flash');
