@@ -1213,7 +1213,9 @@ with col2:
                 <span></span>
                 <span class="pattern-copy-icon"
                       data-pattern="{idx}"
-                      title="メッセージをコピーします">📋</span>
+                      title="メッセージをコピーします">
+                    📋 テキストコピー  
+                </span>
               </div>
 
               <div style="margin-top:4px;">
@@ -1343,6 +1345,7 @@ with col2:
             """,
             height=0,
         )
+
 
 
 
