@@ -15,6 +15,11 @@ try:
 except ImportError:
     HAS_DB = False
 
+st.set_page_config(
+    page_title="ビジネスメール作成アシスタント",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
 # ============================================
 # 時候の挨拶（ヘルパー）
@@ -1314,6 +1319,7 @@ with col2:
             """,
             height=0,
         )
+
 
 
 
