@@ -1347,16 +1347,12 @@ with col2:
                 improve = html.escape(parsed["improve"] or "").replace("\n", "<br>")
                 caution = html.escape(parsed["caution"] or "").replace("\n", "<br>")
 
-                # ★ 1) 見た目は元のまま：右上に pattern-copy-icon を置く
+                # ① プレビューカード本体：右上に "ボタン置き場" スロットを作る
                 card_html = f"""
                 <div class="preview-main-wrapper">
                   <div class="preview-header">
                     <span></span>
-                    <span class="pattern-copy-icon"
-                          data-pattern="{idx}"
-                          title="メッセージをコピーします">
-                      📋 テキストコピー
-                    </span>
+                    <span id="copy-slot-{idx}"></span>
                   </div>
 
                   <div style="margin-top:4px;">
@@ -1382,19 +1378,16 @@ with col2:
                 """
                 st.markdown(card_html, unsafe_allow_html=True)
 
-                # ★ 2) 裏側の「本物ボタン」（非表示）を仕込んでおく（ログ用）
-                st.markdown(
-                    f'<div id="real-copy-wrap-{idx}" style="display:none;">',
-                    unsafe_allow_html=True,
-                )
-                real_clicked = st.button(
-                    f"real_copy_button_{idx}",  # ラベルは何でもよい（見えない）
-                    key=f"real_copy_button_{idx}",
+                # ② 本物の Streamlit ボタンを一旦普通に描画し、wrap にIDを振っておく
+                st.markdown(f'<div id="copy-btn-wrap-{idx}">', unsafe_allow_html=True)
+                copy_clicked = st.button(
+                    "📋 テキストコピー",  # ラベルはそのまま
+                    key=f"copy_button_{idx}",
                 )
                 st.markdown("</div>", unsafe_allow_html=True)
 
-                # ★ 3) Python側：本物ボタンが押されたらログを記録
-                if real_clicked:
+                # ③ Python側：本物ボタンがクリックされたらログを記録
+                if copy_clicked:
                     if HAS_DB:
                         try:
                             log_copy_click(
@@ -1406,11 +1399,13 @@ with col2:
                         except Exception as e:
                             st.error(f"コピークリックログ保存エラー: {e}")
 
+                    # ここでテキストをサーバ側に保持したければ使えるが、
+                    # コピー自体はJS側でやるので必須ではない。
+                    # st.session_state.copy_target_text = copy_texts[idx]
+
                 st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-        # ★ 4) コピーアイコン用 JS
-        #    - クリック時にテキストをクリップボードへコピー
-        #    - ＋ 裏側の本物ボタンを click させて Python にイベントを飛ばす
+        # ④ JS：ボタンをカード右上へ移動させ、pattern-copy-icon スタイル＆コピー機能を付与
         texts_json = json.dumps(copy_texts, ensure_ascii=False)
 
         st.components.v1.html(
@@ -1419,71 +1414,84 @@ with col2:
             (function() {{
               const texts = {texts_json};
 
-              function setupIcons() {{
-                // プレビュー内のコピーアイコンだけを対象にする
-                const icons = parent.document.querySelectorAll('.preview-main-wrapper .pattern-copy-icon');
-                if (!icons || icons.length === 0) return;
+              // ボタンの見た目と位置を整える
+              function setupButtons() {{
+                const wraps = parent.document.querySelectorAll('[id^="copy-btn-wrap-"]');
+                wraps.forEach(wrap => {{
+                  const id = wrap.id.replace("copy-btn-wrap-", "");
+                  const slot = parent.document.getElementById("copy-slot-" + id);
+                  if (!slot) return;
 
-                function copyText(text) {{
-                  if (navigator.clipboard && navigator.clipboard.writeText) {{
-                    navigator.clipboard.writeText(text).catch(function(err) {{
-                      console.warn("navigator.clipboard failed:", err);
-                      fallbackCopy(text);
-                    }});
-                  }} else {{
-                    fallbackCopy(text);
-                  }}
-                }}
+                  // wrapごとカード右上のスロットに移動
+                  slot.innerHTML = "";
+                  slot.appendChild(wrap);
 
-                function fallbackCopy(text) {{
-                  try {{
-                    const textarea = document.createElement('textarea');
-                    textarea.value = text;
-                    textarea.style.position = 'fixed';
-                    textarea.style.top = '-9999px';
-                    textarea.style.left = '-9999px';
-                    document.body.appendChild(textarea);
-                    textarea.focus();
-                    textarea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textarea);
-                  }} catch (e) {{
-                    console.error("Fallback copy failed:", e);
-                  }}
-                }}
+                  const btn = wrap.querySelector("button");
+                  if (!btn) return;
 
-                icons.forEach(function(icon) {{
-                  const idxAttr = icon.getAttribute('data-pattern');
-                  const idx = parseInt(idxAttr, 10);
+                  // デフォルトのオレンジスタイルを消し、pattern-copy-icon を適用
+                  btn.classList.add("pattern-copy-icon");
+                  // ボタン内部のテキストはそのまま（📋 テキストコピー）
+                }});
+              }}
+
+              // クリックでコピー＆キラキラ
+              function setupCopy() {{
+                const wraps = parent.document.querySelectorAll('[id^="copy-btn-wrap-"]');
+                wraps.forEach(wrap => {{
+                  const id = wrap.id.replace("copy-btn-wrap-", "");
+                  const idx = parseInt(id, 10);
                   if (isNaN(idx) || !texts[idx]) return;
 
-                  icon.addEventListener('click', function(ev) {{
-                    // タブクリックなど親要素への伝播を止める
-                    ev.stopPropagation();
+                  const btn = wrap.querySelector("button");
+                  if (!btn) return;
 
-                    // ① テキストをコピー
+                  function copyText(text) {{
+                    if (navigator.clipboard && navigator.clipboard.writeText) {{
+                      navigator.clipboard.writeText(text).catch(function(err) {{
+                        console.warn("navigator.clipboard failed:", err);
+                        fallbackCopy(text);
+                      }});
+                    }} else {{
+                      fallbackCopy(text);
+                    }}
+                  }}
+
+                  function fallbackCopy(text) {{
+                    try {{
+                      const textarea = document.createElement('textarea');
+                      textarea.value = text;
+                      textarea.style.position = 'fixed';
+                      textarea.style.top = '-9999px';
+                      textarea.style.left = '-9999px';
+                      document.body.appendChild(textarea);
+                      textarea.focus();
+                      textarea.select();
+                      document.execCommand('copy');
+                      document.body.removeChild(textarea);
+                    }} catch (e) {{
+                      console.error("Fallback copy failed:", e);
+                    }}
+                  }}
+
+                  btn.addEventListener("click", function(ev) {{
+                    // 本物ボタンのclickは Streamlitが拾ってPython側が rerun する
+                    // ここではコピー＆キラキラだけ追加でやる
                     copyText(texts[idx]);
 
-                    // ② 裏側の本物ボタンを押して Python 側にイベントを送る
-                    //    → label が real_copy_button_{idx} の button を探して click
-                    const allButtons = parent.document.querySelectorAll('button');
-                    allButtons.forEach(btn => {{
-                      try {{
-                        if (btn.innerText.trim() === `real_copy_button_${{idx}}`) {{
-                          btn.click();
-                        }}
-                      }} catch (e) {{}}
-                    }});
-
-                    // ③ キラキラエフェクト（元のCSSをそのまま利用）
-                    icon.classList.remove('copy-flash');
-                    void icon.offsetWidth;
-                    icon.classList.add('copy-flash');
+                    btn.classList.remove("copy-flash");
+                    void btn.offsetWidth;
+                    btn.classList.add("copy-flash");
                   }});
                 }});
               }}
 
-              setTimeout(setupIcons, 500);
+              function init() {{
+                setupButtons();
+                setupCopy();
+              }}
+
+              setTimeout(init, 500);
             }})();
             </script>
             """,
