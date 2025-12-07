@@ -90,7 +90,7 @@ def parse_pattern_block(block: str) -> dict:
 
     # 改善点・注意点
     if rest2:
-        if idx_caution != -1 and rest2.find("- 注意点") > -1:
+        if "- 注意点" in rest2:
             split_pos = rest2.find("- 注意点")
             improve_block = rest2[:split_pos].strip()
             caution_block = rest2[split_pos:].strip()
@@ -250,7 +250,7 @@ def generate_email(
         ],
     }
     closing_list = closings_variations.get(recipient, ["よろしくお願いいたします。"])
-    closing = closing_list[variation % len(closing_list)]
+    closing = closing_list[variation % len(greeting_list)]
 
     body = body_start + closing
 
@@ -272,7 +272,7 @@ def generate_email(
 
 
 # ============================================
-# カスタムCSS（あなたの元コードそのまま）
+# カスタムCSS（元のコード＋プレビュー枠グラデ）
 # ============================================
 st.markdown(
     """
@@ -488,7 +488,7 @@ div[data-testid="stHorizontalBlock"] {
     color: #ffffff !important;
 }
 .section-header {
-    fontサイズ: 16px;
+    font-size: 16px;
     font-weight: 700;
     color: #ffd666;
     margin: 8px 0;
@@ -782,7 +782,7 @@ main.block-container {
     border-radius: 18px;
     background: transparent;
     overflow: visible;
-    margin-right: auto;
+    margin右: auto;
     max-width: 85%;
 }
 .chat-bubble.assistant::before {
@@ -1046,7 +1046,7 @@ with st.sidebar:
             "📄 標準ビジネス（最も一般的）",
             "📘 フォーマル（社外／上位者／依頼交渉）",
             "🙏 厳粛・儀礼的（謝罪・クレーム対応）",
-            "⏱️ 緊急・簡潔（即時対応が必要な通知）",
+            "⏱️ 緊急・簡潔（即時通知）",
             "🌿 ソフト（関係維持・お礼・勧誘・広報）",
         ],
         index=1,
@@ -1060,7 +1060,7 @@ with st.sidebar:
         "📄 標準ビジネス（最も一般的）": "標準ビジネス",
         "📘 フォーマル（社外／上位者／依頼交渉）": "フォーマル",
         "🙏 厳粛・儀礼的（謝罪・クレーム対応）": "厳粛・儀礼的",
-        "⏱️ 緊急・簡潔（即時対応が必要な通知）": "緊急・簡潔",
+        "⏱️ 緊急・簡潔（即時通知）": "緊急・簡潔",
         "🌿 ソフト（関係維持・お礼・勧誘・広報）": "柔らめ",
     }
     tone = display_to_tone[tone_display]
