@@ -1347,7 +1347,7 @@ with col2:
                 improve = html.escape(parsed["improve"] or "").replace("\n", "<br>")
                 caution = html.escape(parsed["caution"] or "").replace("\n", "<br>")
 
-                # カード本体（コピーアイコンはHTMLから外す）
+                # カード本体（ヘッダー右はボタンで埋めるので空にしておく）
                 card_html = f"""
                 <div class="preview-main-wrapper">
                   <div class="preview-header">
@@ -1365,7 +1365,7 @@ with col2:
                     <div class="preview-body">{body}</div>
                   </div>
 
-                  <div style="margin-top:12px;">
+                  <div style="marginトップ:12px;">
                     <div class="preview-section-label">改善点</div>
                     <div class="preview-note-body">{improve}</div>
                   </div>
@@ -1378,9 +1378,9 @@ with col2:
                 """
                 st.markdown(card_html, unsafe_allow_html=True)
 
-                # コピー用ボタン（ここでPython側でクリックを検知する）
+                # ★ コピー用ボタン（Pythonでクリックを検知する）
                 copy_clicked = st.button(
-                    "📋 このパターンをコピー",
+                    "📋 テキストコピー",     # 元のラベルを再利用
                     key=f"copy_button_{idx}",
                 )
 
@@ -1402,7 +1402,7 @@ with col2:
 
                 st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-        # ここから：コピー対象テキストがあれば、JSでクリップボードにコピーする
+        # ★ コピー対象テキストがあれば、JSでクリップボードにコピーする
         copy_target = st.session_state.get("copy_target_text", "")
 
         if copy_target:
