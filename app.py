@@ -1166,12 +1166,18 @@ with col1:
             reset_clicked = st.form_submit_button("リセット", use_container_width=True)
 
     # フォーム送信後の処理
+    # フォーム送信後の処理
     if submitted and user_message:
         if template == "その他" and not custom_template:
             st.error("⚠️ カスタムテンプレートを入力してください")
         elif recipient == "その他" and not custom_recipient:
             st.error("⚠️ カスタム相手を入力してください")
         else:
+            # ★ 初回送信が通ったタイミングでサイドバーをロック
+            #    （すでにロック済みなら何もしない）
+            if not st.session_state.nav_locked:
+                st.session_state.nav_locked = True
+
             # 既に3パターン生成済みかどうかで初回／再生成を判定
             is_first_generation = st.session_state.ai_suggestions is None
 
@@ -1302,10 +1308,6 @@ with col1:
 
                     except Exception as e:
                         st.error(f"❌ DB保存エラー: {str(e)}")
-
-            # ★ 初回生成が終わったらサイドナビをロック
-            if is_first_generation and ai_text:
-                st.session_state.nav_locked = True
 
             # チャットログを最大50件に制限
             if len(st.session_state.messages) > 50:
@@ -1511,3 +1513,4 @@ with col2:
             """,
             height=0,
         )
+
