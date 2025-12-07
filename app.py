@@ -782,13 +782,21 @@ main.block-container {
 
 /* -------------------------------------------
    カスタムテンプレート入力ボックス（その他）
-   幅を30px狭め、背景色と枠線を変更
 ------------------------------------------- */
+
+/* 外側コンテナ：幅を30px狭める＆背景を消す */
+[data-testid="stSidebar"] [data-testid="stTextInput"] > div {
+    width: calc(100% - 30px) !important;  /* ← こっちを狭める */
+    margin-left: 0 !important;
+    background: transparent !important;   /* 白い余白を消す */
+}
+
+/* 実際の入力ボックス */
 [data-testid="stSidebar"] [data-testid="stTextInput"] input {
-    width: calc(100% - 30px) !important;   /* 30px 狭める */
-    background-color: #330033 !important;  /* 背景色 */
-    border: 5px solid #ffffcc !important;  /* 枠線色＆太さ */
-    color: #ffffff !important;             /* 文字色（背景が暗いので白に） */
+    width: 100% !important;               /* コンテナ内でフル幅 */
+    background-color: #330033 !important; /* 背景色 */
+    border: 5px solid #ffffcc !important; /* 枠線 */
+    color: #ffffff !important;
     padding: 6px 10px !important;
     border-radius: 8px !important;
 }
@@ -1299,6 +1307,7 @@ with col2:
             """,
             height=0,
         )
+
 
 
 
