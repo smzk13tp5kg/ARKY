@@ -375,7 +375,7 @@ div[data-testid="stHorizontalBlock"] {
     padding-bottom: 0 !important;
 }
 [data-testid="stSidebarContent"] {
-    padding-top: 7px !important;
+    padding-top: 0px !important;
 }
 
 /* -------------------------------------------
@@ -1306,3 +1306,4 @@ with col2:
             """,
             height=0,
         )
+
