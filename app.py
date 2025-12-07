@@ -1347,12 +1347,15 @@ with col2:
                 improve = html.escape(parsed["improve"] or "").replace("\n", "<br>")
                 caution = html.escape(parsed["caution"] or "").replace("\n", "<br>")
 
-                # ① カード本体（右上にボタンを埋めるため、ヘッダにスロットを用意）
                 card_html = f"""
                 <div class="preview-main-wrapper">
                   <div class="preview-header">
                     <span></span>
-                    <span id="copy-slot-{idx}"></span>
+                    <span class="pattern-copy-icon"
+                          data-pattern="{idx}"
+                          title="メッセージをコピーします">
+                      📋 テキストコピー
+                    </span>
                   </div>
 
                   <div style="margin-top:4px;">
@@ -1377,32 +1380,9 @@ with col2:
                 </div>
                 """
                 st.markdown(card_html, unsafe_allow_html=True)
-
-                # ② 本物の Streamlit ボタンを作る（見た目は後でCSSで整える）
-                #   wrap にIDを振って、あとでヘッダ右側に移動させる
-                st.markdown(f'<div id="copy-btn-wrap-{idx}">', unsafe_allow_html=True)
-                copy_clicked = st.button(
-                    "📋 テキストコピー",
-                    key=f"copy_button_{idx}",
-                )
-                st.markdown("</div>", unsafe_allow_html=True)
-
-                # ③ Python側：クリックされたらログテーブルにレコード追加
-                if copy_clicked:
-                    if HAS_DB:
-                        try:
-                            log_copy_click(
-                                template=template,
-                                tone=tone,
-                                recipient=recipient,
-                                pattern_index=idx + 1,
-                            )
-                        except Exception as e:
-                            st.error(f"コピークリックログ保存エラー: {e}")
-
                 st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-        # ④ JS：ボタンをカード右上に移動し、クリック時にコピー＋キラキラを追加
+        # コピーアイコン用 JS（元に戻す）
         texts_json = json.dumps(copy_texts, ensure_ascii=False)
 
         st.components.v1.html(
@@ -1411,79 +1391,54 @@ with col2:
             (function() {{
               const texts = {texts_json};
 
-              function setup() {{
-                const wraps = parent.document.querySelectorAll('[id^="copy-btn-wrap-"]');
-                wraps.forEach(wrap => {{
-                  const id = wrap.id.replace("copy-btn-wrap-", "");
-                  const idx = parseInt(id, 10);
-                  const slot = parent.document.getElementById("copy-slot-" + id);
-                  if (!slot || isNaN(idx) || !texts[idx]) return;
+              function setupIcons() {{
+                const icons = parent.document.querySelectorAll('.pattern-copy-icon');
+                if (!icons || icons.length === 0) return;
 
-                  // wrapごとヘッダ右側に移動
-                  slot.innerHTML = "";
-                  slot.appendChild(wrap);
+                function copyText(text) {{
+                  if (navigator.clipboard && navigator.clipboard.writeText) {{
+                    navigator.clipboard.writeText(text).catch(function(err) {{
+                      console.warn("navigator.clipboard failed:", err);
+                      fallbackCopy(text);
+                    }});
+                  }} else {{
+                    fallbackCopy(text);
+                  }}
+                }}
 
-                  const btn = wrap.querySelector("button");
-                  if (!btn) return;
+                function fallbackCopy(text) {{
+                  try {{
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.style.position = 'fixed';
+                    textarea.style.top = '-9999px';
+                    textarea.style.left = '-9999px';
+                    document.body.appendChild(textarea);
+                    textarea.focus();
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                  }} catch (e) {{
+                    console.error("Fallback copy failed:", e);
+                  }}
+                }}
 
-                  // 3Dオレンジボタンのスタイルを打ち消し、pattern-copy-icon 風にする
-                  btn.classList.add("pattern-copy-icon");
-                  btn.style.border = "1px solid #ffd666";
-                  btn.style.backgroundColor = "#111827";
-                  btn.style.borderRadius = "999px";
-                  btn.style.padding = "4px 10px";
-                  btn.style.height = "auto";
-                  btn.style.width = "auto";
-                  btn.style.transform = "none";
-                  btn.style.boxShadow = "none";
+                icons.forEach(function(icon) {{
+                  const idx = parseInt(icon.getAttribute('data-pattern'), 10);
+                  if (isNaN(idx) || !texts[idx]) return;
 
-                  // Streamlit の ::before / ::after を無効化
-                  btn.style.setProperty("--before-display", "none");
-
-                  // クリック時：コピー＋キラキラ（ログは Python 側が処理）
-                  btn.addEventListener("click", function(ev) {{
-                    // テキストコピー
-                    const text = texts[idx];
-
-                    function copyText(t) {{
-                      if (navigator.clipboard && navigator.clipboard.writeText) {{
-                        navigator.clipboard.writeText(t).catch(function(err) {{
-                          console.warn("navigator.clipboard failed:", err);
-                          fallbackCopy(t);
-                        }});
-                      }} else {{
-                        fallbackCopy(t);
-                      }}
-                    }}
-
-                    function fallbackCopy(t) {{
-                      try {{
-                        const textarea = document.createElement('textarea');
-                        textarea.value = t;
-                        textarea.style.position = 'fixed';
-                        textarea.style.top = '-9999px';
-                        textarea.style.left = '-9999px';
-                        document.body.appendChild(textarea);
-                        textarea.focus();
-                        textarea.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(textarea);
-                      }} catch (e) {{
-                        console.error("Fallback copy failed:", e);
-                      }}
-                    }}
-
-                    copyText(text);
+                  icon.addEventListener('click', function() {{
+                    copyText(texts[idx]);
 
                     // キラキラエフェクト
-                    btn.classList.remove("copy-flash");
-                    void btn.offsetWidth;
-                    btn.classList.add("copy-flash");
+                    icon.classList.remove('copy-flash');
+                    void icon.offsetWidth;
+                    icon.classList.add('copy-flash');
                   }});
                 }});
               }}
 
-              setTimeout(setup, 500);
+              setTimeout(setupIcons, 500);
             }})();
             </script>
             """,
