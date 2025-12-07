@@ -368,6 +368,13 @@ button[title="Close sidebar"] svg {
     color: #050b23 !important;
 }
 
+/* サイドバー開閉ボタンを完全非表示 */
+button[title="Open sidebar"],
+button[title="Close sidebar"],
+button[data-testid="baseButton-sidebar"] {
+    display: none !important;
+}
+
 /* サイドバー上部ヘッダー縮小 */
 [data-testid="stSidebarHeader"] {
     min-height: 0 !important;
@@ -1307,6 +1314,7 @@ with col2:
             """,
             height=0,
         )
+
 
 
 
