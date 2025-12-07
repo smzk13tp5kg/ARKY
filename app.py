@@ -647,10 +647,10 @@ main.block-container {
 
 /* 右：プレビューカード（グラデーション枠つき） */
 .preview-main-wrapper {
-    position: relative;               /* ← グラデ枠を重ねるために追加 */
+    position: relative;
     background: #ffffff;
     border-radius: 12px;
-    padding: 16px;                    /* ← border ではなく padding に枠分の余裕を確保 */
+    padding: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     min-height: 350px;
     width: 100%;
@@ -658,7 +658,7 @@ main.block-container {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    overflow: hidden;                 /* 内側のはみ出し防止 */
+    overflow: hidden;
 }
 
 /* グラデーション枠（イントロバブル系） */
@@ -667,7 +667,7 @@ main.block-container {
     position: absolute;
     inset: 0;
     border-radius: 12px;
-    padding: 3px;  /* 枠の太さ（好みで 2〜5px に調整可） */
+    padding: 3px;
 
     background: linear-gradient(
         120deg,
@@ -680,7 +680,6 @@ main.block-container {
     background-size: 400% 400%;
     animation: preview-gradient 4s ease-in-out infinite;
 
-    /* 枠の内側だけ見せる Mask 技法（イントロバブルと同じ） */
     -webkit-mask:
         linear-gradient(#000 0 0) content-box,
         linear-gradient(#000 0 0);
@@ -704,41 +703,7 @@ main.block-container {
     }
 }
 
-/* 以下は中身なのでそのまま使用して問題なし */
-.preview-subject {
-    color: #111827;
-    font-size: 14px;
-    margin-bottom: 8px;
-    font-weight: bold;
-}
-.preview-body {
-    background: #f3f4f6;
-    border-radius: 8px;
-    border: 1px solid #d1d5db;
-    color: #111827;
-    font-size: 14px;
-    padding: 12px;
-    flex-grow: 1;
-    min-height: 120px;
-    overflow-y: auto;
-    word-break: break-word;
-    white-space: pre-wrap;
-}
-.advice-box {
-    background: #fffbe6;
-    border: 1px solid #ffd666;
-    border-radius: 8px;
-    padding: 10px;
-    color: #4b5563;
-    font-size: 13px;
-    margin-top: 12px;
-}
-.copy-info {
-    color: #ffffff;
-    font-size: 13px;
-    margin-bottom: 4px;
-}
-
+/* プレビュー本文など（中身）はそのまま */
 .preview-subject {
     color: #111827;
     font-size: 14px;
@@ -858,7 +823,7 @@ main.block-container {
         box-shadow: 0 0 0px rgba(255, 214, 102, 0.0);
     }
     50% {
-        background-position: 100% 50%;
+       背景 posição: 100% 50%;
         box-shadow: 0 0 16px rgba(255, 214, 102, 0.35);
     }
     100% {
@@ -893,18 +858,12 @@ main.block-container {
     margin-bottom: 4px !important;
 }
 
-/* -------------------------------------------
-   カスタムテンプレート入力ボックス（その他）
-------------------------------------------- */
-
-/* 外側コンテナ：幅を30px狭める＆背景を消す */
+/* カスタムテンプレート入力ボックス（その他） */
 [data-testid="stSidebar"] [data-testid="stTextInput"] > div {
     width: calc(100% - 30px) !important;
     margin-left: 0 !important;
     background: transparent !important;
 }
-
-/* 実際の入力ボックス */
 [data-testid="stSidebar"] [data-testid="stTextInput"] input {
     width: 100% !important;
     background-color: #330033 !important;
@@ -927,8 +886,7 @@ main.block-container {
 }
 
 /* ============================================
-   プレビュータブの見た目カスタマイズ
-   （パターン1〜3用）
+   プレビュータブの見た目カスタマイズ（パターン1〜3用）
 ============================================ */
 .stTabs {
     margin-top: 4px;
@@ -1252,13 +1210,14 @@ with col1:
             )
 
             # ④ OpenAI案（3パターン分 Markdown）を生成して保持
-            ai_text = generate_email_with_openai(
-                template=template,
-                tone=tone,
-                recipient=recipient,
-                message=user_message,
-                seasonal_text=seasonal_text,
-            )
+            with st.spinner("メッセージを生成しています…"):
+                ai_text = generate_email_with_openai(
+                    template=template,
+                    tone=tone,
+                    recipient=recipient,
+                    message=user_message,
+                    seasonal_text=seasonal_text,
+                )
             st.session_state.ai_suggestions = ai_text
 
             # ⑤ DB保存（あれば）
@@ -1333,10 +1292,19 @@ with col2:
     ai_text = st.session_state.ai_suggestions
 
     if not ai_text:
+        # 未生成／リセット直後のプレースホルダ
         placeholder_html = textwrap.dedent(
             """
             <div class="preview-main-wrapper">
-                <p><em>メッセージを送信すると、ここにAIが生成した3パターンのプレビューが表示されます。</em></p>
+              <div class="preview-header">
+                <span></span>
+              </div>
+              <div style="margin-top:8px;">
+                <p style="font-size:14px; color:#4b5563; margin:0;">
+                  メッセージを生成する準備ができています。<br>
+                  左側で内容を入力し、「送信」ボタンをクリックしてください。
+                </p>
+              </div>
             </div>
             """
         )
@@ -1465,5 +1433,3 @@ with col2:
             """,
             height=0,
         )
-
-
