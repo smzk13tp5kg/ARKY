@@ -360,17 +360,9 @@ div[data-testid="stHorizontalBlock"] {
     color: #ffffff !important;
 }
 
-/* サイドバー開閉ボタンを必ず表示に戻す */
-button[data-testid="baseButton-sidebar"] {
-    display: inline-flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
-/* サイドバー開閉ボタンのアイコン色を背景と同化させる（濃紺に） */
-button[data-testid="baseButton-sidebar"] svg {
-    fill: #050b23 !important;  /* ← ここを白(#ffffff)にすれば、白アイコンに戻せる */
-    color: #050b23 !important;
+/* ヘッダー内のボタンのテキスト色＝アイコン色を背景と同化させる */
+[data-testid="stHeader"] button {
+    color: #050b23 !important;   /* ヘッダー背景と同系色にする */
 }
 
 /* サイドバー上部ヘッダー縮小 */
@@ -1312,6 +1304,7 @@ with col2:
             """,
             height=0,
         )
+
 
 
 
