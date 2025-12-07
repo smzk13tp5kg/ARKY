@@ -935,7 +935,7 @@ main.block-container {
     background-color: #990000;
 }
 .stTabs [role="tablist"] > [role="tab"]:nth-child(2) > div {
-    background-color: #660066;
+   背景色: #660066;
 }
 .stTabs [role="tablist"] > [role="tab"]:nth-child(3) > div {
     background-color: #336600;
@@ -1239,14 +1239,16 @@ with col1:
             if len(st.session_state.messages) > 50:
                 st.session_state.messages = st.session_state.messages[-50:]
 
-            st.experimental_rerun()
+            # ★ 修正：experimental_rerun → rerun
+            st.rerun()
 
     elif reset_clicked:
         # 全リセット
         st.session_state.messages = []
         st.session_state.last_user_message = ""
         st.session_state.ai_suggestions = None
-        st.experimental_rerun()
+        # ★ 修正：experimental_rerun → rerun
+        st.rerun()
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
