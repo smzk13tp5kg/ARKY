@@ -360,6 +360,15 @@ div[data-testid="stHorizontalBlock"] {
     color: #ffffff !important;
 }
 
+/* サイドバー開閉ボタンを必ず表示に戻す */
+button[title="Open sidebar"],
+button[title="Close sidebar"],
+button[data-testid="baseButton-sidebar"] {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
 /* サイドバー開閉ボタンのアイコン色 */
 button[title="Open sidebar"] svg,
 button[title="Close sidebar"] svg {
@@ -1306,6 +1315,7 @@ with col2:
             """,
             height=0,
         )
+
 
 
 
