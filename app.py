@@ -1164,7 +1164,6 @@ with col1:
     chat_html_parts.append("</div>")
     st.markdown("\n".join(chat_html_parts), unsafe_allow_html=True)
 
-
 # --------------------------------------------
 # 右：AIが作った3パターンのプレビュー
 # --------------------------------------------
@@ -1195,95 +1194,100 @@ with col2:
         # コピー用テキスト配列（元の Markdown まるごと）
         copy_texts = blocks.copy()
 
-        for idx, block in enumerate(blocks):
-            st.markdown(
-                f"<div class='section-header'>◆ パターン {idx + 1}</div>",
-                unsafe_allow_html=True,
-            )
+        # ----- ここからタブ生成 -----
+        tab_labels = [f"パターン {i + 1}" for i in range(len(blocks))]
+        tabs = st.tabs(tab_labels)
 
-            parsed = parse_pattern_block(block)
-            subj = html.escape(parsed["subject"] or "").replace("\n", "<br>")
-            body = html.escape(parsed["body"] or "").replace("\n", "<br>")
-            improve = html.escape(parsed["improve"] or "").replace("\n", "<br>")
-            caution = html.escape(parsed["caution"] or "").replace("\n", "<br>")
+        for idx, (tab, block) in enumerate(zip(tabs, blocks)):
+            with tab:
+                st.markdown(
+                    f"<div class='section-header'>◆ パターン {idx + 1}</div>",
+                    unsafe_allow_html=True,
+                )
 
-            card_html = f"""
-            <div class="preview-main-wrapper">
-              <div class="preview-header">
-                <span></span>
-                <span class="pattern-copy-icon"
-                      data-pattern="{idx}"
-                      title="メッセージをコピーします">
-                    📋 テキストコピー  
-                </span>
-              </div>
+                parsed = parse_pattern_block(block)
+                subj = html.escape(parsed["subject"] or "").replace("\n", "<br>")
+                body = html.escape(parsed["body"] or "").replace("\n", "<br>")
+                improve = html.escape(parsed["improve"] or "").replace("\n", "<br>")
+                caution = html.escape(parsed["caution"] or "").replace("\n", "<br>")
 
-              <div style="margin-top:4px;">
-                <div class="preview-section-label">件名</div>
-                <div class="preview-subject">{subj}</div>
-              </div>
+                card_html = f"""
+                <div class="preview-main-wrapper">
+                  <div class="preview-header">
+                    <span></span>
+                    <span class="pattern-copy-icon"
+                          data-pattern="{idx}"
+                          title="メッセージをコピーします">
+                      📋 テキストコピー
+                    </span>
+                  </div>
 
-              <div style="margin-top:12px;">
-                <div class="preview-section-label">本文</div>
-                <div class="preview-body">{body}</div>
-              </div>
+                  <div style="margin-top:4px;">
+                    <div class="preview-section-label">件名</div>
+                    <div class="preview-subject">{subj}</div>
+                  </div>
 
-              <div style="margin-top:12px;">
-                <div class="preview-section-label">改善点</div>
-                <div class="preview-note-body">{improve}</div>
-              </div>
+                  <div style="margin-top:12px;">
+                    <div class="preview-section-label">本文</div>
+                    <div class="preview-body">{body}</div>
+                  </div>
 
-              <div style="margin-top:12px;">
-                <div class="preview-section-label">注意点</div>
-                <div class="preview-note-body">{caution}</div>
-              </div>
-            </div>
-            """
+                  <div style="margin-top:12px;">
+                    <div class="preview-section-label">改善点</div>
+                    <div class="preview-note-body">{improve}</div>
+                  </div>
 
-            st.markdown(card_html, unsafe_allow_html=True)
+                  <div style="margin-top:12px;">
+                    <div class="preview-section-label">注意点</div>
+                    <div class="preview-note-body">{caution}</div>
+                  </div>
+                </div>
+                """
 
-            # ボタン行（リセット／表現を変える）
-            btn_col1, btn_col2 = st.columns(2)
-            with btn_col1:
-                if st.button("リセット", key=f"reset_{idx}", use_container_width=True):
-                    st.session_state.messages = []
-                    st.session_state.last_user_message = ""
-                    st.session_state.ai_suggestions = None
-                    st.session_state.variation_count = 0
-                    st.rerun()
+                st.markdown(card_html, unsafe_allow_html=True)
 
-            with btn_col2:
-                if st.button("🔄 表現を変える", key=f"regen_{idx}", use_container_width=True):
-                    if st.session_state.last_user_message:
-                        st.session_state.variation_count += 1
+                # ボタン行（リセット／表現を変える）
+                btn_col1, btn_col2 = st.columns(2)
+                with btn_col1:
+                    if st.button("リセット", key=f"reset_{idx}", use_container_width=True):
+                        st.session_state.messages = []
+                        st.session_state.last_user_message = ""
+                        st.session_state.ai_suggestions = None
+                        st.session_state.variation_count = 0
+                        st.rerun()
 
-                        st.session_state.ai_suggestions = generate_email_with_openai(
-                            template=template,
-                            tone=tone,
-                            recipient=recipient,
-                            message=st.session_state.last_user_message,
-                            seasonal_text=seasonal_text,
-                        )
+                with btn_col2:
+                    if st.button("🔄 表現を変える", key=f"regen_{idx}", use_container_width=True):
+                        if st.session_state.last_user_message:
+                            st.session_state.variation_count += 1
 
-                        st.session_state.messages.append(
-                            {
-                                "role": "assistant",
-                                "content": (
-                                    f"AIによる新しい3パターン（バリエーション "
-                                    f"{st.session_state.variation_count + 1}）を生成しました。"
-                                ),
-                            }
-                        )
-                        if len(st.session_state.messages) > 50:
-                            st.session_state.messages = st.session_state.messages[-50:]
-                    else:
-                        st.warning("直近のユーザー入力が見つかりません。先にメッセージを送信してください。")
+                            st.session_state.ai_suggestions = generate_email_with_openai(
+                                template=template,
+                                tone=tone,
+                                recipient=recipient,
+                                message=st.session_state.last_user_message,
+                                seasonal_text=seasonal_text,
+                            )
 
-                    st.rerun()
+                            st.session_state.messages.append(
+                                {
+                                    "role": "assistant",
+                                    "content": (
+                                        f"AIによる新しい3パターン（バリエーション "
+                                        f"{st.session_state.variation_count + 1}）を生成しました。"
+                                    ),
+                                }
+                            )
+                            if len(st.session_state.messages) > 50:
+                                st.session_state.messages = st.session_state.messages[-50:]
+                        else:
+                            st.warning("直近のユーザー入力が見つかりません。先にメッセージを送信してください。")
 
-            st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+                        st.rerun()
 
-        # コピーアイコン用 JS
+                st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+
+        # コピーアイコン用 JS（そのまま）
         texts_json = json.dumps(copy_texts, ensure_ascii=False)
 
         st.components.v1.html(
@@ -1341,22 +1345,8 @@ with col2:
 
               setTimeout(setupIcons, 500);
             }})();
+
             </script>
             """,
             height=0,
         )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
