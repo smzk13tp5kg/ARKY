@@ -954,6 +954,8 @@ if "variation_count" not in st.session_state:
     st.session_state.variation_count = 0
 if "ai_suggestions" not in st.session_state:
     st.session_state.ai_suggestions = None
+if "copy_target_text" not in st.session_state:
+    st.session_state.copy_target_text = ""
 
 # ============================================
 # トップバー
@@ -1442,6 +1444,7 @@ with col2:
             """,
             height=0,
         )
+
 
 
 
