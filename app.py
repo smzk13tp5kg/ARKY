@@ -488,7 +488,7 @@ div[data-testid="stHorizontalBlock"] {
     color: #ffffff !important;
 }
 .section-header {
-    font-size: 16px;
+    fontサイズ: 16px;
     font-weight: 700;
     color: #ffd666;
     margin: 8px 0;
@@ -813,7 +813,7 @@ main.block-container {
     font-size: 14px;
     font-weight: 600;
     line-height: 1.6;
-    animation: assistant-glow-text 4s ease-in-out infinite;
+    animation: assistant-glow-text 3s ease-in-out infinite;
 }
 
 /* 枠のグローアニメーション */
@@ -823,7 +823,7 @@ main.block-container {
         box-shadow: 0 0 0px rgba(255, 214, 102, 0.0);
     }
     50% {
-       背景 posição: 100% 50%;
+        background-position: 100% 50%;
         box-shadow: 0 0 16px rgba(255, 214, 102, 0.35);
     }
     100% {
@@ -885,9 +885,7 @@ main.block-container {
     border: none !important;
 }
 
-/* ============================================
-   プレビュータブの見た目カスタマイズ（パターン1〜3用）
-============================================ */
+/* プレビュータブの見た目カスタマイズ（パターン1〜3用） */
 .stTabs {
     margin-top: 4px;
 }
@@ -984,12 +982,23 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 if "last_user_message" not in st.session_state:
     st.session_state.last_user_message = ""
-if "generated_email" not in st.session_state:
-    st.session_state.generated_email = None
 if "variation_count" not in st.session_state:
     st.session_state.variation_count = 0
 if "ai_suggestions" not in st.session_state:
     st.session_state.ai_suggestions = None
+if "need_generate" not in st.session_state:
+    st.session_state.need_generate = False
+
+# 生成に必要なパラメータ
+for key in [
+    "pending_template",
+    "pending_tone",
+    "pending_recipient",
+    "pending_seasonal_text",
+    "pending_add_seasonal",
+]:
+    if key not in st.session_state:
+        st.session_state[key] = None
 
 # ============================================
 # トップバー
@@ -1169,29 +1178,23 @@ with col1:
         with reset_col:
             reset_clicked = st.form_submit_button("リセット", use_container_width=True)
 
-    # フォーム送信後の処理
+    # フォーム送信後（1stステップ：生成フラグを立てて rerun）
     if submitted and user_message:
         if template == "その他" and not custom_template:
             st.error("⚠️ カスタムテンプレートを入力してください")
         elif recipient == "その他" and not custom_recipient:
             st.error("⚠️ カスタム相手を入力してください")
         else:
-            # ① ベースメッセージ保存
+            # 1) ユーザー入力と条件を保存
             st.session_state.last_user_message = user_message
-
-            # ② 従来ロジックでのベースメール（subject/body）も一応生成
+            st.session_state.pending_template = template
+            st.session_state.pending_tone = tone
+            st.session_state.pending_recipient = recipient
+            st.session_state.pending_seasonal_text = seasonal_text
+            st.session_state.pending_add_seasonal = add_seasonal
             st.session_state.variation_count = 0
-            base_email = generate_email(
-                template,
-                tone,
-                recipient,
-                user_message,
-                variation=0,
-                seasonal_text=seasonal_text,
-            )
-            st.session_state.generated_email = base_email
 
-            # ③ チャットログ（選択内容付き）
+            # 2) チャットログにユーザー／ガイドを積む
             user_display_text = (
                 f"{user_message}\n\n"
                 f"――――――――――\n"
@@ -1200,7 +1203,6 @@ with col1:
             st.session_state.messages.append(
                 {"role": "user", "content": user_display_text}
             )
-
             guide = (
                 f"{template}メールを「{tone}」なトーンで、"
                 f"{recipient}宛に作成しました！右側のプレビューをご覧ください。"
@@ -1208,70 +1210,33 @@ with col1:
             st.session_state.messages.append(
                 {"role": "assistant", "content": guide}
             )
-
-            # ④ OpenAI案（3パターン分 Markdown）を生成して保持
-            with st.spinner("メッセージを生成しています…"):
-                ai_text = generate_email_with_openai(
-                    template=template,
-                    tone=tone,
-                    recipient=recipient,
-                    message=user_message,
-                    seasonal_text=seasonal_text,
-                )
-            st.session_state.ai_suggestions = ai_text
-
-            # ⑤ DB保存（あれば）
-            if HAS_DB and ai_text:
-                try:
-                    raw_blocks = re.split(
-                        r"(?=^##\s*パターン\s*\d+)", ai_text, flags=re.MULTILINE
-                    )
-                    blocks = [b.strip() for b in raw_blocks if b.strip()]
-                    blocks = blocks[:3]
-                    while len(blocks) < 3:
-                        blocks.append("このパターンはまだ生成されていません。")
-
-                    patterns_for_db = []
-                    for b in blocks:
-                        parsed = parse_pattern_block(b)
-                        patterns_for_db.append(
-                            {
-                                "subject": parsed.get("subject", ""),
-                                "body": parsed.get("body", ""),
-                            }
-                        )
-
-                    save_email_batch(
-                        template=template,
-                        tone=tone,
-                        recipient=recipient,
-                        message=user_message,
-                        seasonal_greeting=add_seasonal,
-                        patterns=patterns_for_db,
-                    )
-
-                    st.success("✅ データベースへの保存に成功しました！")
-
-                except Exception as e:
-                    st.error(f"❌ DB保存エラー: {str(e)}")
-
-            # ⑥ チャットログを最大50件に制限
             if len(st.session_state.messages) > 50:
                 st.session_state.messages = st.session_state.messages[-50:]
 
-            st.rerun()
+            # 3) 生成フラグを ON にして、いったん再実行
+            st.session_state.ai_suggestions = None
+            st.session_state.need_generate = True
+            st.experimental_rerun()
 
     elif reset_clicked:
         # 全リセット
         st.session_state.messages = []
         st.session_state.last_user_message = ""
-        st.session_state.generated_email = None
         st.session_state.ai_suggestions = None
-        st.session_state.variation_count = 0
-        st.rerun()
+        st.session_state.need_generate = False
+        for key in [
+            "pending_template",
+            "pending_tone",
+            "pending_recipient",
+            "pending_seasonal_text",
+            "pending_add_seasonal",
+        ]:
+            st.session_state[key] = None
+        st.experimental_rerun()
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
+    # チャットログ描画
     chat_html_parts = ["<div class='chat-log'>"]
     for msg in st.session_state.messages:
         role = msg["role"]
@@ -1286,44 +1251,51 @@ with col1:
     st.markdown("\n".join(chat_html_parts), unsafe_allow_html=True)
 
 # --------------------------------------------
-# 右：AIが作った3パターンのプレビュー（タブ表示）
+# 右：AIが作った3パターンのプレビュー（タブ表示 or プレースホルダ）
 # --------------------------------------------
 with col2:
     ai_text = st.session_state.ai_suggestions
+    generating = st.session_state.need_generate
 
-    if not ai_text:
-        # 起動直後／リセット直後のプレースホルダ
-        placeholder_html = textwrap.dedent(
+    if ai_text is None:
+        # ===== パターン未生成時の表示 =====
+        if generating:
+            # 送信直後〜生成中
+            msg_html = """
+            メッセージを生成しています・・・<br>
+            数秒お待ちください。
             """
+        else:
+            # アプリ起動直後／リセット直後
+            msg_html = """
+            送信ボタンをクリックすると、ここにAIが生成したメッセージが表示されます。
+            """
+
+        placeholder_html = textwrap.dedent(
+            f"""
             <div class="preview-main-wrapper">
               <div class="preview-header">
                 <span></span>
               </div>
               <div style="margin-top:8px;">
                 <p style="font-size:14px; color:#4b5563; margin:0;">
-                  送信ボタンをクリックすると、ここにAIが生成したメッセージが表示されます。
+                  {msg_html}
                 </p>
               </div>
             </div>
             """
         )
         st.markdown(placeholder_html, unsafe_allow_html=True)
+
     else:
-        # 行頭が「## パターン数字」の行で分割
-        raw_blocks = re.split(r"(?=^##\s*パターン\s*\d+)", ai_text, flags=re.MULTILINE)
+        # ===== パターンが生成できている場合：タブ表示 =====
+        raw_blocks = re.split(r"(?=^##\\s*パターン\\s*\\d+)", ai_text, flags=re.MULTILINE)
         blocks = [b.strip() for b in raw_blocks if b.strip()]
-
-        # 先頭3つだけ使う
         blocks = blocks[:3]
-
-        # 3つに満たない場合はプレースホルダで埋める
         while len(blocks) < 3:
             blocks.append("このパターンはまだ生成されていません。")
 
-        # コピー用テキスト配列（元の Markdown まるごと）
         copy_texts = blocks.copy()
-
-        # タブ生成
         tab_labels = [f"パターン {i + 1}" for i in range(len(blocks))]
         tabs = st.tabs(tab_labels)
 
@@ -1372,7 +1344,6 @@ with col2:
 
         # コピーアイコン用 JS
         texts_json = json.dumps(copy_texts, ensure_ascii=False)
-
         st.components.v1.html(
             f"""
             <script>
@@ -1417,7 +1388,6 @@ with col2:
                     icon.addEventListener('click', function() {{
                       copyText(texts[idx]);
 
-                      // クリック時にキラッとアニメーション
                       icon.classList.remove('copy-flash');
                       void icon.offsetWidth;
                       icon.classList.add('copy-flash');
@@ -1433,4 +1403,53 @@ with col2:
             height=0,
         )
 
+# ============================================
+# 生成フラグが立っているときにだけ、実際の生成を行う（2ndステップ）
+# ============================================
+if st.session_state.need_generate and st.session_state.last_user_message:
+    with st.spinner("メッセージを生成しています…"):
+        ai_text = generate_email_with_openai(
+            template=st.session_state.pending_template,
+            tone=st.session_state.pending_tone,
+            recipient=st.session_state.pending_recipient,
+            message=st.session_state.last_user_message,
+            seasonal_text=st.session_state.pending_seasonal_text,
+        )
 
+    st.session_state.ai_suggestions = ai_text
+
+    # DB保存
+    if HAS_DB and ai_text:
+        try:
+            raw_blocks = re.split(
+                r"(?=^##\\s*パターン\\s*\\d+)", ai_text, flags=re.MULTILINE
+            )
+            blocks = [b.strip() for b in raw_blocks if b.strip()]
+            blocks = blocks[:3]
+            while len(blocks) < 3:
+                blocks.append("このパターンはまだ生成されていません。")
+
+            patterns_for_db = []
+            for b in blocks:
+                parsed = parse_pattern_block(b)
+                patterns_for_db.append(
+                    {
+                        "subject": parsed.get("subject", ""),
+                        "body": parsed.get("body", ""),
+                    }
+                )
+
+            save_email_batch(
+                template=st.session_state.pending_template,
+                tone=st.session_state.pending_tone,
+                recipient=st.session_state.pending_recipient,
+                message=st.session_state.last_user_message,
+                seasonal_greeting=st.session_state.pending_add_seasonal,
+                patterns=patterns_for_db,
+            )
+        except Exception as e:
+            st.error(f"❌ DB保存エラー: {str(e)}")
+
+    # 生成完了
+    st.session_state.need_generate = False
+    st.experimental_rerun()
