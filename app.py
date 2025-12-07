@@ -645,12 +645,12 @@ main.block-container {
     100% { background-position: 14% 0%; }
 }
 
-/* 右：プレビューカード */
+/* 右：プレビューカード（グラデーション枠つき） */
 .preview-main-wrapper {
+    position: relative;               /* ← グラデ枠を重ねるために追加 */
     background: #ffffff;
     border-radius: 12px;
-    border: 1px solid #e5e7eb;
-    padding: 16px;
+    padding: 16px;                    /* ← border ではなく padding に枠分の余裕を確保 */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     min-height: 350px;
     width: 100%;
@@ -658,8 +658,87 @@ main.block-container {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: hidden;                 /* 内側のはみ出し防止 */
 }
+
+/* グラデーション枠（イントロバブル系） */
+.preview-main-wrapper::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    padding: 3px;  /* 枠の太さ（好みで 2〜5px に調整可） */
+
+    background: linear-gradient(
+        120deg,
+        #6559ae,
+        #ff7159,
+        #ffd666,
+        #ff7159,
+        #6559ae
+    );
+    background-size: 400% 400%;
+    animation: preview-gradient 4s ease-in-out infinite;
+
+    /* 枠の内側だけ見せる Mask 技法（イントロバブルと同じ） */
+    -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+}
+
+/* グラデーションの動き */
+@keyframes preview-gradient {
+    0% {
+        background-position: 0% 0%;
+        box-shadow: 0 0 0px rgba(255, 214, 102, 0.0);
+    }
+    50% {
+        background-position: 100% 100%;
+        box-shadow: 0 0 14px rgba(255, 214, 102, 0.4);
+    }
+    100% {
+        background-position: 0% 0%;
+        box-shadow: 0 0 0px rgba(255, 214, 102, 0.0);
+    }
+}
+
+/* 以下は中身なのでそのまま使用して問題なし */
+.preview-subject {
+    color: #111827;
+    font-size: 14px;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+.preview-body {
+    background: #f3f4f6;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    color: #111827;
+    font-size: 14px;
+    padding: 12px;
+    flex-grow: 1;
+    min-height: 120px;
+    overflow-y: auto;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+.advice-box {
+    background: #fffbe6;
+    border: 1px solid #ffd666;
+    border-radius: 8px;
+    padding: 10px;
+    color: #4b5563;
+    font-size: 13px;
+    margin-top: 12px;
+}
+.copy-info {
+    color: #ffffff;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
 .preview-subject {
     color: #111827;
     font-size: 14px;
@@ -1386,4 +1465,5 @@ with col2:
             """,
             height=0,
         )
+
 
