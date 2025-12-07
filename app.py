@@ -272,7 +272,7 @@ def generate_email(
 
 
 # ============================================
-# カスタムCSS
+# カスタムCSS（元コードそのまま）
 # ============================================
 st.markdown(
     """
@@ -334,7 +334,7 @@ main.block-container {
 [data-testid="column"] {
     padding: 0 !important;
     width: 100% !important;
-    min-width: 0 !重要;
+    min-width: 0 !important;
 }
 div[data-testid="stHorizontalBlock"] {
     gap: 0.5rem !important;
@@ -1380,33 +1380,28 @@ with col2:
                 st.markdown(card_html, unsafe_allow_html=True)
                 st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-                # ===== 追加：隠しボタン（UI上は非表示、JSからclickさせる） =====
+                # --- 隠しボタン（画面外に追い出して完全非表示） ---
+                # JS からこのボタンを click() させて log_copy_click を発火させる
                 st.markdown(
-                    "<div style='height:0; overflow:hidden; margin:0; padding:0;'>",
+                    f"<div style='position:absolute; left:-9999px; top:-9999px; width:0; height:0; overflow:hidden;'>",
                     unsafe_allow_html=True,
                 )
-
                 hidden_label = f"__COPY_TRIGGER_{idx}__"
                 hidden_pressed = st.button(
                     hidden_label,
                     key=f"copy_trigger_{idx}",
                 )
-
                 st.markdown("</div>", unsafe_allow_html=True)
 
-                # 隠しボタンが押されたら email_copy_log に1レコード挿入
                 if hidden_pressed and HAS_DB:
                     try:
-                        pattern_index = idx + 1
                         log_copy_click(
                             template=template,
                             tone=tone,
                             recipient=recipient,
-                            pattern_index=pattern_index,
+                            pattern_index=idx + 1,
                         )
                     except Exception as e:
-                        # コピー自体は成功しているはずなので、
-                        # ここでは軽くエラー表示のみにとどめる
                         st.error(f"コピー履歴の保存に失敗しました: {e}")
 
         # コピーアイコン用 JS（コピー＋隠しボタンクリック）
@@ -1458,7 +1453,7 @@ with col2:
                     // ① クリップボードへコピー
                     copyText(texts[idx]);
 
-                    // ② 対応する隠しボタンをクリックして Python 側の log_copy_click を発火
+                    // ② 対応する隠しボタンをクリック（Python側で log_copy_click が動く）
                     try {{
                       const label = "__COPY_TRIGGER_" + idx + "__";
                       const allButtons = parent.document.querySelectorAll('button');
