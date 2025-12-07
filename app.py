@@ -15,12 +15,6 @@ try:
 except ImportError:
     HAS_DB = False
 
-st.set_page_config(
-    page_title="ビジネスメール作成アシスタント",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
-
 # ============================================
 # 時候の挨拶（ヘルパー）
 # ============================================
@@ -371,13 +365,6 @@ button[title="Open sidebar"] svg,
 button[title="Close sidebar"] svg {
     fill: #050b23 !important;
     color: #050b23 !important;
-}
-
-/* サイドバー開閉ボタンを完全非表示 */
-button[title="Open sidebar"],
-button[title="Close sidebar"],
-button[data-testid="baseButton-sidebar"] {
-    display: none !important;
 }
 
 /* サイドバー上部ヘッダー縮小 */
@@ -1319,6 +1306,7 @@ with col2:
             """,
             height=0,
         )
+
 
 
 
