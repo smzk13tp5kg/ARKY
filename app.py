@@ -361,18 +361,15 @@ div[data-testid="stHorizontalBlock"] {
 }
 
 /* サイドバー開閉ボタンを必ず表示に戻す */
-button[title="Open sidebar"],
-button[title="Close sidebar"],
 button[data-testid="baseButton-sidebar"] {
     display: inline-flex !important;
     visibility: visible !important;
     opacity: 1 !important;
 }
 
-/* サイドバー開閉ボタンのアイコン色 */
-button[title="Open sidebar"] svg,
-button[title="Close sidebar"] svg {
-    fill: #050b23 !important;
+/* サイドバー開閉ボタンのアイコン色を背景と同化させる（濃紺に） */
+button[data-testid="baseButton-sidebar"] svg {
+    fill: #050b23 !important;  /* ← ここを白(#ffffff)にすれば、白アイコンに戻せる */
     color: #050b23 !important;
 }
 
@@ -1315,6 +1312,7 @@ with col2:
             """,
             height=0,
         )
+
 
 
 
