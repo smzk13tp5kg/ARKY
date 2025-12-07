@@ -363,16 +363,32 @@ div[data-testid="stHorizontalBlock"] {
     background: #050b23;
     border-right: 1px solid #cfae63;
 }
-/* サイドバーの文字だけ白 */
+
+/* サイドバーの開閉ボタン（≪アイコン）の色設定 */
+[data-testid="stSidebar"] [data-testid="collapsedControl"] {
+    color: #cfae63 !important;
+}
+
+[data-testid="stSidebar"] [data-testid="collapsedControl"] svg {
+    color: #cfae63 !important;
+    fill: #cfae63 !important;
+}
+
+/* サイドバー内のテキストは白色 */
 [data-testid="stSidebar"] label,
-[data-testid="stSidebar"] span,
-[data-testid="stSidebar"] div,
+[data-testid="stSidebar"] span:not([data-testid="collapsedControl"] span),
+[data-testid="stSidebar"] div:not([data-testid="collapsedControl"]),
 [data-testid="stSidebar"] p {
     color: #ffffff !important;
 }
 
-/* 開閉ボタンだけ色を別にする */
-[data-testid="stSidebar"] button {
+/* ラジオボタンのラベルテキストも白 */
+[data-testid="stSidebar"] .stRadio label {
+    color: #ffffff !important;
+}
+
+/* 開閉ボタン内のテキストだけゴールド */
+[data-testid="stSidebar"] [data-testid="collapsedControl"] span {
     color: #cfae63 !important;
 }
 
@@ -1315,5 +1331,6 @@ with col2:
             """,
             height=0,
         )
+
 
 
