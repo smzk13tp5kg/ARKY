@@ -1347,7 +1347,7 @@ with col2:
                 improve = html.escape(parsed["improve"] or "").replace("\n", "<br>")
                 caution = html.escape(parsed["caution"] or "").replace("\n", "<br>")
 
-                # ★ ここは元のまま：右上に pattern-copy-icon を出す
+                # ★ 1) 見た目は元のまま：右上に pattern-copy-icon を置く
                 card_html = f"""
                 <div class="preview-main-wrapper">
                   <div class="preview-header">
@@ -1382,18 +1382,18 @@ with col2:
                 """
                 st.markdown(card_html, unsafe_allow_html=True)
 
-                # ★ 裏側に「本物のボタン」を隠して置いておく（ログ用）
+                # ★ 2) 裏側の「本物ボタン」（非表示）を仕込んでおく（ログ用）
                 st.markdown(
                     f'<div id="real-copy-wrap-{idx}" style="display:none;">',
                     unsafe_allow_html=True,
                 )
                 real_clicked = st.button(
-                    f"real_copy_button_{idx}",
+                    f"real_copy_button_{idx}",  # ラベルは何でもよい（見えない）
                     key=f"real_copy_button_{idx}",
                 )
                 st.markdown("</div>", unsafe_allow_html=True)
 
-                # Python側：本物ボタンが押されたらログ＋コピー対象をセット（コピー対象は使わなくてもOK）
+                # ★ 3) Python側：本物ボタンが押されたらログを記録
                 if real_clicked:
                     if HAS_DB:
                         try:
@@ -1405,12 +1405,12 @@ with col2:
                             )
                         except Exception as e:
                             st.error(f"コピークリックログ保存エラー: {e}")
-                    # 必要ならサーバ側にも残せる
-                    # st.session_state.copy_target_text = copy_texts[idx]
 
                 st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-        # ★ コピーアイコン用 JS（ここに「隠しボタンをクリックする」処理を足す）
+        # ★ 4) コピーアイコン用 JS
+        #    - クリック時にテキストをクリップボードへコピー
+        #    - ＋ 裏側の本物ボタンを click させて Python にイベントを飛ばす
         texts_json = json.dumps(copy_texts, ensure_ascii=False)
 
         st.components.v1.html(
@@ -1459,14 +1459,14 @@ with col2:
                     // ① これまで通りテキストをコピー
                     copyText(texts[idx]);
 
-                    // ② 裏側の本物ボタンを押して Python にイベントを届ける
+                    // ② 裏側の本物ボタンを押して Python 側にイベントを送る
                     const wrap = parent.document.getElementById('real-copy-wrap-' + idx);
                     if (wrap) {{
                       const realBtn = wrap.querySelector('button');
                       if (realBtn) realBtn.click();
                     }}
 
-                    // ③ キラキラエフェクト（元のまま）
+                    // ③ キラキラエフェクト（元のCSSをそのまま利用）
                     icon.classList.remove('copy-flash');
                     void icon.offsetWidth;
                     icon.classList.add('copy-flash');
