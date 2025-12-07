@@ -780,11 +780,23 @@ main.block-container {
     margin-bottom: 4px !important;
 }
 
+/* -------------------------------------------
+   カスタムテンプレート入力ボックス（その他）
+   幅を30px狭め、背景色と枠線を変更
+------------------------------------------- */
+[data-testid="stSidebar"] [data-testid="stTextInput"] input {
+    width: calc(100% - 30px) !important;   /* 30px 狭める */
+    background-color: #330033 !important;  /* 背景色 */
+    border: 5px solid #ffffcc !important;  /* 枠線色＆太さ */
+    color: #ffffff !important;             /* 文字色（背景が暗いので白に） */
+    padding: 6px 10px !important;
+    border-radius: 8px !important;
+}
+
 </style>
 """,
     unsafe_allow_html=True,
 )
-
 
 # ============================================
 # JS：全ボタンに data-text を付与（3D用）
@@ -1287,6 +1299,7 @@ with col2:
             """,
             height=0,
         )
+
 
 
 
