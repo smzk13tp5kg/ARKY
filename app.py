@@ -26,7 +26,6 @@ except ImportError:
     HAS_DB = False
 
 
-
 # ============================================
 # 時候の挨拶（ヘルパー）
 # ============================================
@@ -335,7 +334,7 @@ main.block-container {
 [data-testid="column"] {
     padding: 0 !important;
     width: 100% !important;
-    min-width: 0 !important;
+    min-width: 0 !重要;
 }
 div[data-testid="stHorizontalBlock"] {
     gap: 0.5rem !important;
@@ -1136,7 +1135,6 @@ with col1:
             reset_clicked = st.form_submit_button("リセット", use_container_width=True)
 
     # フォーム送信後の処理
-    # フォーム送信後の処理
     if submitted and user_message:
         if template == "その他" and not custom_template:
             st.error("⚠️ カスタムテンプレートを入力してください")
@@ -1228,7 +1226,6 @@ with col1:
                     prev_suggestions = st.session_state.ai_suggestions
                     refine_flag = True
 
-                # ★ 修正ポイント：openai_logic の新シグネチャに合わせて引数追加
                 ai_text = generate_email_with_openai(
                     template=template,
                     tone=tone,
@@ -1339,6 +1336,7 @@ with col2:
         tab_labels = [f"パターン {i + 1}" for i in range(len(blocks))]
         tabs = st.tabs(tab_labels)
 
+        # 各タブ描画＋隠しボタン
         for idx, (tab, block) in enumerate(zip(tabs, blocks)):
             with tab:
                 parsed = parse_pattern_block(block)
@@ -1382,7 +1380,36 @@ with col2:
                 st.markdown(card_html, unsafe_allow_html=True)
                 st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-        # コピーアイコン用 JS（元に戻す）
+                # ===== 追加：隠しボタン（UI上は非表示、JSからclickさせる） =====
+                st.markdown(
+                    "<div style='height:0; overflow:hidden; margin:0; padding:0;'>",
+                    unsafe_allow_html=True,
+                )
+
+                hidden_label = f"__COPY_TRIGGER_{idx}__"
+                hidden_pressed = st.button(
+                    hidden_label,
+                    key=f"copy_trigger_{idx}",
+                )
+
+                st.markdown("</div>", unsafe_allow_html=True)
+
+                # 隠しボタンが押されたら email_copy_log に1レコード挿入
+                if hidden_pressed and HAS_DB:
+                    try:
+                        pattern_index = idx + 1
+                        log_copy_click(
+                            template=template,
+                            tone=tone,
+                            recipient=recipient,
+                            pattern_index=pattern_index,
+                        )
+                    except Exception as e:
+                        # コピー自体は成功しているはずなので、
+                        # ここでは軽くエラー表示のみにとどめる
+                        st.error(f"コピー履歴の保存に失敗しました: {e}")
+
+        # コピーアイコン用 JS（コピー＋隠しボタンクリック）
         texts_json = json.dumps(copy_texts, ensure_ascii=False)
 
         st.components.v1.html(
@@ -1428,9 +1455,25 @@ with col2:
                   if (isNaN(idx) || !texts[idx]) return;
 
                   icon.addEventListener('click', function() {{
+                    // ① クリップボードへコピー
                     copyText(texts[idx]);
 
-                    // キラキラエフェクト
+                    // ② 対応する隠しボタンをクリックして Python 側の log_copy_click を発火
+                    try {{
+                      const label = "__COPY_TRIGGER_" + idx + "__";
+                      const allButtons = parent.document.querySelectorAll('button');
+                      for (let i = 0; i < allButtons.length; i++) {{
+                        const btn = allButtons[i];
+                        if ((btn.innerText || "").trim() === label) {{
+                          btn.click();
+                          break;
+                        }}
+                      }}
+                    }} catch (e) {{
+                      console.warn("Hidden button click failed:", e);
+                    }}
+
+                    // ③ キラキラエフェクト
                     icon.classList.remove('copy-flash');
                     void icon.offsetWidth;
                     icon.classList.add('copy-flash');
