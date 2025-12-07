@@ -1292,7 +1292,7 @@ with col2:
     ai_text = st.session_state.ai_suggestions
 
     if not ai_text:
-        # 未生成／リセット直後のプレースホルダ
+        # 起動直後／リセット直後のプレースホルダ
         placeholder_html = textwrap.dedent(
             """
             <div class="preview-main-wrapper">
@@ -1301,8 +1301,7 @@ with col2:
               </div>
               <div style="margin-top:8px;">
                 <p style="font-size:14px; color:#4b5563; margin:0;">
-                  メッセージを生成しています・・・<br>
-                  数秒お待ちください。
+                  送信ボタンをクリックすると、ここにAIが生成したメッセージが表示されます。
                 </p>
               </div>
             </div>
@@ -1433,4 +1432,5 @@ with col2:
             """,
             height=0,
         )
+
 
