@@ -1281,11 +1281,7 @@ with col2:
 
         for idx, (tab, block) in enumerate(zip(tabs, blocks)):
             with tab:
-                st.markdown(
-                    f"<div class='section-header'>◆ パターン {idx + 1}</div>",
-                    unsafe_allow_html=True,
-                )
-
+                
                 parsed = parse_pattern_block(block)
                 subj = html.escape(parsed["subject"] or "").replace("\n", "<br>")
                 body = html.escape(parsed["body"] or "").replace("\n", "<br>")
@@ -1431,4 +1427,5 @@ with col2:
             """,
             height=0,
         )
+
 
