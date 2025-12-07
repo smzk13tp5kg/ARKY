@@ -20,10 +20,11 @@ from openai_logic import generate_email_with_openai
 
 # DB保存ロジック（あれば使う）
 try:
-    from db_logic import save_email_batch
+    from db_logic import save_email_batch, log_copy_click
     HAS_DB = True
 except ImportError:
     HAS_DB = False
+
 
 
 # ============================================
@@ -1441,6 +1442,7 @@ with col2:
             """,
             height=0,
         )
+
 
 
 
