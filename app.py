@@ -5,6 +5,16 @@ import textwrap
 import json
 import re
 
+# ============================================
+# ページ設定（アプリの最重要設定：最優先で実行）
+# ============================================
+st.set_page_config(
+    page_title="ビジネスメール作成アシスタント",
+    page_icon="✉️",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
 # 外部ロジックをインポート
 from openai_logic import generate_email_with_openai
 
@@ -360,9 +370,11 @@ div[data-testid="stHorizontalBlock"] {
     color: #ffffff !important;
 }
 
-/* ヘッダー内のボタンのテキスト色＝アイコン色を背景と同化させる */
+/* -------------------------------------------
+   ヘッダー内のボタン（＝サイドバー開閉ボタン）を完全に非表示
+------------------------------------------- */
 [data-testid="stHeader"] button {
-    color: #050b23 !important;   /* ヘッダー背景と同系色にする */
+    display: none !important;
 }
 
 /* サイドバー上部ヘッダー縮小 */
@@ -1304,6 +1316,7 @@ with col2:
             """,
             height=0,
         )
+
 
 
 
