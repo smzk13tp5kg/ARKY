@@ -334,8 +334,8 @@ div[data-testid="stToolbar"] > div {
 /* メインエリア調整 */
 main.block-container {
     padding-top: 0rem;
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
     max-width: 100% !important;
 }
 
@@ -1343,6 +1343,7 @@ with col2:
             """,
             height=0,
         )
+
 
 
 
