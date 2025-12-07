@@ -1321,7 +1321,6 @@ with col1:
         st.session_state.generated_email = None
         st.session_state.ai_suggestions = None
         st.session_state.variation_count = 0
-        st.session_state.nav_locked = False  # ★ ロック解除
         st.rerun()
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
@@ -1512,5 +1511,6 @@ with col2:
             """,
             height=0,
         )
+
 
 
