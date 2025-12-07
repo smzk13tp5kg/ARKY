@@ -979,9 +979,9 @@ if "ai_suggestions" not in st.session_state:
     st.session_state.ai_suggestions = None
 if "copy_target_text" not in st.session_state:
     st.session_state.copy_target_text = ""
-# ★ 追加：サイドナビのロック状態
-if "nav_locked" not in st.session_state:
-    st.session_state.nav_locked = False
+
+# ★ ロック状態は「AI 生成済みかどうか」から毎回計算する
+nav_locked = st.session_state.ai_suggestions is not None
 
 # ============================================
 # トップバー
@@ -1016,7 +1016,7 @@ with st.sidebar:
         index=0,
         label_visibility="collapsed",
         key="template_radio",
-        disabled=st.session_state.nav_locked,  # ★ ロック対応
+        disabled=nav_locked,  # ★ ロック対応
     )
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1051,7 +1051,7 @@ with st.sidebar:
         index=1,
         label_visibility="collapsed",
         key="tone_radio",
-        disabled=st.session_state.nav_locked,  # ★ ロック対応
+        disabled=nav_locked,  # ★ ロック対応
     )
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1081,7 +1081,7 @@ with st.sidebar:
         index=0,
         label_visibility="collapsed",
         key="recipient_radio",
-        disabled=st.session_state.nav_locked,  # ★ ロック対応
+        disabled=nav_locked,  # ★ ロック対応
     )
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1109,7 +1109,7 @@ with st.sidebar:
         index=0,
         label_visibility="collapsed",
         key="seasonal_radio",
-        disabled=st.session_state.nav_locked,  # ★ ロック対応
+        disabled=nav_locked,  # ★ ロック対応
     )
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1175,8 +1175,7 @@ with col1:
         else:
             # ★ 初回送信が通ったタイミングでサイドバーをロック
             #    （すでにロック済みなら何もしない）
-            if not st.session_state.nav_locked:
-                st.session_state.nav_locked = True
+
 
             # 既に3パターン生成済みかどうかで初回／再生成を判定
             is_first_generation = st.session_state.ai_suggestions is None
@@ -1513,4 +1512,5 @@ with col2:
             """,
             height=0,
         )
+
 
