@@ -316,10 +316,12 @@ st.markdown(
     position: relative;
     z-index: 1;
 }
+
+/* Streamlit標準ヘッダーを丸ごと消す（＝開閉アイコンも消える） */
 [data-testid="stHeader"] {
-    background-color: rgba(5, 11, 35, 0.95);
-    backdrop-filter: blur(10px);
+    display: none !important;
 }
+
 body { background-color: #050b23; }
 
 /* ツールバー消す */
@@ -1316,6 +1318,7 @@ with col2:
             """,
             height=0,
         )
+
 
 
 
