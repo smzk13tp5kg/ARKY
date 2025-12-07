@@ -1173,8 +1173,20 @@ with col1:
             )
 
             # ④ OpenAI案（3パターン分 Markdown）を生成して保持
-            #    ＋ DB保存（あれば）を spinner でまとめて実行
-            with st.spinner("メッセージを生成しています…"):
+            #    ＋ DB保存（あれば）を「イントロbubble風ローディング表示」つきで実行
+            with st.spinner(""):
+                # イントロbubbleと同じスタイルで「生成中」メッセージを表示
+                loading_html = """
+                <div class="intro-bubble" style="margin-top: 8px;">
+                  <span class="intro-bubble-text">
+                    ✨ メッセージを生成しています…<br>
+                    数秒お待ちください。
+                  </span>
+                </div>
+                """
+                st.markdown(loading_html, unsafe_allow_html=True)
+
+                # OpenAI 生成
                 ai_text = generate_email_with_openai(
                     template=template,
                     tone=tone,
@@ -1214,7 +1226,7 @@ with col1:
                             patterns=patterns_for_db,
                         )
 
-                        # 生成完了後のメッセージ（今まで通り）
+                        # 生成完了メッセージ（スタイルは今のまま）
                         st.success("✅ メッセージの生成が完了し、データベースに保存しました！")
 
                     except Exception as e:
@@ -1389,4 +1401,5 @@ with col2:
             """,
             height=0,
         )
+
 
