@@ -1173,49 +1173,52 @@ with col1:
             )
 
             # ④ OpenAI案（3パターン分 Markdown）を生成して保持
-            ai_text = generate_email_with_openai(
-                template=template,
-                tone=tone,
-                recipient=recipient,
-                message=user_message,
-                seasonal_text=seasonal_text,
-            )
-            st.session_state.ai_suggestions = ai_text
+            #    ＋ DB保存（あれば）を spinner でまとめて実行
+            with st.spinner("メッセージを生成しています…"):
+                ai_text = generate_email_with_openai(
+                    template=template,
+                    tone=tone,
+                    recipient=recipient,
+                    message=user_message,
+                    seasonal_text=seasonal_text,
+                )
+                st.session_state.ai_suggestions = ai_text
 
-            # ⑤ DB保存（あれば）
-            if HAS_DB and ai_text:
-                try:
-                    raw_blocks = re.split(
-                        r"(?=^##\s*パターン\s*\d+)", ai_text, flags=re.MULTILINE
-                    )
-                    blocks = [b.strip() for b in raw_blocks if b.strip()]
-                    blocks = blocks[:3]
-                    while len(blocks) < 3:
-                        blocks.append("このパターンはまだ生成されていません。")
+                # ⑤ DB保存（あれば）
+                if HAS_DB and ai_text:
+                    try:
+                        raw_blocks = re.split(
+                            r"(?=^##\s*パターン\s*\d+)", ai_text, flags=re.MULTILINE
+                        )
+                        blocks = [b.strip() for b in raw_blocks if b.strip()]
+                        blocks = blocks[:3]
+                        while len(blocks) < 3:
+                            blocks.append("このパターンはまだ生成されていません。")
 
-                    patterns_for_db = []
-                    for b in blocks:
-                        parsed = parse_pattern_block(b)
-                        patterns_for_db.append(
-                            {
-                                "subject": parsed.get("subject", ""),
-                                "body": parsed.get("body", ""),
-                            }
+                        patterns_for_db = []
+                        for b in blocks:
+                            parsed = parse_pattern_block(b)
+                            patterns_for_db.append(
+                                {
+                                    "subject": parsed.get("subject", ""),
+                                    "body": parsed.get("body", ""),
+                                }
+                            )
+
+                        save_email_batch(
+                            template=template,
+                            tone=tone,
+                            recipient=recipient,
+                            message=user_message,
+                            seasonal_greeting=add_seasonal,
+                            patterns=patterns_for_db,
                         )
 
-                    save_email_batch(
-                        template=template,
-                        tone=tone,
-                        recipient=recipient,
-                        message=user_message,
-                        seasonal_greeting=add_seasonal,
-                        patterns=patterns_for_db,
-                    )
+                        # 生成完了後のメッセージ（今まで通り）
+                        st.success("✅ メッセージの生成が完了し、データベースに保存しました！")
 
-                    st.success("✅ データベースへの保存に成功しました！")
-
-                except Exception as e:
-                    st.error(f"❌ DB保存エラー: {str(e)}")
+                    except Exception as e:
+                        st.error(f"❌ DB保存エラー: {str(e)}")
 
             # ⑥ チャットログを最大50件に制限
             if len(st.session_state.messages) > 50:
@@ -1386,3 +1389,4 @@ with col2:
             """,
             height=0,
         )
+
