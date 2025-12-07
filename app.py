@@ -363,8 +363,17 @@ div[data-testid="stHorizontalBlock"] {
     background: #050b23;
     border-right: 1px solid #cfae63;
 }
-[data-testid="stSidebar"] * {
+/* サイドバーの文字だけ白 */
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] div,
+[data-testid="stSidebar"] p {
     color: #ffffff !important;
+}
+
+/* 開閉ボタンだけ色を別にする */
+[data-testid="stSidebar"] button {
+    color: #cfae63 !important;
 }
 
 /* サイドバー上部ヘッダー縮小 */
@@ -1306,4 +1315,5 @@ with col2:
             """,
             height=0,
         )
+
 
